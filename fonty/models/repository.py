@@ -77,7 +77,7 @@ class Repository(object):
         typefaces = []
         for typeface in repo['typefaces']:
             fonts = [Font(v, k) for k, v in typeface['fonts'].items()]
-            typefaces.append(Typeface(typeface['name'], fonts))
+            typefaces.append(Typeface(typeface['name'], typeface['category'], fonts))
 
         return Repository(repo['source'], typefaces)
 

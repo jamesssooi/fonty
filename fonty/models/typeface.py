@@ -1,6 +1,7 @@
 '''typeface.py: Class to manage a typeface.'''
 
 import json
+import hashlib
 from click import style
 from pprint import pprint
 from fonty.models.font import Font
@@ -9,9 +10,10 @@ import fonty.lib.utils as utils
 class Typeface(object):
     '''Class to manage a typeface.'''
 
-    def __init__(self, name, fonts):
+    def __init__(self, name, category, fonts):
         self.name = name
         self.fonts = fonts
+        self.category = category
 
     def get_variations(self):
         '''Gets the variations available for this typeface.'''
@@ -36,6 +38,11 @@ class Typeface(object):
             fonts='  Variations({}): '.format(len(variations)) + style(font_str, dim=True)
         )
 
+    def generate_id(self, source):
+        '''Generates a unique id.'''
+        unique_str = '{source}-{name}'.format(source=source, name=self.name)
+        return hashlib.md5(unique_str.encode('utf-8')).hexdigest()
+
     @staticmethod
     def load_from_json(json_string):
         '''Initialize a new typeface instance from JSON data.'''
@@ -44,4 +51,4 @@ class Typeface(object):
         # convert fonts to a Font object
         data['fonts'] = [Font(v, k) for k, v in data['fonts'].items()]
 
-        return Typeface(data['name'], data['fonts'])
+        return Typeface(data['name'], data['category'], data['fonts'])
