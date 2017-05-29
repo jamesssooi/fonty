@@ -1,6 +1,7 @@
 '''search.py: Library to handle the search of fonts.'''
 
 import os.path
+from whoosh.query import Phrase, And, Term
 from whoosh.qparser import QueryParser
 from whoosh.index import create_in, open_dir, EmptyIndexError
 from whoosh.fields import Schema, TEXT, KEYWORD, ID, NGRAM
@@ -8,7 +9,7 @@ from fonty.lib.constants import SEARCH_INDEX_PATH
 
 SCHEMA = Schema(
     id=ID(stored=True),
-    name=TEXT(stored=True, phrase=False),
+    name=TEXT(stored=True),
     category=KEYWORD(stored=True),
     repository=ID(stored=True)
 )
@@ -21,11 +22,17 @@ def search(name):
 
     with index.searcher() as searcher:
         results = searcher.search(query)
-        for result in results:
-            print(result, result.score)
-        print(searcher.suggest('name', name))
 
-    return results
+        if not results:
+            return False
+
+        if results:
+            if results[0]['name'].lower() != name.lower():
+                print(results[0]['name'], name)
+                print("Did you mean '{}'?".format(results[0]['name']))
+                return
+            else:
+                return dict(**results[0])
 
 def create_index():
     '''Creates a font search schema.'''

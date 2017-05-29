@@ -31,15 +31,16 @@ def install(name):
 
     # Compare local and remote repository hash
     click.echo('Resolving font sources...')
-    time.sleep(1.4)
+    #time.sleep(1.4)
 
     # Search for typeface
     click.echo('Searching for {}...'.format(name))
-    results = search.search(name)
+    result = search.search(name)
+    click.echo(result)
 
     # Download font files
     click.echo('Downloading (6) font files...')
-    time.sleep(3)
+    #time.sleep(3)
 
     # Install into local computer
     click.echo('Installing (6) fonts...')
