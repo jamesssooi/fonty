@@ -1,11 +1,13 @@
 '''search.py: Library to handle the search of fonts.'''
 
 import os.path
+import click
 from whoosh.query import Phrase, And, Term
 from whoosh.qparser import QueryParser
 from whoosh.index import create_in, open_dir, EmptyIndexError
-from whoosh.fields import Schema, TEXT, KEYWORD, ID, NGRAM
+from whoosh.fields import Schema, TEXT, KEYWORD, ID
 from fonty.lib.constants import SEARCH_INDEX_PATH
+from fonty.models.repository import Repository
 
 SCHEMA = Schema(
     id=ID(stored=True),
@@ -15,24 +17,30 @@ SCHEMA = Schema(
 )
 
 def search(name):
-    '''Search the font index.'''
+    '''Search the font index and return results.'''
     index = load_index()
     parser = QueryParser('name', SCHEMA)
     query = parser.parse(name)
 
-    with index.searcher() as searcher:
-        results = searcher.search(query)
+    # Execute search query
+    searcher = index.searcher()
+    results = searcher.search(query)
 
-        if not results:
-            return False
+    if not results:
+        corrector = searcher.corrector('name')
+        raise SearchNotFound(name, corrector.suggest(name))
 
-        if results:
-            if results[0]['name'].lower() != name.lower():
-                print(results[0]['name'], name)
-                print("Did you mean '{}'?".format(results[0]['name']))
-                return
-            else:
-                return dict(**results[0])
+    result = dict(**results[0]) # Convert search results object to Dictionary
+    searcher.close()
+
+    # Check if exact match
+    if results and result['name'].lower() != name.lower():
+        raise SearchNotFound(name, result['name'])
+
+    repo = Repository.load_from_local(result['repository'])
+    typeface = repo.get_typeface(result['name'])
+
+    return repo, typeface
 
 def create_index():
     '''Creates a font search schema.'''
@@ -72,3 +80,14 @@ def load_index(create=True):
         index = create_index() if create else False
 
     return index
+
+
+class SearchNotFound(Exception):
+    '''Exception: Raises when a search results fails to return any results.'''
+    def __init__(self, keyword, suggestion):
+        super(SearchNotFound, self).__init__()
+        self.keyword = keyword
+
+        if isinstance(suggestion, list):
+            suggestion = ', '.join(suggestion)
+        self.suggestion = suggestion

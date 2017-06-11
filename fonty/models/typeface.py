@@ -15,6 +15,9 @@ class Typeface(object):
         self.fonts = fonts
         self.category = category
 
+    def download(self, variations=None):
+        pass
+
     def get_variations(self):
         '''Gets the variations available for this typeface.'''
         return [(font.variation, font.get_descriptive_variation()) for font in self.fonts]

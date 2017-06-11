@@ -1,11 +1,12 @@
 '''font.py: Class to manage individual fonts.'''
 
+import requests
 from click import style
 
 class Font(object):
     '''Class to manage individual fonts.'''
 
-    def __init__(self, path_to_file, variation=None, category=None):
+    def __init__(self, path_to_file=None, variation=None, category=None):
         self.path_to_file = path_to_file
         self.category = category
 
@@ -14,6 +15,9 @@ class Font(object):
             self.variation = VARIATIONS_MAP_CSS[variation]
         else:
             self.variation = variation
+
+    def uninstall(self):
+        pass
 
     def to_pretty_string(self):
         '''Prints the contents of this font as ANSI formatted string.'''
@@ -38,6 +42,7 @@ class Font(object):
             return VARIATIONS_MAP_DESCRIPTIVE[self.variation]
         else:
             return None
+
 
 VARIATIONS_MAP_DESCRIPTIVE = {
     '100'  : 'thin',

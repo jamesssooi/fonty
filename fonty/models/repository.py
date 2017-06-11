@@ -44,7 +44,6 @@ class Repository(object):
 
         return self
 
-
     def unsubscribe(self):
         '''Remove this repository from users's subscription list.'''
         # Load existing subscription list
@@ -54,7 +53,7 @@ class Repository(object):
                 subscriptions = json.loads(data.read())
         else:
             subscriptions = {}
-        
+
         # Check if source is already unsubscribed
         # TODO: Implement exception
         if self.source not in subscriptions:
@@ -68,10 +67,20 @@ class Repository(object):
 
         return self
 
+    def get_typeface(self, name):
+        '''Returns a Typeface object.'''
+        typeface = next((x for x in self.typefaces if x.name == name), None)
+        if typeface is None:
+            raise Exception
+
+        return typeface
+
     @staticmethod
-    def load_from_json(json_string):
+    def load_from_json(json_data):
         '''Load a repository from a JSON string.'''
-        repo = json.loads(json_string)
+        repo = json_data
+        if not isinstance(json_data, dict):
+            repo = json.loads(json_data)
 
         # Convert all font objects into Font instances
         typefaces = []
@@ -85,3 +94,14 @@ class Repository(object):
     def load_from_external_json(url):
         '''Load an external repository.'''
         pass
+
+    @staticmethod
+    def load_from_local(name):
+        with open('./sample/repo.json') as raw_json:
+            raw_json = raw_json.read()
+            data = json.loads(raw_json)
+
+        if name not in data:
+            raise Exception
+
+        return Repository.load_from_json(data[name])

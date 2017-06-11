@@ -20,23 +20,34 @@ def test(verbose):
     with open('./sample/repo.json') as json_string:
         repo = Repository.load_from_json(json_string.read())
         search.index_fonts(repo)
-    # with open('./fonty/sample/lato.json') as json_string:
-    #     typeface = Typeface.load_from_json(json_string.read())
-    #     click.echo(typeface.to_pretty_string(verbose))
 
 @click.command()
-@click.argument('name')
+@click.argument('name', nargs=-1, type=click.STRING)
 def install(name):
     '''Installs a font'''
 
+    # Convert tuple argument to space delimited string
+    name = ' '.join(str(x) for x in name)
+
     # Compare local and remote repository hash
     click.echo('Resolving font sources...')
-    #time.sleep(1.4)
 
-    # Search for typeface
-    click.echo('Searching for {}...'.format(name))
-    result = search.search(name)
-    click.echo(result)
+    # Search for typeface in local repositories
+    click.echo("Searching for '{}'...".format(name))
+    try:
+        repo, typeface = search.search(name)
+    except search.SearchNotFound as e:
+        click.echo("\nNo results found for '{}'".format(
+            click.style(name, fg='green')
+        ))
+        if e.suggestion:
+            click.echo("Did you mean '{}'?".format(e.suggestion))
+        return
+
+    click.echo("Found '{typeface}' in {repo}".format(
+        typeface=click.style(typeface.name, fg='green'),
+        repo=repo.source
+    ))
 
     # Download font files
     click.echo('Downloading (6) font files...')
