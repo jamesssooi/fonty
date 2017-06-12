@@ -2,40 +2,45 @@
 
 import requests
 from click import style
+from fonty.lib.install import install
 
 class Font(object):
     '''Class to manage individual fonts.'''
 
-    def __init__(self, local_path=None, remote_path=None, variation=None, category=None, raw_bytes=None):
+    def __init__(self, filename=None, local_path=None, remote_path=None, variant=None, category=None, raw_bytes=None):
+        self.filename = filename
         self.local_path = local_path
         self.remote_path = remote_path
         self.category = category
-        self.raw_bytes = raw_bytes
+        self.bytes = raw_bytes
 
-        # standardise variation identifiers to the CSS standard
-        if variation in VARIATIONS_MAP_CSS:
-            self.variation = VARIATIONS_MAP_CSS[variation]
+        # standardise variant identifiers to the CSS standard
+        if variant in VARIATIONS_MAP_CSS:
+            self.variant = VARIATIONS_MAP_CSS[variation]
         else:
-            self.variation = variation
+            self.variant = variant
     
     def download(self, handler=None):
-        '''Download this font.'''
+        '''Download this font. Appends the bytes as a property to self.'''
 
         if not self.remote_path:
             raise Exception # TODO: Raise Exception
 
         request = requests.get(self.remote_path, stream=True)
         if handler:
-            iterator = handler(request)
+            iterator = handler(self, request)
             next(iterator)
         
-        self.raw_bytes = []
-        for bytes_ in request.iter_content(512):
+        self.bytes = b''
+        for bytes_ in request.iter_content(128):
             if bytes_:
-                self.raw_bytes.append(bytes_)
-                if handler: iterator.send(len(bytes_))
+                self.bytes += bytes_
+                if handler: iterator.send(len(self.bytes))
         
         return self
+
+    def install(self, path=None):
+        install(self, path)
 
     def to_pretty_string(self):
         '''Prints the contents of this font as ANSI formatted string.'''
@@ -49,15 +54,15 @@ class Font(object):
             path=self.local_path
         ), dim=True)
 
-    def get_descriptive_variation(self):
+    def get_descriptive_variant(self):
         '''Get the descriptive variation name of this font.
 
         For example, a font variation of 400i returns 'italics', while a font
         variation of 700 returns 'bold'. Returns None if there's no matching
         descriptive value.
         '''
-        if self.variation in VARIATIONS_MAP_DESCRIPTIVE:
-            return VARIATIONS_MAP_DESCRIPTIVE[self.variation]
+        if self.variant in VARIATIONS_MAP_DESCRIPTIVE:
+            return VARIATIONS_MAP_DESCRIPTIVE[self.variant]
         else:
             return None
 

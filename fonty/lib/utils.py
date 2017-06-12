@@ -1,5 +1,8 @@
 '''utils.py: Utility functions.'''
 
+def xstr(s):
+    return '' if s is None else str(s)
+
 def empty_string_if_none(obj, fn):
     if obj is None:
         return ''

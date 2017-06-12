@@ -17,59 +17,42 @@ class Typeface(object):
         self.fonts = fonts
         self.category = category
 
-    def download(self, variations=None, handler=None):
+    def download(self, variants=None, handler=None):
         '''Download this typeface.'''
 
-        # Get list of fonts to download
-        if variations:
-            fonts = [font for font in self.fonts if font.variation in variations]
+        # Filter font list to requested variants only
+        if variants:
+            fonts = [font for font in self.fonts if font.variant in variants]
         else:
             fonts = self.fonts
 
         # Download fonts
         for font in fonts:
             font.download(handler)
-        # font_bytes = []
-        # for font in fonts:
-        #     request = requests.get(font.remote_path, stream=True)
-        #     file_size = request.headers['Content-Length']
-        #     if handler:
-        #         iterator = handler(request)
-        #         next(iterator)
-
-        #     data = []
-        #     total_bytes = 0
-        #     for bytes_ in request.iter_content(512):
-        #         if bytes_:
-        #             total_bytes += len(bytes_)
-        #             data.append(bytes_)
-        #             if handler:
-        #                 iterator.send(len(bytes_))
-        #     font_bytes.append(data)
 
         return fonts
 
-    def get_variations(self):
+    def get_variants(self):
         '''Gets the variations available for this typeface.'''
-        return [(font.variation, font.get_descriptive_variation()) for font in self.fonts]
+        return [(font.variant, font.get_descriptive_variant()) for font in self.fonts]
 
     def to_pretty_string(self, verbose=False):
         '''Prints the contents of this typeface as ANSI formatted string.'''
 
         font_str = ''
-        font_variations = self.get_variations()
-        variations = []
-        for var, desc in font_variations:
+        font_variants = self.get_variants()
+        variants = []
+        for var, desc in font_variants:
             if desc is not None:
-                variations.append(desc + '({})'.format(var))
+                variants.append(desc + '({})'.format(var))
             else:
-                variations.append(var)
-        font_str = ', '.join(variations)
+                variants.append(var)
+        font_str = ', '.join(variants)
 
         return '{name}\n{category}\n{fonts}'.format(
             name=style(self.name, 'blue'),
             category='  Category: ' + style('sans-serif', dim=True),
-            fonts='  Variations({}): '.format(len(variations)) + style(font_str, dim=True)
+            fonts='  Variations({}): '.format(len(variants)) + style(font_str, dim=True)
         )
 
     def generate_id(self, source):
@@ -88,8 +71,9 @@ class Typeface(object):
         fonts = []
         for key, value in data['fonts'].items():
             fonts.append(Font(
-                variation=key,
-                remote_path=value
+                variant=key,
+                filename=value['filename'],
+                remote_path=value['url']
             ))
 
         return Typeface(data['name'], data['category'], fonts)
