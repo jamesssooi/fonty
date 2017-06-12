@@ -23,17 +23,20 @@ def test(verbose):
 
 @click.command()
 @click.argument('name', nargs=-1, type=click.STRING)
-def install(name):
+@click.option('--variants', '-v', multiple=True, default=None, type=click.STRING)
+def install(name, variants):
     '''Installs a font'''
 
-    # Convert tuple argument to space delimited string
+    # Process arguments and options
     name = ' '.join(str(x) for x in name)
+    if variants:
+        variants = (','.join(str(x) for x in variants)).split(',')
 
     # Compare local and remote repository hash
     click.echo('Resolving font sources...')
 
     # Search for typeface in local repositories
-    click.echo("Searching for '{}'...".format(name))
+    click.echo("Searching for '{}'...".format(click.style(name, fg='green')))
     try:
         repo, typeface = search.search(name)
     except search.SearchNotFound as e:
@@ -49,9 +52,38 @@ def install(name):
         repo=repo.source
     ))
 
+    # Check if variants exists
+    available_variants = [x[0] for x in typeface.get_variations()]
+    invalid_variants = []
+    for variant in variants:
+        if variant not in available_variants:
+            invalid_variants.append(variant)
+    if invalid_variants:
+        if len(invalid_variants) > 1:
+            click.echo('Variants {} are not available'.format(
+                click.style(', '.join(invalid_variants), fg='green')
+            ))
+        else:
+            click.echo('Variant {} is not available'.format(
+                click.style(', '.join(invalid_variants), fg='green')
+            ))
+        return # TODO: Raise exception
+    variants_count = len(variants) if variants else len(available_variants)
+
     # Download font files
-    click.echo('Downloading (6) font files...')
-    #time.sleep(3)
+    click.echo('Downloading ({}) font files...'.format(variants_count))
+
+    def download_handler(request):
+        total_size = int(request.headers['Content-Length'])
+        current_size = 0
+        with click.progressbar(length=total_size) as bar:
+            while current_size < total_size:
+                received_size = yield
+                current_size += received_size
+                bar.update(current_size)
+                yield current_size
+
+    fonts = typeface.download(variants, download_handler)
 
     # Install into local computer
     click.echo('Installing (6) fonts...')

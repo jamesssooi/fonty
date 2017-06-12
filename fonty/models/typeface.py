@@ -2,6 +2,8 @@
 
 import json
 import hashlib
+import requests
+import click
 from click import style
 from pprint import pprint
 from fonty.models.font import Font
@@ -15,8 +17,37 @@ class Typeface(object):
         self.fonts = fonts
         self.category = category
 
-    def download(self, variations=None):
-        pass
+    def download(self, variations=None, handler=None):
+        '''Download this typeface.'''
+
+        # Get list of fonts to download
+        if variations:
+            fonts = [font for font in self.fonts if font.variation in variations]
+        else:
+            fonts = self.fonts
+
+        # Download fonts
+        for font in fonts:
+            font.download(handler)
+        # font_bytes = []
+        # for font in fonts:
+        #     request = requests.get(font.remote_path, stream=True)
+        #     file_size = request.headers['Content-Length']
+        #     if handler:
+        #         iterator = handler(request)
+        #         next(iterator)
+
+        #     data = []
+        #     total_bytes = 0
+        #     for bytes_ in request.iter_content(512):
+        #         if bytes_:
+        #             total_bytes += len(bytes_)
+        #             data.append(bytes_)
+        #             if handler:
+        #                 iterator.send(len(bytes_))
+        #     font_bytes.append(data)
+
+        return fonts
 
     def get_variations(self):
         '''Gets the variations available for this typeface.'''
@@ -49,9 +80,26 @@ class Typeface(object):
     @staticmethod
     def load_from_json(json_string):
         '''Initialize a new typeface instance from JSON data.'''
-        data = json.loads(json_string)
+        data = json_string
+        if not isinstance(json_string, dict):
+            data = json.loads(json_string)
 
         # convert fonts to a Font object
-        data['fonts'] = [Font(v, k) for k, v in data['fonts'].items()]
+        fonts = []
+        for key, value in data['fonts'].items():
+            fonts.append(Font(
+                variation=key,
+                remote_path=value
+            ))
 
-        return Typeface(data['name'], data['category'], data['fonts'])
+        return Typeface(data['name'], data['category'], fonts)
+
+
+# Functions
+def download_generator(total_size):
+    current_size = 0
+    while current_size < total_size:
+        received_size = yield
+        current_size += received_size
+        yield current_size
+    return

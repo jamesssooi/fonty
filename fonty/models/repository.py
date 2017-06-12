@@ -85,8 +85,7 @@ class Repository(object):
         # Convert all font objects into Font instances
         typefaces = []
         for typeface in repo['typefaces']:
-            fonts = [Font(v, k) for k, v in typeface['fonts'].items()]
-            typefaces.append(Typeface(typeface['name'], typeface['category'], fonts))
+            typefaces.append(Typeface.load_from_json(typeface))
 
         return Repository(repo['source'], typefaces)
 

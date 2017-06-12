@@ -6,18 +6,36 @@ from click import style
 class Font(object):
     '''Class to manage individual fonts.'''
 
-    def __init__(self, path_to_file=None, variation=None, category=None):
-        self.path_to_file = path_to_file
+    def __init__(self, local_path=None, remote_path=None, variation=None, category=None, raw_bytes=None):
+        self.local_path = local_path
+        self.remote_path = remote_path
         self.category = category
+        self.raw_bytes = raw_bytes
 
         # standardise variation identifiers to the CSS standard
         if variation in VARIATIONS_MAP_CSS:
             self.variation = VARIATIONS_MAP_CSS[variation]
         else:
             self.variation = variation
+    
+    def download(self, handler=None):
+        '''Download this font.'''
 
-    def uninstall(self):
-        pass
+        if not self.remote_path:
+            raise Exception # TODO: Raise Exception
+
+        request = requests.get(self.remote_path, stream=True)
+        if handler:
+            iterator = handler(request)
+            next(iterator)
+        
+        self.raw_bytes = []
+        for bytes_ in request.iter_content(512):
+            if bytes_:
+                self.raw_bytes.append(bytes_)
+                if handler: iterator.send(len(bytes_))
+        
+        return self
 
     def to_pretty_string(self):
         '''Prints the contents of this font as ANSI formatted string.'''
@@ -28,7 +46,7 @@ class Font(object):
 
         return style('{variation} - {path}'.format(
             variation=variation,
-            path=self.path_to_file
+            path=self.local_path
         ), dim=True)
 
     def get_descriptive_variation(self):
