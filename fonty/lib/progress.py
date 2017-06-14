@@ -1,11 +1,15 @@
+# -*- coding: utf-8 -*-
 '''progress.py'''
 
 import sys
 import time
 import threading
 import math
+import colorama
 from termcolor import colored
 from fonty.lib import utils
+
+colorama.init()
 
 class ProgressBar(object):
     DEFAULT_FORMAT = '{desc}{bar}{percentage}'

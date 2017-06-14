@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 '''fonty.fonty: entry point for fonty'''
 
 import io
@@ -6,7 +7,6 @@ import click
 import json
 import time
 import timeit
-from tqdm import tqdm
 from termcolor import colored
 from pprint import pprint
 from whoosh.qparser import QueryParser
@@ -25,19 +25,19 @@ def main():
 @click.option('--verbose/-v', is_flag=True)
 def test(verbose):
     '''Testing function.'''
-    bar = ProgressBar(1024)
-    for _ in range(1024):
-        bar.increment(2)
-        print(bar, end='\r')
-        time.sleep(0.01)
+    #bar = ProgressBar(1024)
+    #for _ in range(1024):
+    #    bar.increment(2)
+    #    print(bar, end='\r')
+    #    time.sleep(0.01)
 
     # p = Progress('foo')
     # time.sleep(3)
     # p.stop('✓', 'done!')
 
-    # repositories = Repository.load_all()
-    # for repo in repositories:
-    #     search.index_fonts(repo)
+    repositories = Repository.load_all()
+    for repo in repositories:
+        search.index_fonts(repo)
 
 @click.command()
 @click.argument('name', nargs=-1, type=click.STRING)
@@ -104,19 +104,22 @@ def install(name, variants):
     action.stop(status=ACTION_OK,
                 message="Downloaded ({}) font file(s)".format(len(fonts)))
 
+    time.sleep(0.1)
+
     # Install into local computer
     action = Action('Installing ({}) fonts...'.format(len(fonts)))
     for font in fonts:
         font.install()
-    
+
+    time.sleep(0.1)
+
     # Done!
     end_time = timeit.default_timer()
     total_time = end_time - start_time
     action.stop(status=ACTION_OK,
                 message='Installed {typeface}({variants})'.format(
                     typeface=colored(typeface.name, COLOR_INPUT),
-                    variants=click.style(', '.join([font.variant for font in fonts]), dim=True),
-                    time=round(total_time, 2)
+                    variants=colored(', '.join([font.variant for font in fonts]), 'red')
                 ))
     
     click.echo('Done in {}s'.format(round(total_time, 2)))

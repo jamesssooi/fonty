@@ -91,7 +91,9 @@ class Repository(object):
 
     @staticmethod
     def load_from_local(name):
-        with open('./sample/repo.json') as raw_json:
+        path_to_json = os.path.join(os.getcwd(), 'fonty/sample/repo.json')
+
+        with open(path_to_json) as raw_json:
             raw_json = raw_json.read()
             data = json.loads(raw_json)
 
@@ -103,8 +105,9 @@ class Repository(object):
     @staticmethod
     def load_all(path_to_json=None):
         if not path_to_json:
-            path_to_json = './sample/repo.json'
-        
+            dir_path = os.path.dirname(os.path.realpath(__file__))
+            path_to_json = os.path.join(os.getcwd(), 'fonty/sample/repo.json')
+
         with open(path_to_json) as raw_json:
             raw_json = raw_json.read()
             data = json.loads(raw_json)
