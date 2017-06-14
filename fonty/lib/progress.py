@@ -85,7 +85,7 @@ class Action:
     
     def stop(self, status=None, message=None):
         self.active = False
-
+        
         if not message:
             message = self.message
 
@@ -93,7 +93,8 @@ class Action:
             s = '{status} {message}'.format(status=status, message=message)
         else:
             s = message
-
+        
+        # TODO: Move this into main draw loop to prevent race conditions
         # Clear line
         sys.stdout.write('\r{}\r'.format(' ' * len(self.current_message)))
         sys.stdout.flush()
