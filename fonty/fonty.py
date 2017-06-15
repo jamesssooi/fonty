@@ -44,9 +44,6 @@ def test(verbose):
     # time.sleep(3)
     # p.stop('✓', 'done!')
 
-    repositories = Repository.load_all()
-    for repo in repositories:
-        search.index_fonts(repo)
 
 @click.command()
 @click.argument('name', nargs=-1, type=click.STRING)
@@ -127,6 +124,7 @@ def install(name, output, variants):
     total_time = end_time - start_time
     click.echo('Done in {}s'.format(round(total_time, 2)))
 
+
 @click.command()
 @click.argument('name')
 def uninstall(name):
@@ -134,7 +132,21 @@ def uninstall(name):
     click.echo('Uninstalling font ' + name)
 
 
+@click.command()
+def update():
+    '''Fetch latest repository data and reindex fonts.'''
+
+    click.echo('Fetching latest repository data...')
+
+    repositories = Repository.load_all()
+    for repo in repositories:
+        task = Task('Updating {}'.format(repo.source))
+        search.index_fonts(repo)
+        task.stop(TaskStatus.SUCCESS, 'Updated {}'.format(repo.source))
+
+
 # register commands
 main.add_command(install)
 main.add_command(uninstall)
 main.add_command(test)
+main.add_command(update)
