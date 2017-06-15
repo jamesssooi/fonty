@@ -31,6 +31,7 @@ def install_osx(fonts):
 
 def install_win32(fonts):
     '''Install a font on a Windows system'''
+    font_dir = os.path.join(os.environ['WINDIR'], 'Fonts')
     tmp_folder = os.path.join(APP_DIR, 'tmp')
     
     if not isinstance(fonts, list):
@@ -49,6 +50,11 @@ def install_win32(fonts):
     # systems. More info: http://code.kliu.org/misc/fontreg/
     for font in fonts:
         if not font.bytes: raise Exception # TODO: Raise Exception
+
+        # Check if font already installed
+        if os.path.isfile(os.path.join(font_dir, font.filename)):
+            continue
+
         path = os.path.join(tmp_folder, font.filename)
         with open(path, 'wb+') as f:
             f.write(font.bytes)
