@@ -25,7 +25,7 @@ class Task(object):
     def __init__(self, message, nl=True):
         self.message = message
         self.nl = nl
-        threading.Thread(target=self.loop).start()
+        threading.Thread(target=self.loop, daemon=True).start()
 
     def loop(self):
         '''Main print loop.'''
