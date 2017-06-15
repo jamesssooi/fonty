@@ -43,9 +43,9 @@ def test(verbose):
     # time.sleep(3)
     # p.stop('✓', 'done!')
 
-    # repositories = Repository.load_all()
-    # for repo in repositories:
-    #     search.index_fonts(repo)
+    repositories = Repository.load_all()
+    for repo in repositories:
+        search.index_fonts(repo)
 
 @click.command()
 @click.argument('name', nargs=-1, type=click.STRING)
