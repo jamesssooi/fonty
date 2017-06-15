@@ -6,22 +6,31 @@ import sys
 import subprocess
 from fonty.lib.constants import APP_DIR, ROOT_DIR, IS_x64
 
-def install(fonts, path=None):
+def install_fonts(fonts, path=None):
     '''OS agnostic function to install fonts on systems'''
     platform = sys.platform
-    
-    if platform == 'darwin': # OSX
-        install_osx(fonts)
-    elif platform == 'linux' or platform == 'linux2':
-        install_linux(fonts)
-    elif platform == 'win32':
-        install_win32(fonts)
-
-def install_osx(fonts):
-    '''Install a font on an OSX system'''
 
     if not isinstance(fonts, list):
         fonts = [fonts]
+
+    # If no path is specified, install the font into the user's system by
+    # calling the system's specific subroutine. If a path is provided, install
+    # to that directory instead.
+    if not path:
+        if platform == 'darwin': # OSX
+            install_osx(fonts)
+            return
+        elif platform == 'linux' or platform == 'linux2': # Linux
+            install_linux(fonts)
+            return
+        elif platform == 'win32': # Windows
+            install_win32(fonts)
+            return
+    else:
+        install_to_dir(fonts, path)
+
+def install_osx(fonts):
+    '''Install a font on an OSX system'''
 
     for font in fonts:
         if not font.bytes: raise Exception # TODO: Raise Exception
@@ -31,11 +40,9 @@ def install_osx(fonts):
 
 def install_win32(fonts):
     '''Install a font on a Windows system'''
+
     font_dir = os.path.join(os.environ['WINDIR'], 'Fonts')
     tmp_folder = os.path.join(APP_DIR, 'tmp')
-    
-    if not isinstance(fonts, list):
-        fonts = [fonts]
 
     # Create empty tmp folder and/or delete its contents
     if not os.path.exists(tmp_folder):
@@ -52,8 +59,7 @@ def install_win32(fonts):
         if not font.bytes: raise Exception # TODO: Raise Exception
 
         # Check if font already installed
-        if os.path.isfile(os.path.join(font_dir, font.filename)):
-            continue
+        if os.path.isfile(os.path.join(font_dir, font.filename)): continue
 
         path = os.path.join(tmp_folder, font.filename)
         with open(path, 'wb+') as f:
@@ -80,3 +86,15 @@ def install_win32(fonts):
 def install_linux(fonts):
     '''Install a font on a Linux system'''
     pass
+
+def install_to_dir(fonts, dir_):
+    '''Install fonts to a directory.'''
+
+    if not os.path.exists(dir_):
+        os.makedirs(dir_, exist_ok=True)
+    
+    for font in fonts:
+        if not font.bytes: raise Exception # TODO: Raise Exception
+        path = os.path.join(dir_, font.filename)
+        with open(path, 'wb+') as f:
+            f.write(font.bytes)

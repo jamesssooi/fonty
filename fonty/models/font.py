@@ -2,7 +2,7 @@
 
 import requests
 from click import style
-from fonty.lib.install import install
+from fonty.lib.install import install_fonts
 
 class Font(object):
     '''Class to manage individual fonts.'''
@@ -21,7 +21,7 @@ class Font(object):
             self.variant = variant
     
     def download(self, handler=None):
-        '''Download this font. Appends the bytes as a property to self.'''
+        '''Download this font and return its bytes. Also appends the bytes as a property to self.'''
 
         if not self.remote_path:
             raise Exception # TODO: Raise Exception
@@ -30,17 +30,17 @@ class Font(object):
         if handler:
             iterator = handler(self, request)
             next(iterator)
-        
+
         self.bytes = b''
         for bytes_ in request.iter_content(128):
             if bytes_:
                 self.bytes += bytes_
                 if handler: iterator.send(len(self.bytes))
         
-        return self
+        return self.bytes
 
     def install(self, path=None):
-        install(self, path)
+        install_fonts(self, path)
 
     def to_pretty_string(self):
         '''Prints the contents of this font as ANSI formatted string.'''

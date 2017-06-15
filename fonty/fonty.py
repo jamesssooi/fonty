@@ -17,6 +17,7 @@ from fonty.lib import search
 from fonty.lib.progress import ProgressBar
 from fonty.lib.constants import COLOR_INPUT
 from fonty.lib.task import Task, TaskStatus
+from fonty.lib.install import install_fonts
 
 colorama.init()
 
@@ -49,8 +50,9 @@ def test(verbose):
 
 @click.command()
 @click.argument('name', nargs=-1, type=click.STRING)
+@click.option('--output', '-o', type=click.Path(file_okay=False, writable=True, resolve_path=True))
 @click.option('--variants', '-v', multiple=True, default=None, type=click.STRING)
-def install(name, variants):
+def install(name, output, variants):
     '''Installs a font'''
 
     start_time = timeit.default_timer()
@@ -109,18 +111,20 @@ def install(name, variants):
 
     # Install into local computer
     task = Task('Installing ({}) fonts...'.format(len(fonts)))
-    for font in fonts:
-        font.install()
+    install_fonts(fonts, output)
 
     # Done!
-    end_time = timeit.default_timer()
-    total_time = end_time - start_time
-    task.stop(status=TaskStatus.SUCCESS,
-              message='Installed {typeface}({variants})'.format(
+    message = 'Installed {typeface}({variants})'.format(
                   typeface=colored(typeface.name, COLOR_INPUT),
                   variants=colored(', '.join([font.variant for font in fonts]), 'red')
-              ))
+              )
+    if output: message += ' to {}'.format(output)
+    task.stop(status=TaskStatus.SUCCESS,
+              message=message)
 
+    # Calculate execution time
+    end_time = timeit.default_timer()
+    total_time = end_time - start_time
     click.echo('Done in {}s'.format(round(total_time, 2)))
 
 @click.command()
