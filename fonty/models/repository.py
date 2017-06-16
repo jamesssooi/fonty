@@ -79,6 +79,7 @@ class Repository(object):
     def load_from_json(json_data):
         '''Load a repository from a JSON string.'''
         repo = json_data
+
         if not isinstance(json_data, dict):
             repo = json.loads(json_data)
 
@@ -90,30 +91,32 @@ class Repository(object):
         return Repository(repo['source'], typefaces)
 
     @staticmethod
-    def load_from_local(name):
-        path_to_json = os.path.join(os.getcwd(), 'sample/repo.json')
+    def load_from_local(source):
+        '''Load a local repository.'''
 
-        with open(path_to_json) as raw_json:
-            raw_json = raw_json.read()
-            data = json.loads(raw_json)
+        # Get local path to repository
+        with open(SUBSCRIPTIONS_PATH) as f:
+            sources = json.loads(f.read())
+        repository = next((item for item in sources['sources'] if item['remotePath'] == source), None)
 
-        if name not in data:
-            raise Exception
+        if not repository: raise Exception
 
-        return Repository.load_from_json(data[name])
+        # Read local repository file and create Repository instance
+        with open(repository['localPath']) as f: data = f.read()
+        return Repository.load_from_json(data)
 
     @staticmethod
-    def load_all(path_to_json=None):
-        if not path_to_json:
-            dir_path = os.path.dirname(os.path.realpath(__file__))
-            path_to_json = os.path.join(os.getcwd(), 'sample/repo.json')
+    def load_all():
+        '''Load all subscribed repositories.'''
 
-        with open(path_to_json) as raw_json:
-            raw_json = raw_json.read()
-            data = json.loads(raw_json)
+        # Get list of subscriptions
+        with open(SUBSCRIPTIONS_PATH) as f:
+            sources = json.loads(f.read())
         
+        # Get local repositories
         repositories = []
-        for key, value in data.items():
-            repositories.append(Repository.load_from_json(value))
+        for source in sources['sources']:
+            with open(source['localPath']) as f: data = f.read()
+            repositories.append(Repository.load_from_json(data))
         
         return repositories

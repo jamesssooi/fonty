@@ -22,5 +22,4 @@ ACTION_OK = colored('✓', COLOR_OK)
 ACTION_ERR = colored('✗', COLOR_ERR)
 
 # System
-IS_x32 = sys.maxsize > 2**32
 IS_x64 = sys.maxsize > 2**32

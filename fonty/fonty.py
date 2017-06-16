@@ -96,7 +96,7 @@ def install(name, output, variants):
         current_size = 0
         bar = ProgressBar(total=total_size,
                           desc='Downloading {}'.format(font.filename))
-        while current_size < total_size:
+        while True:
             current_size = yield
             bar.update(current_size)
             task.message = str(bar)
