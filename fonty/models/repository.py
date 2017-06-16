@@ -26,21 +26,22 @@ class Repository(object):
             with open(SUBSCRIPTIONS_PATH) as data:
                 subscriptions = json.loads(data.read())
         else:
-            subscriptions = {}
+            subscriptions = []
 
         # Check if source is already subscribed
         # TODO: Implement exception
-        if self.source in subscriptions:
+        repository = next((item for item in subscriptions['sources'] if item['remotePath'] == self.source), None)
+        if repository:
             raise Exception
-
-        subscriptions[self.source] = {
-            'source': self.source,
-            'last_updated': datetime.now().isoformat()
-        }
+        
+        subscriptions['sources'].append({
+            'remotePath': self.source,
+            'lastUpdated': datetime.now().isoformat()
+        })
 
         # Write to file
-        with open(SUBSCRIPTIONS_PATH, 'w') as outfile:
-            json.dump(subscriptions, outfile, ensure_ascii=False)
+        with open(SUBSCRIPTIONS_PATH, 'w') as f:
+            json.dump(subscriptions, f, ensure_ascii=False)
 
         return self
 
@@ -52,14 +53,15 @@ class Repository(object):
             with open(SUBSCRIPTIONS_PATH) as data:
                 subscriptions = json.loads(data.read())
         else:
-            subscriptions = {}
+            subscriptions = []
 
         # Check if source is already unsubscribed
         # TODO: Implement exception
-        if self.source not in subscriptions:
+        repository = next((item for item in subscriptions['sources'] if item['remotePath'] == self.source), None)
+        if not repository:
             raise Exception
 
-        del subscriptions[self.source]
+        subscriptions.remove(repository)
 
         # Write to file
         with open(SUBSCRIPTIONS_PATH, 'w') as outfile:
