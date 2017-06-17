@@ -1,8 +1,7 @@
-# -*- coding: utf-8 -*-
 '''fonty.fonty: entry point for fonty'''
 
 import io
-import sys
+
 import click
 import json
 import time
@@ -10,8 +9,6 @@ import timeit
 import colorama
 from termcolor import colored
 from pprint import pprint
-from whoosh.qparser import QueryParser
-from fonty.models.typeface import Typeface
 from fonty.models.repository import Repository
 from fonty.lib import search
 from fonty.lib.progress import ProgressBar

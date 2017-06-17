@@ -2,11 +2,11 @@
 
 import json
 import os
+import requests
 from datetime import datetime
 from pprint import pprint
 from fonty.lib.constants import APP_DIR, SUBSCRIPTIONS_PATH
 from fonty.models.typeface import Typeface
-from fonty.models.font import Font
 
 class Repository(object):
     '''A model for a repository'''
@@ -65,7 +65,15 @@ class Repository(object):
         with open(SUBSCRIPTIONS_PATH, 'w') as outfile:
             json.dump(subscriptions, outfile, ensure_ascii=False)
 
+        self.update(source={'foo': 123})
+
         return self
+
+    def update(self, source: str):
+        '''Update local copy of repository with remote.'''
+
+        request = requests.get(self.source)
+
 
     def get_typeface(self, name):
         '''Returns a Typeface object.'''
@@ -97,12 +105,15 @@ class Repository(object):
         # Get local path to repository
         with open(SUBSCRIPTIONS_PATH) as f:
             sources = json.loads(f.read())
-        repository = next((item for item in sources['sources'] if item['remotePath'] == source), None)
+        repository = next((
+            item for item in sources['sources'] if item['remotePath'] == source
+        ), None)
 
         if not repository: raise Exception
 
         # Read local repository file and create Repository instance
-        with open(repository['localPath']) as f: data = f.read()
+        with open(repository['localPath']) as f:
+            data = f.read()
         return Repository.load_from_json(data)
 
     @staticmethod
@@ -112,11 +123,12 @@ class Repository(object):
         # Get list of subscriptions
         with open(SUBSCRIPTIONS_PATH) as f:
             sources = json.loads(f.read())
-        
+
         # Get local repositories
         repositories = []
         for source in sources['sources']:
-            with open(source['localPath']) as f: data = f.read()
+            with open(source['localPath']) as f:
+                data = f.read()
             repositories.append(Repository.load_from_json(data))
-        
+
         return repositories
