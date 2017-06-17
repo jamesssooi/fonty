@@ -27,20 +27,7 @@ def main():
 @click.option('--verbose/-v', is_flag=True)
 def test(verbose):
     '''Testing function.'''
-    # bar = ProgressBar(1024)
-    # for _ in range(1024):
-    #    bar.increment(2)
-    #    click.echo(str(bar) + '\r', nl=False)
-    #    time.sleep(0.01)
-
-    # t = Task('foo')
-    # time.sleep(3)
-    # t.stop(TaskStatus.ERROR, 'done!')
-
-    # p = Progress('foo')
-    # time.sleep(3)
-    # p.stop('✓', 'done!')
-
+    pass
 
 @click.command()
 @click.argument('name', nargs=-1, type=click.STRING)

@@ -13,7 +13,7 @@ SCHEMA = Schema(
     id=ID(stored=True),
     name=TEXT(stored=True),
     category=KEYWORD(stored=True),
-    repository=ID(stored=True)
+    repository_path=ID(stored=True)
 )
 
 def search(name):
@@ -36,8 +36,8 @@ def search(name):
     # Check if exact match
     if results and result['name'].lower() != name.lower():
         raise SearchNotFound(name, result['name'])
-
-    repo = Repository.load_from_local(result['repository'])
+    
+    repo = Repository.load_from_path(result['repository_path'])
     typeface = repo.get_typeface(result['name'])
 
     return repo, typeface
@@ -68,7 +68,7 @@ def index_fonts(repository):
             id=typeface.generate_id(repository.source),
             name=typeface.name,
             category=typeface.category,
-            repository=repository.source
+            repository_path=repository.local_path
         )
     writer.commit()
 
