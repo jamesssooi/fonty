@@ -84,6 +84,40 @@ class Subscription:
         with open(self.local_path, mode='rb') as f:
             return hashlib.md5(f.read()).hexdigest()
 
+    def subscribe(self) -> None:
+        '''Add this subscription to the user's subscription list.
+
+        This method is a convenience wrapper around the static `update_entry`
+        method. The `update_entry` automatically appends the data to the
+        subscriptions list if no existing similar entry is found.
+        '''
+        Subscription.update_entry(self)
+
+    def unsubscribe(self) -> None:
+        '''Remove this subscription from the user's subscription list.'''
+
+        if not os.path.isfile(SUBSCRIPTIONS_PATH):
+            return
+
+        # Get list of subscriptions from subscriptions.json
+        data = {}
+        with open(SUBSCRIPTIONS_PATH) as f:
+            data = json.loads(f.read())
+
+        # Get index value to replace, or `None` if there is no existing entry
+        id_ = self.id_
+        idx = next((idx for idx, val in enumerate(data['subscriptions']) if val['id'] == id_), None)
+
+        if 'subscriptions' not in data:
+            return
+
+        if idx is not None:
+            del data['subscriptions'][idx]
+
+        # Write to file
+        with open(SUBSCRIPTIONS_PATH, 'w') as f:
+            json.dump(data, f, **JSON_DUMP_OPTS)
+
     @staticmethod
     def update_entry(subscription: Subscription) -> None:
         '''Update an entry in the subscriptions list.
@@ -102,6 +136,9 @@ class Subscription:
         id_ = subscription.id_
         idx = next((idx for idx, val in enumerate(data['subscriptions']) if val['id'] == id_), None)
 
+        if 'subscriptions' not in data:
+            data['subscriptions'] = []
+
         # Update with new value
         subscription_data = {
             'id': subscription.id_,
@@ -110,13 +147,13 @@ class Subscription:
             'lastUpdated': subscription.last_updated
         }
         if idx is not None:
-            data[idx] = subscription_data
+            data['subscriptions'][idx] = subscription_data
         elif idx is None:
-            data.append(subscription_data)
+            data['subscriptions'].append(subscription_data)
 
         # Write to file (subscriptions.json)
         with open(SUBSCRIPTIONS_PATH, 'w') as f:
-            json.dump({'subscriptions': data}, f, **JSON_DUMP_OPTS)
+            json.dump(data, f, **JSON_DUMP_OPTS)
 
     @staticmethod
     def load_entries(path: str = None) -> List['Subscription']:
