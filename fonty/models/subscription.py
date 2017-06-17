@@ -2,7 +2,7 @@
 import os
 import json
 from datetime import datetime
-from typing import List
+from typing import List, Tuple
 
 import hashlib
 import requests
@@ -22,13 +22,13 @@ class Subscription:
         `last_updated` (datetime): Last updated date.
     '''
 
-    def __init__(self, remote_path: str, local_path: str, last_updated=None) -> None:
+    def __init__(self, remote_path: str, local_path: str = None, last_updated=None) -> None:
         self.remote_path = remote_path
         self.local_path = local_path
         self.last_updated = last_updated
         self.id_ = hashlib.md5(self.remote_path.encode('utf-8')).hexdigest()
 
-    def fetch(self) -> bool:
+    def fetch(self) -> Tuple['Subscription', bool]:
         '''Update local copy of repository with remote.'''
         path = os.path.join(REPOSITORY_DIR, self.id_ + '.json')
 
@@ -55,7 +55,7 @@ class Subscription:
         self.local_path = path
         Subscription.update_entry(self)
 
-        return has_changes
+        return self, has_changes
 
     def get_local_repository(self) -> Repository:
         '''Gets the local copy of the repository.
@@ -66,7 +66,7 @@ class Subscription:
         if not self.local_path:
             raise Exception
 
-        return Repository.load_from_json(self.local_path)
+        return Repository.load_from_path(self.local_path)
 
     def get_local_md5(self) -> str:
         '''Returns a MD5 hash representation of the local repository file.
@@ -84,14 +84,15 @@ class Subscription:
         with open(self.local_path, mode='rb') as f:
             return hashlib.md5(f.read()).hexdigest()
 
-    def subscribe(self) -> None:
+    def subscribe(self) -> 'Subscription':
         '''Add this subscription to the user's subscription list.
 
         This method is a convenience wrapper around the static `update_entry`
         method. The `update_entry` automatically appends the data to the
         subscriptions list if no existing similar entry is found.
         '''
-        Subscription.update_entry(self)
+        subscription, _ = self.fetch()
+        return subscription
 
     def unsubscribe(self) -> None:
         '''Remove this subscription from the user's subscription list.'''
@@ -101,15 +102,15 @@ class Subscription:
 
         # Get list of subscriptions from subscriptions.json
         data = {}
-        with open(SUBSCRIPTIONS_PATH) as f:
+        with open(SUBSCRIPTIONS_PATH, encoding='utf-8') as f:
             data = json.loads(f.read())
+
+        if 'subscriptions' not in data:
+            return
 
         # Get index value to replace, or `None` if there is no existing entry
         id_ = self.id_
         idx = next((idx for idx, val in enumerate(data['subscriptions']) if val['id'] == id_), None)
-
-        if 'subscriptions' not in data:
-            return
 
         if idx is not None:
             del data['subscriptions'][idx]
@@ -119,7 +120,7 @@ class Subscription:
             json.dump(data, f, **JSON_DUMP_OPTS)
 
     @staticmethod
-    def update_entry(subscription: Subscription) -> None:
+    def update_entry(subscription: 'Subscription') -> None:
         '''Update an entry in the subscriptions list.
 
         Args:
@@ -129,15 +130,22 @@ class Subscription:
         # Get list of subscriptions from subscriptions.json
         data = {}
         if os.path.isfile(SUBSCRIPTIONS_PATH):
-            with open(SUBSCRIPTIONS_PATH) as f:
-                data = json.loads(f.read())
-
-        # Get index value to replace, or `None` if there is no existing entry
-        id_ = subscription.id_
-        idx = next((idx for idx, val in enumerate(data['subscriptions']) if val['id'] == id_), None)
+            with open(SUBSCRIPTIONS_PATH, encoding='utf-8') as f:
+                content = f.read()
+                if not content:
+                    data = {}
+                else:
+                    data = json.loads(content)
 
         if 'subscriptions' not in data:
             data['subscriptions'] = []
+
+        # Get index value to replace, or `None` if there is no existing entry
+        id_ = subscription.id_
+        idx = next((
+            idx for idx, val in enumerate(data['subscriptions'])
+            if 'id' in val and val['id'] == id_
+        ), None)
 
         # Update with new value
         subscription_data = {
@@ -168,7 +176,7 @@ class Subscription:
         # Get list of subscriptions from subscriptions.json
         if not os.path.isfile(path):
             return []
-        with open(path) as f:
+        with open(path, encoding='utf-8') as f:
             data = json.loads(f.read())
 
         subscriptions = []

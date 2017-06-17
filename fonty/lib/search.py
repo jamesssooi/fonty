@@ -36,7 +36,7 @@ def search(name):
     # Check if exact match
     if results and result['name'].lower() != name.lower():
         raise SearchNotFound(name, result['name'])
-    
+
     repo = Repository.load_from_path(result['repository_path'])
     typeface = repo.get_typeface(result['name'])
 
@@ -48,7 +48,7 @@ def create_index():
         os.makedirs(SEARCH_INDEX_PATH, exist_ok=True)
     return create_in(SEARCH_INDEX_PATH, SCHEMA)
 
-def index_fonts(repository):
+def index_fonts(repository, path_to_repository):
     '''Indexes a repository's font data.
 
        A local index file will be automatically created in the user's
@@ -60,15 +60,15 @@ def index_fonts(repository):
 
     # Delete all existing index for this repository and start clean
     # TODO: Implement incremental indexing
-    writer.delete_by_term('repository', repository.source)
+    writer.delete_by_term('repository_path', path_to_repository)
 
     # Index all typefaces in this repository
     for typeface in repository.typefaces:
         writer.add_document(
-            id=typeface.generate_id(repository.source),
+            id=typeface.generate_id(path_to_repository),
             name=typeface.name,
             category=typeface.category,
-            repository_path=repository.local_path
+            repository_path=path_to_repository
         )
     writer.commit()
 

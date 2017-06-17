@@ -1,12 +1,7 @@
 '''repository.py'''
 import json
-import os
-import hashlib
 from typing import List
-from datetime import datetime
 
-import requests
-from fonty.lib.constants import APP_DIR, SUBSCRIPTIONS_PATH, REPOSITORY_DIR
 from fonty.models.typeface import Typeface
 
 class Repository(object):
@@ -50,5 +45,7 @@ class Repository(object):
     @staticmethod
     def load_from_path(path):
         '''Load a repository from a file.'''
-        with open(path) as f:
-            return Repository.load_from_json(f.read())
+        with open(path, encoding='utf-8') as f:
+            data = f.read()
+
+        return Repository.load_from_json(data)

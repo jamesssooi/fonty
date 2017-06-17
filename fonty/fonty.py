@@ -10,6 +10,7 @@ import colorama
 from termcolor import colored
 from pprint import pprint
 from fonty.models.repository import Repository
+from fonty.models.subscription import Subscription
 from fonty.lib import search
 from fonty.lib.progress import ProgressBar
 from fonty.lib.constants import COLOR_INPUT
@@ -58,7 +59,7 @@ def install(name, output, variants):
     task.stop(status=TaskStatus.SUCCESS,
               message="Found '{typeface}' in {repo}".format(
                   typeface=colored(typeface.name, COLOR_INPUT),
-                  repo=repo.source
+                  repo=repo.name
               ))
 
     # Check if variants exists
@@ -96,10 +97,13 @@ def install(name, output, variants):
 
     # Done!
     message = 'Installed {typeface}({variants})'.format(
-                  typeface=colored(typeface.name, COLOR_INPUT),
-                  variants=colored(', '.join([font.variant for font in fonts]), 'red')
-              )
-    if output: message += ' to {}'.format(output)
+        typeface=colored(typeface.name, COLOR_INPUT),
+        variants=colored(', '.join([font.variant for font in fonts]), 'red')
+    )
+
+    if output:
+        message += ' to {}'.format(output)
+
     task.stop(status=TaskStatus.SUCCESS,
               message=message)
 
@@ -122,11 +126,41 @@ def update():
 
     click.echo('Fetching latest repository data...')
 
-    repositories = Repository.load_all()
-    for repo in repositories:
-        task = Task('Updating {}'.format(repo.source))
-        search.index_fonts(repo)
-        task.stop(TaskStatus.SUCCESS, 'Updated {}'.format(repo.source))
+    subscriptions = Subscription.load_entries()
+    for sub in subscriptions:
+        task = Task('Updating {}'.format(sub.remote_path))
+
+        # Fetch remote repositories
+        sub, has_changes = sub.fetch()
+        if not has_changes:
+            task.stop(TaskStatus.SUCCESS, 'No updates available for {}'.format(sub.remote_path))
+            continue
+
+        # Reindex fonts
+        task.message = 'Indexing {}'.format(sub.remote_path)
+        search.index_fonts(sub.get_local_repository(), sub.local_path)
+
+        task.stop(TaskStatus.SUCCESS, 'Updated {}'.format(sub.remote_path))
+
+
+@click.command()
+@click.argument('url')
+def subscribe(url):
+    '''Subscribe to a respository.'''
+    task = Task("Adding '{}' to subscription list...".format(colored(url, COLOR_INPUT)))
+
+    # Add to subscription list and fetch remote repository
+    sub = Subscription(remote_path=url).subscribe()
+
+    # Index fonts
+    task.message = "Indexing '{}'".format(colored(url, COLOR_INPUT))
+    repo = sub.get_local_repository()
+    search.index_fonts(repo, sub.local_path)
+
+    task.stop(status=TaskStatus.SUCCESS,
+              message="Subscribed to '{}'".format(colored(repo.name, COLOR_INPUT)))
+
+    click.echo('{} new typefaces available.'.format(colored(len(repo.typefaces), 'green')))
 
 
 # register commands
@@ -134,3 +168,4 @@ main.add_command(install)
 main.add_command(uninstall)
 main.add_command(test)
 main.add_command(update)
+main.add_command(subscribe)
