@@ -53,9 +53,20 @@ class Subscription:
         # Update entry in subscriptions listing
         self.last_updated = datetime.now().isoformat()
         self.local_path = path
-        Subscription.update(self.id_, self)
+        Subscription.update_entry(self)
 
         return has_changes
+
+    def get_local_repository(self) -> Repository:
+        '''Gets the local copy of the repository.
+
+        Returns:
+            `Repository` A Repository instance of the local repository file.
+        '''
+        if not self.local_path:
+            raise Exception
+
+        return Repository.load_from_json(self.local_path)
 
     def get_local_md5(self) -> str:
         '''Returns a MD5 hash representation of the local repository file.
@@ -74,14 +85,21 @@ class Subscription:
             return hashlib.md5(f.read()).hexdigest()
 
     @staticmethod
-    def update(id_, subscription: Subscription) -> None:
-        '''Update an entry in the subscriptions list.'''
+    def update_entry(subscription: Subscription) -> None:
+        '''Update an entry in the subscriptions list.
+
+        Args:
+            subscription (Subscription): The `Subscription` instance to be updated.
+        '''
 
         # Get list of subscriptions from subscriptions.json
-        with open(SUBSCRIPTIONS_PATH) as f:
-            data = json.loads(f.read())
+        data = {}
+        if os.path.isfile(SUBSCRIPTIONS_PATH):
+            with open(SUBSCRIPTIONS_PATH) as f:
+                data = json.loads(f.read())
 
         # Get index value to replace, or `None` if there is no existing entry
+        id_ = subscription.id_
         idx = next((idx for idx, val in enumerate(data['subscriptions']) if val['id'] == id_), None)
 
         # Update with new value
@@ -98,11 +116,15 @@ class Subscription:
 
         # Write to file (subscriptions.json)
         with open(SUBSCRIPTIONS_PATH, 'w') as f:
-            json.dump(data, f, **JSON_DUMP_OPTS)
+            json.dump({'subscriptions': data}, f, **JSON_DUMP_OPTS)
 
     @staticmethod
-    def load_all(path: str = None) -> List['Subscription']:
-        '''Load all subscribed repositories.'''
+    def load_entries(path: str = None) -> List['Subscription']:
+        '''Load all subscribed repositories.
+
+        Returns:
+            `List[Subscription]` A list of Subscription instances
+        '''
         if not path:
             path = SUBSCRIPTIONS_PATH
 
