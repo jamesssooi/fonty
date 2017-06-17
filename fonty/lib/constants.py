@@ -11,6 +11,7 @@ APP_DIR = user_data_dir(APP_NAME)
 ROOT_DIR = os.getcwd()
 SEARCH_INDEX_PATH = os.path.join(APP_DIR, 'index')
 SUBSCRIPTIONS_PATH = os.path.join(APP_DIR, 'subscriptions.json')
+REPOSITORY_DIR = os.path.join(APP_DIR, 'repositories')
 
 # Colors
 COLOR_OK = 'green'
@@ -23,3 +24,6 @@ ACTION_ERR = colored('✗', COLOR_ERR)
 
 # System
 IS_x64 = sys.maxsize > 2**32
+
+# Configuration
+JSON_DUMP_OPTS = {'indent': 2, 'separators': (',', ': ')}
