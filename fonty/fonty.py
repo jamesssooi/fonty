@@ -23,6 +23,7 @@ colorama.init()
 @click.group()
 def main():
     '''Entry function for fonty'''
+    print('')
     pass
 
 @click.command()
