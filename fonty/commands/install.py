@@ -8,6 +8,7 @@ from fonty.lib.task import Task, TaskStatus
 from fonty.lib.progress import ProgressBar
 from fonty.lib.install import install_fonts
 from fonty.lib.constants import COLOR_INPUT
+from fonty.models.subscription import Subscription
 
 @click.command('install')
 @click.argument('name', nargs=-1, type=click.STRING)
@@ -25,6 +26,15 @@ def cli_install(name, output, variants):
 
     # Compare local and remote repository hash
     #click.echo('Resolving font sources...')
+    subscriptions = Subscription.load_entries()
+    if not subscriptions:
+        Task(message="You are not subscribed to any font sources.",
+             status=TaskStatus.ERROR,
+             asynchronous=False)
+        click.echo("\nEnter '{command}' to add a new font source.".format(
+            command=colored('fonty source add <url>', color='cyan')
+        ))
+        return
 
     # Search for typeface in local repositories
     task = Task("Searching for '{}'...".format(colored(name, 'green')))
@@ -33,7 +43,8 @@ def cli_install(name, output, variants):
     except search.SearchNotFound as e:
         task.stop(status=TaskStatus.ERROR,
                   message="No results found for '{}'".format(colored(name, 'green')))
-        if e.suggestion: click.echo("Did you mean '{}'?".format(e.suggestion))
+        if e.suggestion:
+            click.echo("Did you mean '{}'?".format(e.suggestion))
         return
     task.stop(status=TaskStatus.SUCCESS,
               message="Found '{typeface}' in {repo}".format(
