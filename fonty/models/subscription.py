@@ -52,7 +52,7 @@ class Subscription:
 
         # Check if valid Repository schema
         try:
-            Repository.load_from_json(data)
+            repo = Repository.load_from_json(data)
         except ValueError:
             raise NotJSONError('Data not valid JSON') from None
 
@@ -62,6 +62,7 @@ class Subscription:
         has_changes = True if local_md5 != remote_md5 else False
 
         # Update attributes
+        self.repo = repo
         self.last_updated = datetime.now()
 
         # Replace local copy of repository with latest
