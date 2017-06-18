@@ -38,10 +38,16 @@ class Task(object):
     _indicator_iteration = 0
     _done = False
 
-    def __init__(self, message: str, short_message: str = None) -> None:
+    def __init__(self, message: str, status: TaskStatus = TaskStatus.WAITING,
+                 asynchronous: bool = True) -> None:
         self.message = message
-        self.short_message = short_message if short_message else message
-        threading.Thread(target=self.loop, daemon=True).start()
+        self.status = status
+
+        if asynchronous:
+            threading.Thread(target=self.loop, daemon=True).start()
+        else:
+            self.active = False
+            self.loop() # Prints only one iteration
 
     def loop(self) -> None:
         '''Main print loop.'''
