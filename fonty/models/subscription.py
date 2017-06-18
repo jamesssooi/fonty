@@ -87,10 +87,24 @@ class Subscription:
     def subscribe(self) -> 'Subscription':
         '''Add this subscription to the user's subscription list.
 
-        This method is a convenience wrapper around the static `update_entry`
-        method. The `update_entry` automatically appends the data to the
-        subscriptions list if no existing similar entry is found.
+        This method is a convenience wrapper around the `fetch` method. The
+        The `fetch` automatically appends the data to the subscriptions list if
+        no existing similar entry is found.
         '''
+        # Check if source is already subscribed
+        if os.path.isfile(SUBSCRIPTIONS_PATH):
+            with open(SUBSCRIPTIONS_PATH, encoding='utf-8') as f:
+                data = json.loads(f.read())
+
+            if 'subscriptions' in data:
+                idx = next((
+                    idx for idx, val in enumerate(data['subscriptions'])
+                    if val['id'] == self.id_
+                ), None)
+
+                if idx is not None:
+                    raise AlreadySubscribedError
+
         subscription, _ = self.fetch()
         return subscription
 
@@ -188,3 +202,7 @@ class Subscription:
             ))
 
         return subscriptions
+
+
+class AlreadySubscribedError(Exception):
+    pass
