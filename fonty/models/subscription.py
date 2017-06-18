@@ -1,11 +1,14 @@
 '''subscriptions.py'''
 import os
 import json
-from datetime import datetime
-from typing import List, Tuple
-
 import hashlib
+from datetime import datetime
+from typing import List, Tuple, Union
+
+import timeago
 import requests
+import dateutil.parser
+from termcolor import colored
 from fonty.lib.constants import SUBSCRIPTIONS_PATH, REPOSITORY_DIR, JSON_DUMP_OPTS
 from fonty.models.repository import Repository
 
@@ -17,45 +20,74 @@ class Subscription:
     the Repository model.
 
     Attributes:
+        `name` (str): Name of this repository.
         `remote_path` (str): Remote URL of this repository.
         `local_path` (str): Path to local copy of the repository.
         `last_updated` (datetime): Last updated date.
+        `repo` (Repository): The repository this subscription contains.
     '''
 
-    def __init__(self, remote_path: str, local_path: str = None, last_updated=None) -> None:
+    def __init__(self, name: str, remote_path: str,
+                 local_path: str = None, repo: Repository = None,
+                 last_updated: Union[str, datetime] = None) -> None:
+        self.name = name
         self.remote_path = remote_path
         self.local_path = local_path
-        self.last_updated = last_updated
+        self.repo = repo,
         self.id_ = hashlib.md5(self.remote_path.encode('utf-8')).hexdigest()
 
-    def fetch(self) -> Tuple['Subscription', bool]:
-        '''Update local copy of repository with remote.'''
-        path = os.path.join(REPOSITORY_DIR, self.id_ + '.json')
+        # Parse last updated date
+        self.last_updated = last_updated
+        if isinstance(self.last_updated, str):
+            self.last_updated = dateutil.parser.parse(self.last_updated)
 
-        # Check if repository directory exists
-        if not os.path.exists(REPOSITORY_DIR):
-            os.makedirs(REPOSITORY_DIR, exist_ok=True)
+    def fetch(self, save_to_local: bool = False) -> Tuple['Subscription', bool]:
+        '''Update local copy of repository with remote.
 
+        Returns a tuple of `(self, has_changes)`
+        '''
         # Fetch remote repository
         request = requests.get(self.remote_path)
         data = request.content
+
+        # Check if valid Repository schema
+        try:
+            Repository.load_from_json(data)
+        except ValueError:
+            raise NotJSONError('Data not valid JSON') from None
 
         # Compare MD5 hash
         local_md5 = self.get_local_md5()
         remote_md5 = hashlib.md5(data).hexdigest()
         has_changes = True if local_md5 != remote_md5 else False
 
-        # Replace local copy of repository with latest
-        if has_changes:
-            with open(path, 'wb') as f:
-                f.write(data)
+        # Update attributes
+        self.last_updated = datetime.now()
 
-        # Update entry in subscriptions listing
-        self.last_updated = datetime.now().isoformat()
-        self.local_path = path
+        # Replace local copy of repository with latest
+        if save_to_local:
+            self.save_to_local(data)
+
+        # Update subscription entry list
         Subscription.update_entry(self)
 
         return self, has_changes
+
+    def save_to_local(self, bytes_: bytes) -> str:
+        '''Saves a local copy of the repository. Returns a path to the local file.'''
+        # Check if repository directory exists
+        if not os.path.exists(REPOSITORY_DIR):
+            os.makedirs(REPOSITORY_DIR, exist_ok=True)
+
+        # Write to file
+        path = os.path.join(REPOSITORY_DIR, self.id_ + '.json')
+        with open(path, 'wb') as f:
+            f.write(bytes_)
+
+        # Update attribtues
+        self.local_path = path
+
+        return path
 
     def get_local_repository(self) -> Repository:
         '''Gets the local copy of the repository.
@@ -105,7 +137,7 @@ class Subscription:
                 if idx is not None:
                     raise AlreadySubscribedError
 
-        subscription, _ = self.fetch()
+        subscription, _ = self.fetch(save_to_local=True)
         return subscription
 
     def unsubscribe(self) -> None:
@@ -132,6 +164,41 @@ class Subscription:
         # Write to file
         with open(SUBSCRIPTIONS_PATH, 'w') as f:
             json.dump(data, f, **JSON_DUMP_OPTS)
+
+    def pprint(self, output: bool = False, ansi: bool = True,
+               join: bool = True) -> Union[str, List[str]]:
+        '''Pretty prints the details of this subscription.'''
+        format_ = [
+            '{name} @ {url}',
+            '- ID: {id_}',
+            '- Typeface(s) available: {count}',
+            '- Last updated: {last_updated}',
+        ]
+
+        # Generate details
+        repo = self.get_local_repository()
+        name = colored(repo.name, 'cyan') if ansi else repo.name
+        url = colored(self.remote_path, attrs=['dark']) if ansi else self.remote_path
+        id_ = colored(self.id_, attrs=['dark']) if ansi else self.id_
+        count = colored(len(repo.typefaces), attrs=['dark']) if ansi else len(repo.typefaces)
+
+        last_updated = timeago.format(self.last_updated)
+        last_updated = colored(last_updated, attrs=['dark']) if ansi else last_updated
+
+        lines = [line.format(name=name,
+                             url=url,
+                             id_=id_,
+                             count=count,
+                             last_updated=last_updated,)
+                 for line in format_]
+
+        if output:
+            print('\n'.join(lines))
+
+        if join:
+            return '\n'.join(lines)
+        else:
+            return lines
 
     @staticmethod
     def update_entry(subscription: 'Subscription') -> None:
@@ -164,9 +231,10 @@ class Subscription:
         # Update with new value
         subscription_data = {
             'id': subscription.id_,
+            'name': subscription.name,
             'remotePath': subscription.remote_path,
             'localPath': subscription.local_path,
-            'lastUpdated': subscription.last_updated
+            'lastUpdated': subscription.last_updated.isoformat()
         }
         if idx is not None:
             data['subscriptions'][idx] = subscription_data
@@ -196,6 +264,7 @@ class Subscription:
         subscriptions = []
         for sub in data['subscriptions']:
             subscriptions.append(Subscription(
+                name=sub.get('name', None),
                 remote_path=sub.get('remotePath', None),
                 local_path=sub.get('localPath', None),
                 last_updated=sub.get('lastUpdated', None)
@@ -203,6 +272,33 @@ class Subscription:
 
         return subscriptions
 
+    @staticmethod
+    def load_from_url(url: str) -> 'Subscription':
+        '''Load a subscription from a repository URL.'''
+        request = requests.get(url)
+        data = request.content
+
+        # Check if valid Repository schema
+        try:
+            repo = Repository.load_from_json(data)
+        except ValueError:
+            raise NotJSONError('Data not a valid JSON file') from None
+
+        return Subscription(name=repo.name, remote_path=url, repo=repo)
+
+    @staticmethod
+    def get(id_: str) -> 'Subscription':
+        '''Finds and returns a subscription.'''
+
+        subscriptions = Subscription.load_entries()
+
+        return next((sub for sub in subscriptions if sub.remote_path == id_ or
+                                                     sub.name == id_ or
+                                                     sub.id_ == id_), None)
+
 
 class AlreadySubscribedError(Exception):
+    pass
+
+class NotJSONError(ValueError):
     pass
