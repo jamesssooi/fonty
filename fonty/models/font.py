@@ -16,10 +16,10 @@ class Font(object):
 
         # standardise variant identifiers to the CSS standard
         if variant in VARIATIONS_MAP_CSS:
-            self.variant = VARIATIONS_MAP_CSS[variation]
+            self.variant = VARIATIONS_MAP_CSS[variant]
         else:
             self.variant = variant
-    
+
     def download(self, handler=None):
         '''Download this font and return its bytes. Also appends the bytes as a property to self.'''
 
@@ -35,8 +35,13 @@ class Font(object):
         for bytes_ in request.iter_content(128):
             if bytes_:
                 self.bytes += bytes_
-                if handler: iterator.send(len(self.bytes))
-        
+
+                # Send total bytes downloaded to the handler. We use
+                # `request.raw.tell()` instead of `len(bytes_)` to
+                # account for requests with gzip compression.
+                if handler:
+                    iterator.send(request.raw.tell()) # total bytes received
+
         return self.bytes
 
     def install(self, path=None):
@@ -45,8 +50,8 @@ class Font(object):
     def to_pretty_string(self):
         '''Prints the contents of this font as ANSI formatted string.'''
         variation = '{css} {descriptive}'.format(
-            css=self.variation,
-            descriptive='({})'.format(VARIATIONS_MAP_DESCRIPTIVE[self.variation])
+            css=self.variant,
+            descriptive='({})'.format(VARIATIONS_MAP_DESCRIPTIVE[self.variant])
         )
 
         return style('{variation} - {path}'.format(
