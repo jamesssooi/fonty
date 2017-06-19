@@ -17,7 +17,7 @@ class ProgressBar(object):
         self.filled_char = filled_char
         self.empty_char = empty_char
         self.bar_format = bar_format
-    
+
     def __str__(self):
         percentage = self.value / self.total
 
@@ -40,6 +40,6 @@ class ProgressBar(object):
 
     def increment(self, n=1):
         self.value += n
-    
+
     def update(self, n):
         self.value = n

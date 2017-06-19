@@ -4,7 +4,7 @@ import os.path
 import click
 from whoosh.query import Phrase, And, Term
 from whoosh.qparser import QueryParser
-from whoosh.index import create_in, open_dir, EmptyIndexError
+from whoosh.index import create_in, open_dir, EmptyIndexError, Index
 from whoosh.fields import Schema, TEXT, KEYWORD, ID
 from fonty.lib.constants import SEARCH_INDEX_PATH
 from fonty.models.repository import Repository
@@ -13,7 +13,7 @@ SCHEMA = Schema(
     id=ID(stored=True),
     name=TEXT(stored=True),
     category=KEYWORD(stored=True),
-    repository=ID(stored=True)
+    repository_path=ID(stored=True)
 )
 
 def search(name):
@@ -37,18 +37,21 @@ def search(name):
     if results and result['name'].lower() != name.lower():
         raise SearchNotFound(name, result['name'])
 
-    repo = Repository.load_from_local(result['repository'])
-    typeface = repo.get_typeface(result['name'])
+    try:
+        repo = Repository.load_from_path(result['repository_path'])
+        typeface = repo.get_typeface(result['name'])
+    except FileNotFoundError:
+        raise
 
     return repo, typeface
 
-def create_index():
+def create_index() -> Index:
     '''Creates a font search schema.'''
     if not os.path.exists(SEARCH_INDEX_PATH):
         os.makedirs(SEARCH_INDEX_PATH, exist_ok=True)
     return create_in(SEARCH_INDEX_PATH, SCHEMA)
 
-def index_fonts(repository):
+def index_fonts(repository: Repository, path_to_repository: str) -> None:
     '''Indexes a repository's font data.
 
        A local index file will be automatically created in the user's
@@ -60,24 +63,38 @@ def index_fonts(repository):
 
     # Delete all existing index for this repository and start clean
     # TODO: Implement incremental indexing
-    writer.delete_by_term('repository', repository.source)
+    writer.delete_by_term('repository_path', path_to_repository)
 
     # Index all typefaces in this repository
     for typeface in repository.typefaces:
         writer.add_document(
-            id=typeface.generate_id(repository.source),
+            id=typeface.generate_id(path_to_repository),
             name=typeface.name,
             category=typeface.category,
-            repository=repository.source
+            repository_path=path_to_repository
         )
     writer.commit()
 
-def load_index(create=True):
+def unindex_fonts(path_to_repository: str) -> int:
+    '''Unindex a entire repository. Returns the number of documents deleted.'''
+    index = load_index(create=False)
+    writer = index.writer()
+
+    # Delete all existing index for this repository
+    count = writer.delete_by_term('repository_path', path_to_repository)
+    writer.commit()
+
+    return count
+
+def load_index(create: bool = True) -> Index:
     '''Loads a search index file. If one does not exist, create it.'''
     try:
         index = open_dir(SEARCH_INDEX_PATH)
     except EmptyIndexError:
-        index = create_index() if create else False
+        if create:
+            index = create_index()
+        else:
+            raise
 
     return index
 
