@@ -1,4 +1,4 @@
-#!venv/Scripts/python.exe
+#!venv/bin/python
 
 """Convenience wrapper for running fonty directly from the source files."""
 
