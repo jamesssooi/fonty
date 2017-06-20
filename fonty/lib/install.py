@@ -4,6 +4,7 @@ import os
 import shutil
 import sys
 import subprocess
+import platform
 from fonty.lib.constants import APP_DIR, ROOT_DIR, IS_x64
 
 def install_fonts(fonts, path=None):
@@ -111,6 +112,15 @@ def install_to_dir(fonts, dir_):
     for font in fonts:
         if not font.bytes:
             raise Exception # TODO: Raise Exception
+
         path = os.path.join(dir_, font.filename)
         with open(path, 'wb+') as f:
+
+            # Fix permission problems in Cygwin terminals. If Cygwin uses
+            # the unix version of Python, then it writes files with no
+            # executable permission, rendering the font file unopenable.
+            if platform.system().startswith('CYGWIN'):
+                os.chmod(path, 0o755)
+
+            # Write bytes to file
             f.write(font.bytes)
