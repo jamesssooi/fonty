@@ -9,4 +9,5 @@ Fonty TODO list
 - [x] `fonty source show` Show a list of subscribed sources
 - [ ] `fonty disable <name>` Disable a typeface
 - [ ] `fonty enable <name>` Enable a typeface
+- [ ] `fonty webfont <name>` Create webfont versions
 - [ ] Support for custom headers in HTTP requests (allows for password protected sources)

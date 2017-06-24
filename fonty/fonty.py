@@ -11,6 +11,13 @@ def main():
     '''Entry function for fonty'''
     pass
 
+@click.command()
+def test():
+    '''Testing command'''
+    from fonty.lib.list_fonts import get_font_list
+    get_font_list()
+
 # Register commands
 main.add_command(cli_install)
 main.add_command(cli_source)
+main.add_command(test)
