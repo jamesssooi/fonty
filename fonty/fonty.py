@@ -12,10 +12,15 @@ def main():
     pass
 
 @click.command()
-def test():
+@click.argument('variant', nargs=-1)
+def test(variant):
     '''Testing command'''
-    from fonty.lib.list_fonts import get_font_list
-    get_font_list()
+    # from fonty.lib.variants import FontAttribute
+    # variant = ' '.join(variant)
+    # attr = FontAttribute.parse(variant)
+    # attr.print(output=True, long=True)
+    from fonty.lib.list_fonts import get_user_fonts
+    get_user_fonts()
 
 # Register commands
 main.add_command(cli_install)

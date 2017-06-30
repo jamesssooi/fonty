@@ -9,7 +9,7 @@ from fonty.lib.constants import APP_DIR, ROOT_DIR, IS_x64
 
 def install_fonts(fonts, path=None):
     '''OS agnostic function to install fonts on systems.'''
-    platform = sys.platform
+    platform_ = sys.platform
 
     if not isinstance(fonts, list):
         fonts = [fonts]
@@ -18,15 +18,12 @@ def install_fonts(fonts, path=None):
     # calling the system's specific subroutine. If a path is provided, install
     # to that directory instead.
     if not path:
-        if platform == 'darwin': # OSX
-            install_osx(fonts)
-            return
-        elif platform == 'linux' or platform == 'linux2': # Linux
-            install_linux(fonts)
-            return
-        elif platform == 'win32': # Windows
-            install_win32(fonts)
-            return
+        if platform_ == 'darwin': # OSX
+            return install_osx(fonts)
+        elif platform_ == 'linux' or platform_ == 'linux2': # Linux
+            return install_linux(fonts)
+        elif platform_ == 'win32': # Windows
+            return install_win32(fonts)
     else:
         install_to_dir(fonts, path)
 
@@ -36,13 +33,19 @@ def install_osx(fonts):
     Installing fonts on OSX systems is a breeze. The only action required is to
     place the font files in `~/Library/Fonts/` and OSX will take care of the rest.
     '''
-
-    for font in fonts:
+    font_dir = os.path.expanduser('~/Library/Fonts/')
+    for idx, _ in enumerate(fonts):
+        font = fonts[idx]
         if not font.bytes:
             raise Exception # TODO: Raise Exception
-        path = os.path.join(os.path.expanduser('~/Library/Fonts/'), font.filename)
+
+        path = os.path.join(font_dir, font.filename)
         with open(path, 'wb+') as f:
             f.write(font.bytes)
+
+        fonts[idx].local_path = path
+
+    return fonts
 
 def install_win32(fonts):
     '''Install a font on a Windows system.
@@ -64,12 +67,15 @@ def install_win32(fonts):
     else:
         for file_ in os.listdir(tmp_folder):
             path = os.path.join(tmp_folder, file_)
-            if os.path.isfile(path): os.unlink(path)
+            if os.path.isfile(path):
+                os.unlink(path)
 
     # Copy the fonts into a temp directory and then execute FontReg.exe with
     # the /copy flag. FontReg is an external utility to install fonts on Windows
     # systems. More info: http://code.kliu.org/misc/fontreg/
-    for font in fonts:
+    for idx, _ in enumerate(fonts):
+        font = fonts[idx]
+
         if not font.bytes:
             raise Exception # TODO: Raise Exception
 
@@ -79,6 +85,8 @@ def install_win32(fonts):
         path = os.path.join(tmp_folder, font.filename)
         with open(path, 'wb+') as f:
             f.write(font.bytes)
+
+        fonts[idx].local_path = os.path.join(font_dir, font.filename)
 
     if IS_x64:
         fontreg_source = os.path.join(ROOT_DIR, 'ext\\fontreg\\x64\\FontReg.exe')
@@ -98,6 +106,8 @@ def install_win32(fonts):
         path = os.path.join(tmp_folder, file_)
         if os.path.isfile(path):
             os.unlink(path)
+
+    return fonts
 
 def install_linux(fonts):
     '''Install a font on a Linux system'''

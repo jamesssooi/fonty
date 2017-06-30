@@ -11,6 +11,7 @@ APP_DIR = user_data_dir(APP_NAME)
 ROOT_DIR = os.getcwd()
 SEARCH_INDEX_PATH = os.path.join(APP_DIR, 'index')
 SUBSCRIPTIONS_PATH = os.path.join(APP_DIR, 'subscriptions.json')
+MANIFEST_PATH = os.path.join(APP_DIR, 'manifest.json')
 REPOSITORY_DIR = os.path.join(APP_DIR, 'repositories')
 
 # Colors
