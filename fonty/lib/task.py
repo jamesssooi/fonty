@@ -8,7 +8,7 @@ from ansiwrap import shorten, ansilen
 from termcolor import colored
 from fonty.lib.terminal_size import get_terminal_size
 
-TaskStatus = Enum('TaskStatus', 'SUCCESS ERROR WAITING')
+TaskStatus = Enum('TaskStatus', 'SUCCESS ERROR WAITING WARNING')
 
 class Task(object):
     '''`Task` is an utility class that prints a pretty, elegant, and animating
@@ -29,6 +29,7 @@ class Task(object):
     STATUS_SUCCESS = '✓'
     STATUS_ERROR = '✗'
     STATUS_WAITING = ["⠄", "⠆", "⠇", "⠋", "⠙", "⠸", "⠰", "⠠", "⠰", "⠸", "⠙", "⠋", "⠇", "⠆"]
+    STATUS_WARNING = '!'
     DELAY = 0.2
 
     status = TaskStatus.WAITING
@@ -114,5 +115,7 @@ class Task(object):
             indicator = colored(self.STATUS_ERROR, 'red')
         elif self.status == TaskStatus.SUCCESS:
             indicator = colored(self.STATUS_SUCCESS, 'green')
+        elif self.status == TaskStatus.WARNING:
+            indicator = colored(self.STATUS_WARNING, 'yellow')
 
         return indicator
