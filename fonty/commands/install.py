@@ -25,7 +25,6 @@ def cli_install(name, output, variants):
         variants = (','.join(str(x) for x in variants)).split(',')
 
     # Compare local and remote repository hash
-    #click.echo('Resolving font sources...')
     subscriptions = Subscription.load_entries()
     if not subscriptions:
         Task(message="You are not subscribed to any font sources.",
@@ -53,11 +52,11 @@ def cli_install(name, output, variants):
               ))
 
     # Check if variants exists
-    available_variants = [x[0] for x in typeface.get_variants()]
-    invalid_variants = [variant for variant in variants if variant not in available_variants]
+    available_variants = [str(variant) for variant in typeface.get_variants()]
+    invalid_variants = [x for x in variants if x not in available_variants]
     if invalid_variants:
         task.stop(status=TaskStatus.ERROR,
-                  message='Variant(s) [{}] is not available'.format(
+                  message='Variant(s) [{}] not available'.format(
                       colored(', '.join(invalid_variants), COLOR_INPUT)
                   ))
         return # TODO: Raise exception
@@ -83,12 +82,12 @@ def cli_install(name, output, variants):
 
     # Install into local computer
     task = Task('Installing ({}) fonts...'.format(len(fonts)))
-    install_fonts(fonts, output)
+    typeface.install(variants=variants, path=output)
 
     # Done!
     message = 'Installed {typeface}({variants})'.format(
         typeface=colored(typeface.name, COLOR_INPUT),
-        variants=colored(', '.join([font.variant for font in fonts]), 'red')
+        variants=colored(', '.join([str(font.variant) for font in fonts]), 'red')
     )
 
     if output:
