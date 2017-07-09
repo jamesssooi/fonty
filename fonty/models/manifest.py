@@ -6,8 +6,10 @@ from typing import List, Union
 
 from fontTools.ttLib import TTFont
 from fonty.models.font import Font
-from fonty.lib.constants import MANIFEST_PATH, JSON_DUMP_OPTS
+from fonty.models.typeface import Typeface
+from fonty.lib.constants import APP_DIR, MANIFEST_PATH, JSON_DUMP_OPTS
 from fonty.lib.list_fonts import get_user_fonts
+from fonty.lib.json_encoder import FontyJSONEncoder
 from fonty.lib import utils
 
 class Manifest:
@@ -17,47 +19,83 @@ class Manifest:
         self.typefaces = typefaces
         self.last_updated = utils.parse_date(last_updated)
 
-    def add(self, family: str, font: Font):
+    def add(self, typeface: Typeface, fonts: List[Font]):
         '''Add a font to the manifest.'''
 
-        # Check data integrity of font instance
-        if not font.local_path or not font.variant:
-            raise Exception
+        # Retrieve existing Typeface data or create a new one if it doesn't exist
+        typeface_idx = next((
+            idx for idx, val in enumerate(self.typefaces) if val.name == typeface.name
+        ), None)
+        if typeface_idx is None:
+            data = typeface
+        else:
+            data = self.typefaces[typeface_idx]
 
-        if family not in self.typefaces:
-            self.typefaces[family] = {'name': family, 'fonts': []}
+        # Process font files
+        existing_variants = [str(variant) for variant in data.get_variants()]
+        for font in fonts:
+            if str(font.variant) in existing_variants:
+                continue
+            if not font.local_path or not font.variant:
+                raise Exception
+            data.fonts.append(font)
 
-        self.typefaces[family]['fonts'].append({
-            'path': font.local_path,
-            'variant': font.variant
-        })
+        # Update manifest instance
+        if typeface_idx is None:
+            self.typefaces.append(data)
+        else:
+            self.typefaces[typeface_idx] = data
 
-    def remove(self, family: str, variant: str = None) -> int:
+        return self
+
+    def remove(self, typeface: Typeface, variants: List[str] = None) -> int:
         '''Remove a font or an entire family from the manifest.'''
 
-        if family not in self.typefaces:
+        typeface_idx = next((
+            idx for idx, val in enumerate(self.typefaces) if val.name == typeface.name
+        ), None)
+        if typeface_idx is None:
             raise Exception
 
-        if variant is None:
-            count = len(self.typefaces[family]['fonts'])
-            del self.typefaces[family]
-        else:
-            idx_to_delete = next((
-                idx for idx, val in enumerate(self.typefaces[family]['fonts'])
-                if val['variant'] == variant
-            ), None)
+        data = self.typefaces[typeface_idx]
 
-            if idx_to_delete is not None:
-                count = 1
-                del self.typefaces[family][idx_to_delete]
+        if variants is None:
+            count = len(self.typefaces[typeface_idx].fonts)
+            self.typefaces(typeface_idx)
+        else:
+            count = 0
+            for variant in variants:
+                font_idx = next((
+                    idx for idx, val in enumerate(typeface.fonts)
+                    if str(val.variant) in variants
+                ), None)
+
+                if font_idx is None:
+                    raise Exception
+
+                data.fonts.pop(font_idx)
+                count += 1
+
+            if not data.fonts:
+                self.typefaces.pop(typeface_idx)
+            else:
+                self.typefaces[typeface_idx] = data
 
         return count
 
+    def get(self, name: str):
+        '''Load a typeface from the manifest.'''
+        typeface = next((val for val in self.typefaces if val.name == name), None)
+        if typeface is None:
+            return None
+
+        return typeface
+
     def save(self, path: str = None) -> str:
         '''Save the manifest list to disk.'''
+        utils.check_dirs(APP_DIR)
         if path is None:
             path = MANIFEST_PATH
-        path = utils.check_dirs(path)
 
         data = {
             'lastUpdated': datetime.now().isoformat(),
@@ -66,7 +104,7 @@ class Manifest:
 
         # Write to file (manifest.json)
         with open(path, 'w') as f:
-            json.dump(data, f, **JSON_DUMP_OPTS)
+            json.dump(data, f, cls=FontyJSONEncoder, **JSON_DUMP_OPTS)
 
     @staticmethod
     def load(path: str = None) -> 'Manifest':
@@ -77,7 +115,26 @@ class Manifest:
         with open(path, encoding='utf-8') as f:
             data = json.loads(f.read())
 
-        return Manifest(typefaces=data['typefaces'],
+        # Convert data into Typefaces and Font instances
+        typefaces = []
+        for typeface_json in data['typefaces']:
+            fonts = []
+            for font_json in typeface_json['fonts']:
+                d = {'variant': font_json['variant'],
+                     'local_path': font_json['localPath']}
+                if 'remotePath' in font_json:
+                    d['remote_path'] = font_json['remotePath']
+                if 'filename' in font_json:
+                    d['filename'] = font_json['filename']
+                fonts.append(Font(**d))
+
+            typefaces.append(
+                Typeface(name=typeface_json.get('name'),
+                         category=typeface_json.get('category', None),
+                         fonts=fonts)
+            )
+
+        return Manifest(typefaces=typefaces,
                         last_updated=data['lastUpdated'])
 
     @staticmethod
