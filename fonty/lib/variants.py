@@ -35,6 +35,9 @@ class FontAttribute:
         self.style = style
         self.stretch = stretch
         self.misc = misc
+
+    def __str__(self):
+        return self.print()
     
     def print(self, long: bool = False, output: bool = False) -> str:
         '''Print this font's attributes'''
@@ -155,6 +158,7 @@ WEIGHT_MAP = {
     'hairline'   : FONT_WEIGHT.THIN,
     'ultralight' : FONT_WEIGHT.EXTRALIGHT,
     'book'       : FONT_WEIGHT.LIGHT,
+    'roman'      : FONT_WEIGHT.REGULAR,
     'demibold'   : FONT_WEIGHT.SEMIBOLD,
     'ultrabold'  : FONT_WEIGHT.EXTRABOLD,
     'heavy'      : FONT_WEIGHT.BLACK,
