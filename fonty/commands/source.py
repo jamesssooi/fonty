@@ -75,9 +75,9 @@ def remove(identifier: str):
     task.stop(status=TaskStatus.SUCCESS,
               message="Removed {} typeface(s) from index".format(colored(count, 'cyan')))
 
-@cli_source.command()
-def show():
-    '''Show list of subscribed sources'''
+@cli_source.command(name='list')
+def list_():
+    '''List all subscribed sources'''
     subscriptions = Subscription.load_entries()
     count = 1
     for sub in subscriptions:
