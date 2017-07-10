@@ -2,29 +2,24 @@
 
 import json
 import hashlib
-import requests
-import click
+from typing import List
+
 from click import style
-from pprint import pprint
+from fonty.lib.install import install_fonts
+from fonty.lib.uninstall import uninstall_fonts
 from fonty.models.font import Font
-import fonty.lib.utils as utils
 
 class Typeface(object):
     '''Class to manage a typeface.'''
 
-    def __init__(self, name, category, fonts):
+    def __init__(self, name, fonts, category=None):
         self.name = name
         self.fonts = fonts
         self.category = category
 
     def download(self, variants=None, handler=None):
         '''Download this typeface.'''
-
-        # Filter font list to requested variants only
-        if variants:
-            fonts = [font for font in self.fonts if font.variant in variants]
-        else:
-            fonts = self.fonts
+        fonts = self.get_fonts(variants)
 
         # Download fonts
         for font in fonts:
@@ -32,22 +27,54 @@ class Typeface(object):
 
         return fonts
 
+    def install(self, path: str = None, variants: List[str] = None):
+        '''Install this typeface.'''
+        from fonty.models.manifest import Manifest
+
+        # Install fonts
+        fonts = self.get_fonts(variants)
+        success = install_fonts(fonts, path)
+
+        # Update manifest file
+        if success:
+            manifest = Manifest.load()
+            manifest.add(self, success)
+            manifest.save()
+
+        return success
+
+    def uninstall(self, variants: List[str] = None):
+        '''Uninstall this typeface.'''
+        from fonty.models.manifest import Manifest
+
+        # Uninstall fonts
+        fonts = self.get_fonts(variants)
+        success, failed = uninstall_fonts(fonts)
+
+        # Update manifest file
+        if success:
+            uninstalled_variants = [str(font.variant) for font in success]
+            manifest = Manifest.load()
+            manifest.remove(self, uninstalled_variants)
+
+        return success, failed
+
+    def get_fonts(self, variants: List[str] = None):
+        '''Returns the list of fonts in this typeface.'''
+        if variants:
+            return [font for font in self.fonts if str(font.variant) in variants]
+        else:
+            return self.fonts
+
     def get_variants(self):
         '''Gets the variations available for this typeface.'''
-        return [(font.variant, font.get_descriptive_variant()) for font in self.fonts]
+        return [font.variant for font in self.fonts]
 
     def to_pretty_string(self, verbose=False):
         '''Prints the contents of this typeface as ANSI formatted string.'''
 
-        font_str = ''
-        font_variants = self.get_variants()
-        variants = []
-        for var, desc in font_variants:
-            if desc is not None:
-                variants.append(desc + '({})'.format(var))
-            else:
-                variants.append(var)
-        font_str = ', '.join(variants)
+        variants = self.get_variants()
+        font_str = ', '.join(str(variant) for variant in variants)
 
         return '{name}\n{category}\n{fonts}'.format(
             name=style(self.name, 'blue'),
@@ -76,14 +103,18 @@ class Typeface(object):
                 remote_path=value['url']
             ))
 
-        return Typeface(data['name'], data['category'], fonts)
+        return Typeface(name=data['name'],
+                        fonts=fonts,
+                        category=data['category'])
 
+    @staticmethod
+    def load_from_manifest(name: str):
+        '''Load a typeface from the user's local manifest file.'''
+        from fonty.models.manifest import Manifest
 
-# Functions
-def download_generator(total_size):
-    current_size = 0
-    while current_size < total_size:
-        received_size = yield
-        current_size += received_size
-        yield current_size
-    return
+        try:
+            manifest = Manifest.load()
+        except Exception as e:
+            raise e # TODO: Implement exception
+
+        return manifest.get(name)
