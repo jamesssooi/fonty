@@ -7,9 +7,10 @@ import subprocess
 import platform
 from fonty.lib.constants import APP_DIR, ROOT_DIR, IS_x64
 
+platform_ = sys.platform
+
 def install_fonts(fonts, path=None):
     '''OS agnostic function to install fonts on systems.'''
-    platform_ = sys.platform
 
     if not isinstance(fonts, list):
         fonts = [fonts]
@@ -22,7 +23,7 @@ def install_fonts(fonts, path=None):
             return install_osx(fonts)
         elif platform_ == 'linux' or platform_ == 'linux2': # Linux
             return install_linux(fonts)
-        elif platform_ == 'win32': # Windows
+        elif platform_ == 'win32' or platform_ == 'cygwin': # Windows
             return install_win32(fonts)
     else:
         install_to_dir(fonts, path)
@@ -89,9 +90,9 @@ def install_win32(fonts):
         fonts[idx].local_path = os.path.join(font_dir, font.filename)
 
     if IS_x64:
-        fontreg_source = os.path.join(ROOT_DIR, 'ext\\fontreg\\x64\\FontReg.exe')
+        fontreg_source = os.path.join(ROOT_DIR, 'ext', 'fontreg', 'x64', 'FontReg.exe')
     else:
-        fontreg_source = os.path.join(ROOT_DIR, 'ext\\fontreg\\x32\\FontReg.exe')
+        fontreg_source = os.path.join(ROOT_DIR, 'ext', 'fontreg', 'x32', 'FontReg.exe')
 
     shutil.copy2(fontreg_source, tmp_folder)
 
