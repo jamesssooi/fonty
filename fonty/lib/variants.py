@@ -30,11 +30,12 @@ class FONT_STRETCH(Enum):
 
 
 class FontAttribute:
-    def __init__(self, weight, style, stretch, misc: str = None) -> None:
+    def __init__(self, weight, style, stretch, misc: str = None, _raw = None) -> None:
         self.weight = weight
         self.style = style
         self.stretch = stretch
         self.misc = misc
+        self._raw = _raw
 
     def __str__(self):
         return self.print()
@@ -78,6 +79,8 @@ class FontAttribute:
         style = FONT_STYLE.NORMAL
         stretch = FONT_STRETCH.NORMAL
         misc = ''
+
+        raw = variant_str
 
         # Normalize string
         variant_str = ''.join(s.strip() for s in variant_str.split(' '))
@@ -137,7 +140,8 @@ class FontAttribute:
         return FontAttribute(weight=weight,
                              style=style,
                              stretch=stretch,
-                             misc=misc)
+                             misc=misc,
+                             _raw=raw)
 
 
 #===============================================================================
@@ -159,7 +163,9 @@ WEIGHT_MAP = {
     'ultralight' : FONT_WEIGHT.EXTRALIGHT,
     'book'       : FONT_WEIGHT.LIGHT,
     'roman'      : FONT_WEIGHT.REGULAR,
+    'normal'     : FONT_WEIGHT.REGULAR,
     'demibold'   : FONT_WEIGHT.SEMIBOLD,
+    'negreta'    : FONT_WEIGHT.BOLD,
     'ultrabold'  : FONT_WEIGHT.EXTRABOLD,
     'heavy'      : FONT_WEIGHT.BLACK,
     'script'     : FONT_WEIGHT.REGULAR,
@@ -179,7 +185,8 @@ CSS_WEIGHT_MAP = {
 
 STYLE_MAP = {
     'italic'     : FONT_STYLE.ITALIC,
-    'oblique'    : FONT_STYLE.OBLIQUE
+    'oblique'    : FONT_STYLE.OBLIQUE,
+    'cursiva'    : FONT_STYLE.ITALIC
 }
 
 CSS_STYLE_MAP = {
