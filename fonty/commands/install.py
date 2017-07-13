@@ -6,7 +6,6 @@ from termcolor import colored
 from fonty.lib import search
 from fonty.lib.task import Task, TaskStatus
 from fonty.lib.progress import ProgressBar
-from fonty.lib.install import install_fonts
 from fonty.lib.constants import COLOR_INPUT
 from fonty.models.subscription import Subscription
 

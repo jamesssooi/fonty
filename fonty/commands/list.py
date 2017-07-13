@@ -9,11 +9,23 @@ def cli_list(update: bool):
     '''List all user installed fonts'''
 
     # Check if manifest.json exists
-    manifest = Manifest.generate()
-    manifest.save()
+    try:
+        manifest = Manifest.load()
+    except FileNotFoundError:
+        manifest = Manifest.generate()
+        manifest.save()
 
-    # Read manifest.json
+    # Get font list
+    entries = []
+    for typeface in manifest.typefaces:
+        entries.append('{name} ({variants})'.format(
+            name=typeface.name,
+            variants=len(typeface.get_variants()))
+        )
+    entries.sort()
 
-    # Print
+    col1 = entries[0:len(entries)//2]
+    col2 = entries[len(entries)//2 + 1:]
 
-    pass
+    for c1, c2 in zip(col1, col2):
+        print("{:40} {}".format(c1, c2))

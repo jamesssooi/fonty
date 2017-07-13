@@ -1,7 +1,7 @@
 '''utils.py: Utility functions.'''
 import os
 from datetime import datetime
-from typing import Union
+from typing import Union, List
 
 import dateutil.parser
 from fonty.lib.constants import APP_DIR
@@ -44,3 +44,11 @@ def parse_date(d: Union[str, datetime]):
     if isinstance(d, str):
         d = dateutil.parser.parse(d)
     return d
+
+def split_list(list_: list, count: int) -> List[list]:
+    '''Split a list into n number of columns.'''
+    o = []
+    total_count = len(list_)
+
+    for i in range(0, count-1):
+        start_idx = (total_count // count) * i
