@@ -161,7 +161,7 @@ WEIGHT_MAP = {
     # aliases
     'hairline'   : FONT_WEIGHT.THIN,
     'ultralight' : FONT_WEIGHT.EXTRALIGHT,
-    'book'       : FONT_WEIGHT.LIGHT,
+    'book'       : FONT_WEIGHT.REGULAR,
     'roman'      : FONT_WEIGHT.REGULAR,
     'normal'     : FONT_WEIGHT.REGULAR,
     'demibold'   : FONT_WEIGHT.SEMIBOLD,

@@ -5,9 +5,11 @@ import hashlib
 from typing import List
 
 from click import style
+from termcolor import colored
 from fonty.lib.install import install_fonts
 from fonty.lib.uninstall import uninstall_fonts
 from fonty.models.font import Font
+from fonty.lib import utils
 
 class Typeface(object):
     '''Class to manage a typeface.'''
@@ -16,6 +18,11 @@ class Typeface(object):
         self.name = name
         self.fonts = fonts
         self.category = category
+
+    @property
+    def variants(self):
+        '''Gets the variations available for this typeface.'''
+        return [font.variant for font in self.fonts]
 
     def download(self, variants=None, handler=None):
         '''Download this typeface.'''
@@ -33,15 +40,15 @@ class Typeface(object):
 
         # Install fonts
         fonts = self.get_fonts(variants)
-        success = install_fonts(fonts, path)
+        installed_fonts = install_fonts(fonts, path)
 
         # Update manifest file
-        if success:
+        if installed_fonts and path is None:
             manifest = Manifest.load()
-            manifest.add(self, success)
+            manifest.add(self, installed_fonts)
             manifest.save()
 
-        return success
+        return installed_fonts
 
     def uninstall(self, variants: List[str] = None):
         '''Uninstall this typeface.'''
@@ -56,6 +63,7 @@ class Typeface(object):
             uninstalled_variants = [str(font.variant) for font in success]
             manifest = Manifest.load()
             manifest.remove(self, uninstalled_variants)
+            manifest.save()
 
         return success, failed
 
@@ -70,17 +78,33 @@ class Typeface(object):
         '''Gets the variations available for this typeface.'''
         return [font.variant for font in self.fonts]
 
-    def to_pretty_string(self, verbose=False):
-        '''Prints the contents of this typeface as ANSI formatted string.'''
+    def print(self, output=True):
+        '''Prints the contents of this typeface.'''
+        lines = []
 
-        variants = self.get_variants()
-        font_str = ', '.join(str(variant) for variant in variants)
+        # Name
+        lines.append(colored(self.name, 'cyan'))
 
-        return '{name}\n{category}\n{fonts}'.format(
-            name=style(self.name, 'blue'),
-            category='  Category: ' + style('sans-serif', dim=True),
-            fonts='  Variations({}): '.format(len(variants)) + style(font_str, dim=True)
-        )
+        # Font files
+        fonts = [{
+            'variant': font.variant.print(long=True),
+            'path': colored(font.local_path, attrs=['dark'])
+        } for font in self.fonts]
+        font_lines = utils.tabularize(fonts, join=False)
+
+        # Indent font files
+        for idx, _ in enumerate(font_lines):
+            if idx != len(font_lines) - 1:
+                font_lines[idx] = '  ├─ ' + font_lines[idx]
+            else:
+                font_lines[idx] = '  └─ ' + font_lines[idx]
+
+        lines += font_lines
+
+        if output:
+            print('\n'.join(lines))
+
+        return '\n'.join(lines)
 
     def generate_id(self, source):
         '''Generates a unique id.'''

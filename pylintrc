@@ -1,3 +1,6 @@
 [MASTER]
 # Good variable names which should always be accepted, separated by a comma
 good-names=i,j,k,ex,Run,_,pk,x,y,e,f,bar,s,c,d
+
+# Disable invalid variable names warning
+disable=C0103,W0511
