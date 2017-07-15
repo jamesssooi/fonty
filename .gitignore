@@ -89,6 +89,7 @@ celerybeat-schedule
 venv/
 ENV/
 venvwin32/
+testenv/
 
 # Spyder project settings
 .spyderproject
