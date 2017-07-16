@@ -25,7 +25,8 @@ class Manifest:
             idx for idx, val in enumerate(self.typefaces) if val.name == typeface.name
         ), None)
         if typeface_idx is None:
-            data = typeface
+            data = Typeface(name=typeface.name,
+                            category=typeface.category)
         else:
             data = self.typefaces[typeface_idx]
 
