@@ -14,7 +14,7 @@ from fonty.lib import utils
 class Typeface(object):
     '''Class to manage a typeface.'''
 
-    def __init__(self, name, fonts, category=None):
+    def __init__(self, name: str, fonts: List[Font] = [], category: str = None):
         self.name = name
         self.fonts = fonts
         self.category = category
@@ -48,7 +48,12 @@ class Typeface(object):
             manifest.add(self, installed_fonts)
             manifest.save()
 
-        return installed_fonts
+        # Installed typeface
+        installed_typeface = Typeface(name=self.name,
+                                      category=self.category,
+                                      fonts=installed_fonts)
+
+        return installed_typeface
 
     def uninstall(self, variants: List[str] = None):
         '''Uninstall this typeface.'''
@@ -78,12 +83,13 @@ class Typeface(object):
         '''Gets the variations available for this typeface.'''
         return [font.variant for font in self.fonts]
 
-    def print(self, output=True):
+    def print(self, output: bool = True, indent: int = 0, suppress_name: bool = False):
         '''Prints the contents of this typeface.'''
         lines = []
 
         # Name
-        lines.append(colored(self.name, 'cyan'))
+        if not suppress_name:
+            lines.append(colored(self.name, 'cyan'))
 
         # Font files
         fonts = [{
@@ -100,6 +106,11 @@ class Typeface(object):
                 font_lines[idx] = '  └─ ' + font_lines[idx]
 
         lines += font_lines
+
+        # Indent lines
+        if indent:
+            for idx, _ in enumerate(lines):
+                lines[idx] = ' ' * indent + lines[idx]
 
         if output:
             print('\n'.join(lines))
