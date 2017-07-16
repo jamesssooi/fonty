@@ -73,6 +73,9 @@ def list_all_fonts(manifest: Manifest):
         # Calculate the maximum line length of this iteration
         line_length = reduce(lambda x, y: x + ansilen(y) + PADDING, longest, 0)
 
+        # Remove padding from last column
+        line_length -= PADDING
+
         # Check if the line length fits within the terminal size
         if line_length <= term_width:
             break
