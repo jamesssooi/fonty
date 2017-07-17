@@ -1,7 +1,6 @@
 '''font.py: Class to manage individual fonts.'''
 
 import requests
-from click import style
 from fonty.lib.install import install_fonts
 from fonty.lib.variants import FontAttribute
 
@@ -46,15 +45,3 @@ class Font(object):
     def install(self, path=None):
         '''Installs this font to the system.'''
         install_fonts(self, path)
-
-    def to_pretty_string(self):
-        '''Prints the contents of this font as ANSI formatted string.'''
-        variation = '{css} {descriptive}'.format(
-            css=self.variant,
-            descriptive='({})'.format(str(self.variant))
-        )
-
-        return style('{variation} - {path}'.format(
-            variation=variation,
-            path=self.local_path
-        ), dim=True)

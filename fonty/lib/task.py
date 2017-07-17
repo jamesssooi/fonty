@@ -39,10 +39,14 @@ class Task(object):
     _indicator_iteration = 0
     _done = False
 
-    def __init__(self, message: str, status: TaskStatus = TaskStatus.WAITING,
-                 asynchronous: bool = True) -> None:
+    def __init__(self,
+                 message: str,
+                 status: TaskStatus = TaskStatus.WAITING,
+                 asynchronous: bool = True,
+                 truncate: bool = True) -> None:
         self.message = message
         self.status = status
+        self.truncate = truncate
 
         if asynchronous:
             threading.Thread(target=self.loop, daemon=True).start()
@@ -67,10 +71,11 @@ class Task(object):
             # Truncate the output if it is longer than terminal width
             # This is necessary because if the output is wrapped, there would
             # be problems with the output not clearing all lines.
-            term_width, _ = get_terminal_size()
-            self.current_message = shorten(text=self.current_message,
-                                           width=term_width,
-                                           placeholder='...')
+            if self.truncate:
+                term_width, _ = get_terminal_size()
+                self.current_message = shorten(text=self.current_message,
+                                               width=term_width,
+                                               placeholder='...')
 
             # Write new line
             sys.stdout.write(self.current_message)
@@ -91,6 +96,7 @@ class Task(object):
         '''Stop this task.'''
 
         self.active = False
+        self.truncate = False
         if status:
             self.status = status
         if message:

@@ -68,7 +68,7 @@ def cli_uninstall(name, variants):
             errors='\n'.join('- ' + font.local_path for font in failed)
         ))
         click.echo("\nRebuild your manifest file by running '{command}' to fix this.".format(
-            command=colored('fonty list -f', 'cyan')
+            command=colored('fonty list --rebuild', 'cyan')
         ))
     elif success:
         task.stop(status=TaskStatus.SUCCESS,

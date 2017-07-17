@@ -1,5 +1,6 @@
 '''fonty.commands.install.py: Command-line interface to install fonts.'''
 import timeit
+import sys
 
 import click
 from termcolor import colored
@@ -8,6 +9,7 @@ from fonty.lib.task import Task, TaskStatus
 from fonty.lib.progress import ProgressBar
 from fonty.lib.constants import COLOR_INPUT
 from fonty.models.subscription import Subscription
+from fonty.models.typeface import Typeface
 
 @click.command('install')
 @click.argument('name', nargs=-1, type=click.STRING)
@@ -43,7 +45,8 @@ def cli_install(name, output, variants):
                   message="No results found for '{}'".format(colored(name, 'green')))
         if e.suggestion:
             click.echo("Did you mean '{}'?".format(e.suggestion))
-        return
+        sys.exit(1)
+
     task.stop(status=TaskStatus.SUCCESS,
               message="Found '{typeface}' in {repo}".format(
                   typeface=colored(typeface.name, COLOR_INPUT),
@@ -58,13 +61,40 @@ def cli_install(name, output, variants):
                   message='Variant(s) [{}] not available'.format(
                       colored(', '.join(invalid_variants), COLOR_INPUT)
                   ))
+        sys.exit(1)
         return # TODO: Raise exception
     variants_count = len(variants) if variants else len(available_variants)
 
     # Download font files
     task = Task("Downloading ({}) font files...".format(variants_count))
+    fonts = typeface.download(variants, create_download_task_handler(task))
+    task.stop(status=TaskStatus.SUCCESS,
+              message="Downloaded ({}) font file(s)".format(len(fonts)))
+
+    # Install into local computer
+    task = Task('Installing ({}) fonts...'.format(len(fonts)))
+    installed_typeface: Typeface = typeface.install(variants=variants, path=output)
+
+    # Done!
+    message = 'Installed {}'.format(colored(typeface.name, COLOR_INPUT))
+    if output:
+        message += ' to {}'.format(output)
+    task.stop(status=TaskStatus.SUCCESS, message=message)
+
+    # Print typeface contents
+    installed_typeface.print(suppress_name=True)
+
+    # Calculate execution time
+    end_time = timeit.default_timer()
+    total_time = end_time - start_time
+    click.echo('Done in {}s'.format(round(total_time, 2)))
+
+
+def create_download_task_handler(task):
+    '''Create a download handler that prints a progress bar to a Task instance.'''
 
     def download_handler(font, request):
+        '''A generator function that is yielded for every byte packet received.'''
         total_size = int(request.headers['Content-Length'])
         current_size = 0
         bar = ProgressBar(total=total_size,
@@ -75,27 +105,4 @@ def cli_install(name, output, variants):
             task.message = str(bar)
             yield current_size
 
-    fonts = typeface.download(variants, download_handler)
-    task.stop(status=TaskStatus.SUCCESS,
-              message="Downloaded ({}) font file(s)".format(len(fonts)))
-
-    # Install into local computer
-    task = Task('Installing ({}) fonts...'.format(len(fonts)))
-    typeface.install(variants=variants, path=output)
-
-    # Done!
-    message = 'Installed {typeface}({variants})'.format(
-        typeface=colored(typeface.name, COLOR_INPUT),
-        variants=colored(', '.join([str(font.variant) for font in fonts]), 'red')
-    )
-
-    if output:
-        message += ' to {}'.format(output)
-
-    task.stop(status=TaskStatus.SUCCESS,
-              message=message)
-
-    # Calculate execution time
-    end_time = timeit.default_timer()
-    total_time = end_time - start_time
-    click.echo('Done in {}s'.format(round(total_time, 2)))
+    return download_handler

@@ -1,10 +1,8 @@
 '''manifest.py'''
-import os
 import json
 from datetime import datetime
 from typing import List, Union
 
-from fontTools.ttLib import TTFont
 from fonty.models.font import Font
 from fonty.models.typeface import Typeface
 from fonty.lib.constants import APP_DIR, MANIFEST_PATH, JSON_DUMP_OPTS
@@ -27,7 +25,8 @@ class Manifest:
             idx for idx, val in enumerate(self.typefaces) if val.name == typeface.name
         ), None)
         if typeface_idx is None:
-            data = typeface
+            data = Typeface(name=typeface.name,
+                            category=typeface.category)
         else:
             data = self.typefaces[typeface_idx]
 
@@ -85,7 +84,7 @@ class Manifest:
 
     def get(self, name: str):
         '''Load a typeface from the manifest.'''
-        typeface = next((val for val in self.typefaces if val.name == name), None)
+        typeface = next((val for val in self.typefaces if val.name.lower() == name.lower()), None)
         if typeface is None:
             return None
 

@@ -26,7 +26,7 @@ def install_fonts(fonts, path=None):
         elif platform_ == 'win32' or platform_ == 'cygwin': # Windows
             return install_win32(fonts)
     else:
-        install_to_dir(fonts, path)
+        return install_to_dir(fonts, path)
 
 def install_osx(fonts):
     '''Install a font on an OSX system.
@@ -120,7 +120,7 @@ def install_to_dir(fonts, dir_):
     if not os.path.exists(dir_):
         os.makedirs(dir_, exist_ok=True)
 
-    for font in fonts:
+    for idx, font in enumerate(fonts):
         if not font.bytes:
             raise Exception # TODO: Raise Exception
 
@@ -135,3 +135,7 @@ def install_to_dir(fonts, dir_):
 
             # Write bytes to file
             f.write(font.bytes)
+        
+        fonts[idx].local_path = path
+
+    return fonts
