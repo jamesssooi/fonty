@@ -185,8 +185,9 @@ CSS_WEIGHT_MAP = {
 
 STYLE_MAP = {
     'italic'     : FONT_STYLE.ITALIC,
-    'oblique'    : FONT_STYLE.OBLIQUE,
-    'cursiva'    : FONT_STYLE.ITALIC
+    'cursiva'    : FONT_STYLE.ITALIC,
+    'slanted'    : FONT_STYLE.OBLIQUE,
+    'oblique'    : FONT_STYLE.OBLIQUE
 }
 
 CSS_STYLE_MAP = {
