@@ -20,12 +20,15 @@ def test():
     # manifest = Manifest.load('/Users/jamesooi/Desktop/manifest.json')
     # typeface = manifest.get('Abel')
     # print(typeface.uninstall())
-    from fonty.lib import utils
-
-    data = [{'name': 'James Ooi', 'age': 23},
-            {'name': 'Louise Ng', 'age': 19}]
+    # from fonty.lib import utils
+    # data = [{'name': 'James Ooi', 'age': 23},
+    #         {'name': 'Louise Ng', 'age': 19}]
     
-    print(utils.tabularize(data))
+    # print(utils.tabularize(data))
+
+    from fonty.lib.disable import disable_fonts
+
+    disable_fonts(['123'])
 
 # Register commands
 main.add_command(cli_install)
