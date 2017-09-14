@@ -10,26 +10,11 @@ colorama.init()
 
 @click.group()
 def main():
-    '''Entry function for fonty'''
+    '''Fonty 0.1.0'''
     pass
-
-@click.command()
-def test():
-    '''Testing command'''
-    # from fonty.models.manifest import Manifest
-    # manifest = Manifest.load('/Users/jamesooi/Desktop/manifest.json')
-    # typeface = manifest.get('Abel')
-    # print(typeface.uninstall())
-    from fonty.lib import utils
-
-    data = [{'name': 'James Ooi', 'age': 23},
-            {'name': 'Louise Ng', 'age': 19}]
-    
-    print(utils.tabularize(data))
 
 # Register commands
 main.add_command(cli_install)
 main.add_command(cli_uninstall)
 main.add_command(cli_source)
 main.add_command(cli_list)
-main.add_command(test)

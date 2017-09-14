@@ -1,7 +1,8 @@
 '''fonty.commands.source.py: Command-line interface to manage sources.'''
-import timeit
 import shutil
+import sys
 import time
+import timeit
 
 import click
 from termcolor import colored
@@ -43,14 +44,18 @@ def add(url):
 
 
 @cli_source.command()
+@click.pass_context
 @click.argument('identifier', nargs=-1)
-def remove(identifier: str):
+def remove(ctx, identifier: str):
     '''Remove a source'''
 
     # Process arguments and options
     identifier = ' '.join(str(x) for x in identifier)
-    if identifier == '':
-        raise Exception
+
+    if not identifier:
+        click.echo(ctx.get_help())
+        click.echo('\nError: Missing argument')
+        sys.exit(1)
 
     # Search for subscription
     task = Task("Looking for '{}'".format(colored(identifier, COLOR_INPUT)))

@@ -56,7 +56,7 @@ class FontAttribute:
             stretch = self.stretch.value.name if long else self.stretch.value.id
         else:
             stretch = None
-        
+
         misc = self.misc
         strings_to_join = filter(None, [
             ''.join(filter(None, [weight, style])),

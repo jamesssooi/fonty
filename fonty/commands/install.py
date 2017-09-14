@@ -12,10 +12,11 @@ from fonty.models.subscription import Subscription
 from fonty.models.typeface import Typeface
 
 @click.command('install')
+@click.pass_context
 @click.argument('name', nargs=-1, type=click.STRING)
 @click.option('--output', '-o', type=click.Path(file_okay=False, writable=True, resolve_path=True))
 @click.option('--variants', '-v', multiple=True, default=None, type=click.STRING)
-def cli_install(name, output, variants):
+def cli_install(ctx, name, output, variants):
     '''Installs a font'''
 
     start_time = timeit.default_timer()
@@ -24,6 +25,10 @@ def cli_install(name, output, variants):
     name = ' '.join(str(x) for x in name)
     if variants:
         variants = (','.join(str(x) for x in variants)).split(',')
+
+    if not name:
+        click.echo(ctx.get_help())
+        sys.exit(1)
 
     # Compare local and remote repository hash
     subscriptions = Subscription.load_entries()

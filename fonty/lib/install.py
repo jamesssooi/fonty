@@ -135,7 +135,7 @@ def install_to_dir(fonts, dir_):
 
             # Write bytes to file
             f.write(font.bytes)
-        
+
         fonts[idx].local_path = path
 
     return fonts

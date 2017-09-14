@@ -7,8 +7,8 @@ import shlex
 import struct
 import platform
 import subprocess
- 
- 
+
+
 def get_terminal_size():
     """ getTerminalSize()
      - get width and height of console
