@@ -56,7 +56,7 @@ class FontAttribute:
             stretch = self.stretch.value.name if long else self.stretch.value.id
         else:
             stretch = None
-        
+
         misc = self.misc
         strings_to_join = filter(None, [
             ''.join(filter(None, [weight, style])),
@@ -185,8 +185,9 @@ CSS_WEIGHT_MAP = {
 
 STYLE_MAP = {
     'italic'     : FONT_STYLE.ITALIC,
-    'oblique'    : FONT_STYLE.OBLIQUE,
-    'cursiva'    : FONT_STYLE.ITALIC
+    'cursiva'    : FONT_STYLE.ITALIC,
+    'slanted'    : FONT_STYLE.OBLIQUE,
+    'oblique'    : FONT_STYLE.OBLIQUE
 }
 
 CSS_STYLE_MAP = {

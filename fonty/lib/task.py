@@ -26,16 +26,20 @@ class Task(object):
 
         ERROR: `✗ Unicorns do not exist`
     '''
+
+    # Constants
     STATUS_SUCCESS = '✓'
     STATUS_ERROR = '✗'
     STATUS_WAITING = ["⠄", "⠆", "⠇", "⠋", "⠙", "⠸", "⠰", "⠠", "⠰", "⠸", "⠙", "⠋", "⠇", "⠆"]
     STATUS_WARNING = '!'
     DELAY = 0.2
 
+    # Initial state
     status = TaskStatus.WAITING
     active = True
-    current_message = ''
+    message = ''
 
+    # Interval variables
     _indicator_iteration = 0
     _done = False
 
@@ -59,11 +63,12 @@ class Task(object):
 
         while True:
             # Clear previous line
-            sys.stdout.write('\r{}\r'.format(' ' * ansilen(self.current_message)))
+            prev_message = self.message
+            sys.stdout.write('\r{}\r'.format(' ' * ansilen(prev_message)))
             sys.stdout.flush()
 
             # Generate new message
-            self.current_message = '{indicator} {message}'.format(
+            self.message = '{indicator} {message}'.format(
                 indicator=self.get_indicator(),
                 message=self.message,
             )
@@ -73,12 +78,12 @@ class Task(object):
             # be problems with the output not clearing all lines.
             if self.truncate:
                 term_width, _ = get_terminal_size()
-                self.current_message = shorten(text=self.current_message,
-                                               width=term_width,
-                                               placeholder='...')
+                self.message = shorten(text=self.message,
+                                       width=term_width,
+                                       placeholder='...')
 
             # Write new line
-            sys.stdout.write(self.current_message)
+            sys.stdout.write(self.message)
             sys.stdout.flush()
 
             # Exit condition

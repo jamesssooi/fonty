@@ -10,7 +10,7 @@ colorama.init()
 
 @click.group()
 def main():
-    '''Entry function for fonty'''
+    '''Fonty 0.1.0'''
     pass
 
 @click.command()
@@ -23,7 +23,7 @@ def test():
     # from fonty.lib import utils
     # data = [{'name': 'James Ooi', 'age': 23},
     #         {'name': 'Louise Ng', 'age': 19}]
-    
+
     # print(utils.tabularize(data))
 
     from fonty.lib.disable import disable_fonts
@@ -35,4 +35,3 @@ main.add_command(cli_install)
 main.add_command(cli_uninstall)
 main.add_command(cli_source)
 main.add_command(cli_list)
-main.add_command(test)
