@@ -97,7 +97,7 @@ def cli_webfont(files: str, typeface: str, output: str, family_name: str):
         sources = [
             FONT_FACE_SRC_TEMPLATE.format(
                 path=os.path.basename(font_format['path']),
-                format=font_format['format']
+                format=FONT_FORMAT_CSS_MAP.get(font_format['format'], font_format['format'])
             ) for font_format in font['formats']
         ]
 
@@ -125,3 +125,10 @@ FONT_FACE_TEMPLATE = '''
 '''
 
 FONT_FACE_SRC_TEMPLATE = '''url('{path}') format('{format}')'''
+
+FONT_FORMAT_CSS_MAP = {
+    'woff': 'woff',
+    'woff2': 'woff2',
+    'otf': 'opentype',
+    'ttf': 'truetype',
+}
