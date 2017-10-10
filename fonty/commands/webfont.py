@@ -8,6 +8,7 @@ from typing import Tuple
 import click
 from termcolor import colored
 from fonty.lib.constants import COLOR_INPUT
+from fonty.lib.variants import FontAttribute
 from fonty.models.manifest import Manifest
 from fonty.models.font import Font, FontFormat
 
@@ -56,11 +57,71 @@ def cli_webfont(files: str, typeface: str, output: str, family_name: str):
     # Convert files to web-compatible formats (woff, woff2 and otf/ttf)
     output_dir = output if output else os.getcwd()
     results = []
+
     for font in fonts:
+        # Get family and variant name
+        family_name_preferred = font.get_name_data_from_id('16')
+        family_name = family_name_preferred if family_name_preferred else font.get_name_data_from_id('1')
+        variant_preferred = font.get_name_data_from_id('17')
+        variant = variant_preferred if variant_preferred else font.get_name_data_from_id('2')
+
+        # Parse variant
+        variant = FontAttribute.parse(variant)
+        font_weight = variant.weight.value.css
+        font_style = variant.style.value.css
+        font_stretch = variant.stretch.value.css
+
         paths = []
-        paths.append(font.convert(output_dir)) # Default (OTF/TTF)
-        paths.append(font.convert(output_dir, FontFormat.WOFF)) # WOFF
-        paths.append(font.convert(output_dir, FontFormat.WOFF2)) # WOFF2
-        results.append(paths)
+
+        # Default (TTF/OTF)
+        _, ext = os.path.splitext(font.local_path)
+        paths.append({'path': font.convert(output_dir), 'format': ext[1:]})
+
+        # Convert to WOFF
+        paths.append({'path': font.convert(output_dir, FontFormat.WOFF), 'format': 'woff'})
+
+        # Convert to WOFF2
+        paths.append({'path': font.convert(output_dir, FontFormat.WOFF2), 'format': 'woff2'})
+
+        results.append({
+            'family_name': family_name,
+            'font_weight': font_weight,
+            'font_style': font_style,
+            'font_stretch': font_stretch,
+            'formats': paths
+        })
 
     # Create @font-face declaration
+    declarations = []
+    for font in results:
+        sources = [
+            FONT_FACE_SRC_TEMPLATE.format(
+                path=os.path.basename(font_format['path']),
+                format=font_format['format']
+            ) for font_format in font['formats']
+        ]
+
+        declaration = FONT_FACE_TEMPLATE.format(
+            family=font['family_name'],
+            weight=font['font_weight'],
+            style=font['font_style'],
+            stretch=font['font_stretch'],
+            src=',\n       '.join(sources)
+        )
+
+        declarations.append(declaration)
+
+    for x in declarations: print(x)
+
+
+FONT_FACE_TEMPLATE = '''
+@font-face {{
+  font-family: '{family}';
+  font-weight: {weight};
+  font-style: {style};
+  font-stretch: {stretch};
+  src: {src};
+}}
+'''
+
+FONT_FACE_SRC_TEMPLATE = '''url('{path}') format('{format}')'''

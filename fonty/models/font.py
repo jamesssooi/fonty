@@ -1,16 +1,13 @@
 '''font.py: Class to manage individual fonts.'''
 import os
 import codecs
-from typing import Optional
 from enum import Enum
-from collections import namedtuple
 
 import requests
 from fontTools.ttLib import TTFont
 from fonty.lib.install import install_fonts
 from fonty.lib.variants import FontAttribute
 
-FontFormat = Enum('FontFormat', 'WOFF WOFF2 DEFAULT')
 
 class Font(object):
     '''Class to manage individual fonts.'''
@@ -55,7 +52,7 @@ class Font(object):
         '''Installs this font to the system.'''
         install_fonts(self, path)
 
-    def parse(self):
+    def parse(self) -> 'Font':
         '''Parse the font's metadata from the font's name table.'''
         if not self.local_path or not os.path.isfile(self.local_path):
             raise Exception
@@ -76,15 +73,15 @@ class Font(object):
 
             self.name_table[str(record.nameID)] = data
 
-        return self.name_table
+        return self
 
     def get_name_data_from_id(self, name_id: str) -> str:
         '''Gets data from the font's name table via the name id.'''
         if self.name_table is None:
             self.parse()
-        return self.name_table[name_id]
+        return self.name_table.get(name_id, None)
 
-    def convert(self, path: str, font_format: FontFormat = None) -> str:
+    def convert(self, path: str, font_format: 'FontFormat' = None) -> str:
         '''Converts this font to either woff or woff2 formats.'''
         from fontTools.ttLib import TTFont
         filename, ext = os.path.splitext(os.path.basename(self.local_path))
@@ -98,6 +95,8 @@ class Font(object):
             elif font_format == FontFormat.WOFF2:
                 font.flavor = 'woff2'
                 ext = '.woff2'
+            else:
+                raise Exception # Only woff and woff2 supported for now
 
         # Create output directory if it doesn't exist
         path = os.path.abspath(path)
@@ -116,6 +115,11 @@ class Font(object):
         # Convert and save
         font.save(file=output_path)
 
-        Result = namedtuple('Result', 'path filename format')
+        return output_path
 
-        return Result(path=output_path, filename=filename + ext, format=ext[1:])
+
+class FontFormat(Enum):
+    WOFF = 'woff'
+    WOFF2 = 'woff2'
+    TTF = 'ttf'
+    OTF = 'otf'

@@ -5,28 +5,28 @@ import sys
 from collections import namedtuple
 from enum import Enum
 
-Data = namedtuple('Data', 'name, id, hidden')
+Data = namedtuple('Data', 'name, id, css, hidden')
 
 class FONT_WEIGHT(Enum):
-    THIN       = Data(name='Thin',       id='100', hidden=False)
-    EXTRALIGHT = Data(name='ExtraLight', id='200', hidden=False)
-    LIGHT      = Data(name='Light',      id='300', hidden=False)
-    REGULAR    = Data(name='Regular',    id='400', hidden=False)
-    MEDIUM     = Data(name='Medium',     id='500', hidden=False)
-    SEMIBOLD   = Data(name='Semibold',   id='600', hidden=False)
-    BOLD       = Data(name='Bold',       id='700', hidden=False)
-    EXTRABOLD  = Data(name='Extrabold',  id='800', hidden=False)
-    BLACK      = Data(name='Black',      id='900', hidden=False)
+    THIN       = Data(name='Thin',       id='100', css='100', hidden=False)
+    EXTRALIGHT = Data(name='ExtraLight', id='200', css='200', hidden=False)
+    LIGHT      = Data(name='Light',      id='300', css='300', hidden=False)
+    REGULAR    = Data(name='Regular',    id='400', css='400', hidden=False)
+    MEDIUM     = Data(name='Medium',     id='500', css='500', hidden=False)
+    SEMIBOLD   = Data(name='Semibold',   id='600', css='600', hidden=False)
+    BOLD       = Data(name='Bold',       id='700', css='700', hidden=False)
+    EXTRABOLD  = Data(name='Extrabold',  id='800', css='800', hidden=False)
+    BLACK      = Data(name='Black',      id='900', css='900', hidden=False)
 
 class FONT_STYLE(Enum):
-    NORMAL     = Data(name='Normal',     id='',  hidden=True)
-    ITALIC     = Data(name='Italic',     id='i', hidden=False)
-    OBLIQUE    = Data(name='Oblique',    id='o', hidden=False)
+    NORMAL     = Data(name='Normal',     id='',  css='normal',        hidden=True)
+    ITALIC     = Data(name='Italic',     id='i', css='italic',  hidden=False)
+    OBLIQUE    = Data(name='Oblique',    id='o', css='oblique', hidden=False)
 
 class FONT_STRETCH(Enum):
-    NORMAL     = Data(name='Normal',     id='normal',    hidden=True)
-    CONDENSED  = Data(name='Condensed',  id='condensed', hidden=False)
-    EXPANDED   = Data(name='Expanded',   id='expanded',  hidden=False)
+    NORMAL     = Data(name='Normal',     id='normal',    css='normal',    hidden=True)
+    CONDENSED  = Data(name='Condensed',  id='condensed', css='condensed', hidden=False)
+    EXPANDED   = Data(name='Expanded',   id='expanded',  css='expanded',  hidden=False)
 
 
 class FontAttribute:
