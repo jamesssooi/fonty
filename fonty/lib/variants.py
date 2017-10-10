@@ -80,6 +80,7 @@ class FontAttribute:
         stretch = FONT_STRETCH.NORMAL
         misc = ''
 
+        variant_str = variant_str.lower()
         raw = variant_str
 
         # Normalize string
