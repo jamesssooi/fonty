@@ -1,13 +1,10 @@
 '''fonty.fonty: entry point for fonty'''
 import click
-import colorama
 from fonty.commands.install import cli_install
 from fonty.commands.uninstall import cli_uninstall
 from fonty.commands.source import cli_source
 from fonty.commands.list import cli_list
 from fonty.commands.webfont import cli_webfont
-
-colorama.init()
 
 @click.group()
 def main():
@@ -20,4 +17,3 @@ main.add_command(cli_uninstall)
 main.add_command(cli_source)
 main.add_command(cli_list)
 main.add_command(cli_webfont)
-main.add_command(test)
