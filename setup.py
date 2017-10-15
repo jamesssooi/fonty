@@ -1,5 +1,7 @@
 """setup.py: setuptools"""
+import re
 from setuptools import setup
+
 
 install_requires = [
     'ansiwrap>=0.8.3',
@@ -17,9 +19,25 @@ install_requires = [
     'wrapt>=1.10.10'
 ]
 
+
+def parse_version():
+    '''Parse version from version.py'''
+    VERSION_FILE = "fonty/version.py"
+    VERSION_PATTERN = r"^__version__\s*=\s*['\"]([^'\"]*)['\"]"
+
+    with open(VERSION_FILE) as f:
+        contents = f.read()
+
+    match = re.search(VERSION_PATTERN, contents, re.M)
+    if not match:
+        raise RuntimeError('Unable to find version string in {}'.format(VERSION_FILE))
+
+    return match.group(1)
+
+
 setup(
     name='fonty',
-    version='0.1.0',
+    version=parse_version(),
     packages=['fonty'],
     install_requires=install_requires,
     entry_points='''

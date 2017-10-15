@@ -11,13 +11,40 @@ from fonty.lib.constants import COLOR_INPUT
 from fonty.models.subscription import Subscription
 from fonty.models.typeface import Typeface
 
-@click.command('install')
+@click.command('install', short_help='Install a font')
+@click.argument(
+    'name',
+    nargs=-1,
+    type=click.STRING)
+@click.option(
+    '--output', '-o',
+    type=click.Path(file_okay=False, writable=True, resolve_path=True),
+    help='Install the font in this directory.')
+@click.option(
+    '--variants', '-v',
+    multiple=True,
+    default=None,
+    help='Specify which font variants to install.')
 @click.pass_context
-@click.argument('name', nargs=-1, type=click.STRING)
-@click.option('--output', '-o', type=click.Path(file_okay=False, writable=True, resolve_path=True))
-@click.option('--variants', '-v', multiple=True, default=None, type=click.STRING)
 def cli_install(ctx, name, output, variants):
-    '''Installs a font'''
+    '''Install a font into this computer or a directory.
+
+    \b
+    Example usage:
+    ==============
+
+    \b
+      Install Open Sans into your computer:
+      >>> fonty install "Open Sans"
+
+    \b
+      Install Open Sans into a directory named "fonts":
+      >>> fonty install "Open Sans" --output ./fonts
+
+    \b
+      Install only the bold and bold italic variants of Open Sans:
+      >>> fonty install "Open Sans" -v 700,700i
+    '''
 
     start_time = timeit.default_timer()
 

@@ -11,14 +11,43 @@ from fonty.lib.variants import FontAttribute
 from fonty.models.manifest import Manifest
 from fonty.models.font import Font, FontFormat
 
-@click.command('webfont')
-@click.argument('files', nargs=-1, required=False, type=click.STRING)
-@click.option('--typeface', '-t', type=click.STRING)
-@click.option('--output', '-o', type=click.Path(file_okay=False, dir_okay=True, writable=True, resolve_path=True))
-@click.option('--family-name', type=click.STRING)
+@click.command('webfont', short_help='Generate webfonts')
+@click.argument(
+    'files',
+    nargs=-1,
+    required=False,
+    type=click.STRING)
+@click.option(
+    '--typeface', '-t',
+    type=click.STRING,
+    help='Specify an existing installed font.')
+@click.option(
+    '--output', '-o',
+    type=click.Path(file_okay=False, dir_okay=True, writable=True, resolve_path=True),
+    help='Output the converted webfonts in this directory.')
 @click.pass_context
-def cli_webfont(ctx, files: str, typeface: str, output: str, family_name: str):
-    '''Converts to webfont'''
+def cli_webfont(ctx, files: str, typeface: str, output: str):
+    '''Generate webfonts and its @font-face declarations.
+
+    Fonts are converted to .woff and .woff2 formats. Their respective @font-face
+    declarations are placed in a file named 'styles.css'
+
+    \b
+    Example usage:
+    ==============
+
+    \b
+      Create webfonts of all .ttf fonts in this directory:
+      >>> fonty webfont *.ttf
+
+    \b
+      Create webfonts of an existing installed font from this computer:
+      >>> fonty webfont --typeface "Open Sans"
+
+    \b
+      Create and output webfonts into a directory named "fonts":
+      >>> fonty webfont --typeface "Open Sans" --output ./fonts
+    '''
 
     start_time = timeit.default_timer()
 
@@ -30,12 +59,16 @@ def cli_webfont(ctx, files: str, typeface: str, output: str, family_name: str):
             manifest = Manifest.generate()
             manifest.save()
 
-        typeface = manifest.get(typeface)
-        if typeface is None:
-            click.echo("No typeface found with the name '{}'".format(colored(typeface, COLOR_INPUT)))
+        typeface_result = manifest.get(typeface)
+        if typeface_result is None:
+            click.echo(
+                "No typeface found with the name '{typeface}'.\nDid you forget to wrap the name in quotes?".format(
+                    typeface=colored(typeface, COLOR_INPUT)
+                )
+            )
             sys.exit(1)
 
-        font_paths = [font.local_path for font in typeface.get_fonts()]
+        font_paths = [font.local_path for font in typeface_result.get_fonts()]
     elif files:
         # On Unix based systems, a glob argument of *.ttf will be automatically
         # expanded by the shell. Meanwhile on Windows systems or if the pattern

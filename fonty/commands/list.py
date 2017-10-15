@@ -11,11 +11,31 @@ from fonty.lib import utils
 from fonty.lib.terminal_size import get_terminal_size
 from fonty.lib.constants import COLOR_INPUT
 
-@click.command('list')
-@click.argument('name', nargs=-1, required=False, type=click.STRING)
-@click.option('--rebuild', is_flag=True)
+@click.command('list', short_help='List installed fonts')
+@click.argument(
+    'name',
+    nargs=-1,
+    required=False,
+    type=click.STRING)
+@click.option(
+    '--rebuild',
+    is_flag=True,
+    help='Rebuild font list.')
 def cli_list(name: str, rebuild: bool):
-    '''List all user installed fonts'''
+    '''Print a list of all user-installed fonts.
+
+    \b
+    Example usage:
+    ==============
+
+    \b
+      Basic usage:
+      >>> fonty list
+
+    \b
+      Show more details on a particular font:
+      >>> fonty list "Open Sans"
+    '''
 
     # Process arguments
     name = ' '.join(str(x) for x in name)

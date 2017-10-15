@@ -8,16 +8,42 @@ from fonty.lib.task import Task, TaskStatus
 from fonty.lib.constants import COLOR_INPUT
 from fonty.models.manifest import Manifest
 
-@click.command('uninstall')
-@click.argument('name', nargs=-1, type=click.STRING)
-@click.option('--variants', '-v', multiple=True, default=None, type=click.STRING)
-def cli_uninstall(name, variants):
-    '''Uninstall a typeface'''
+@click.command('uninstall', short_help='Uninstall a font')
+@click.argument(
+    'name',
+    nargs=-1,
+    type=click.STRING)
+@click.option(
+    '--variants', '-v',
+    multiple=True,
+    default=None,
+    help='Specify which font variants to uninstall.')
+@click.pass_context
+def cli_uninstall(ctx, name, variants):
+    '''Uninstall a font from this computer.
+
+    \b
+    Example usage:
+    ==============
+
+    \b
+      Uninstall Open Sans from your computer:
+      >>> fonty uninstall "Open Sans"
+
+    \b
+      Uninstall only the bold and bold italic variants of Open Sans:
+      >>> fonty uninstall "Open Sans" -v 700,700i
+
+    '''
 
     # Process arguments and options
     name = ' '.join(str(x) for x in name)
     if variants:
         variants = (','.join(str(x) for x in variants)).split(',')
+
+    if not name:
+        click.echo(ctx.get_help())
+        sys.exit(1)
 
     # Get manifest list
     try:
