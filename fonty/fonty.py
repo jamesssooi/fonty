@@ -18,7 +18,25 @@ from fonty.commands.webfont import cli_webfont
 @click.option('--version', '-v', is_flag=True, help="Show the version number.")
 @click.pass_context
 def main(ctx, version: bool):
-    '''fonty 0.1.0'''
+    '''fonty is a simple command line tool for installing, managing and
+    converting fonts.
+
+    \b
+    Basic usage:
+    ============
+
+    \b
+      Install Open Sans into your computer:
+      >>> fonty install "Open Sans"
+
+    \b
+      Uninstall Open Sans from your computer:
+      >>> fonty uninstall "Open Sans"
+
+    \b
+      Create webfonts of an existing installed font from this computer:
+      >>> fonty webfont --typeface "Open Sans"
+    '''
     if ctx.invoked_subcommand:
         return
 

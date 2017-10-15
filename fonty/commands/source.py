@@ -2,7 +2,6 @@
 import shutil
 import sys
 import time
-import timeit
 
 import click
 from termcolor import colored
@@ -11,15 +10,17 @@ from fonty.lib.task import Task, TaskStatus
 from fonty.lib.constants import COLOR_INPUT, SEARCH_INDEX_PATH
 from fonty.models.subscription import Subscription
 
-@click.group('source')
+
+@click.group('source', short_help='Manage font sources')
 def cli_source():
-    '''Manage font sources'''
+    '''Manage font sources.'''
     pass
 
-@cli_source.command()
+
+@cli_source.command(short_help='Add a new source')
 @click.argument('url')
 def add(url):
-    '''Add a new source'''
+    '''Add a new source.'''
 
     # Add to subscription list and fetch remote repository
     task = Task("Loading '{}'...".format(colored(url, COLOR_INPUT)))
@@ -43,18 +44,17 @@ def add(url):
     sub.pprint(output=True)
 
 
-@cli_source.command()
-@click.pass_context
+@cli_source.command(short_help='Remove a source')
 @click.argument('identifier', nargs=-1)
+@click.pass_context
 def remove(ctx, identifier: str):
-    '''Remove a source'''
+    '''Remove a source.'''
 
     # Process arguments and options
     identifier = ' '.join(str(x) for x in identifier)
 
     if not identifier:
         click.echo(ctx.get_help())
-        click.echo('\nError: Missing argument')
         sys.exit(1)
 
     # Search for subscription
@@ -80,9 +80,10 @@ def remove(ctx, identifier: str):
     task.stop(status=TaskStatus.SUCCESS,
               message="Removed {} typeface(s) from index".format(colored(count, 'cyan')))
 
-@cli_source.command(name='list')
+
+@cli_source.command(name='list', short_help='List subscribed sources')
 def list_():
-    '''List all subscribed sources'''
+    '''List all subscribed sources.'''
     subscriptions = Subscription.load_entries()
     count = 1
     for sub in subscriptions:
@@ -104,11 +105,13 @@ def list_():
         count += 1
 
 
-
-@cli_source.command()
-@click.option('--force', '-f', is_flag=True)
+@cli_source.command(short_help='Check sources for updates')
+@click.option(
+    '--force', '-f',
+    is_flag=True,
+    help='Force all sources to update.')
 def update(force: bool):
-    '''Update all sources'''
+    '''Check sources for updates.'''
 
     # Delete search index directory if `force` flag is True
     if force:
