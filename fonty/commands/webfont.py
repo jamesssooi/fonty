@@ -59,12 +59,16 @@ def cli_webfont(ctx, files: str, typeface: str, output: str):
             manifest = Manifest.generate()
             manifest.save()
 
-        typeface = manifest.get(typeface)
-        if typeface is None:
-            click.echo("No typeface found with the name '{}'".format(colored(typeface, COLOR_INPUT)))
+        typeface_result = manifest.get(typeface)
+        if typeface_result is None:
+            click.echo(
+                "No typeface found with the name '{typeface}'.\nDid you forget to wrap the name in quotes?".format(
+                    typeface=colored(typeface, COLOR_INPUT)
+                )
+            )
             sys.exit(1)
 
-        font_paths = [font.local_path for font in typeface.get_fonts()]
+        font_paths = [font.local_path for font in typeface_result.get_fonts()]
     elif files:
         # On Unix based systems, a glob argument of *.ttf will be automatically
         # expanded by the shell. Meanwhile on Windows systems or if the pattern
