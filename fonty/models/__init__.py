@@ -1,1 +1,1 @@
-'''Fonty models'''
+'''fonty.models'''

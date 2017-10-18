@@ -1,11 +1,12 @@
 """setup.py: setuptools"""
 import re
-from setuptools import setup
+from setuptools import setup, find_packages
 
 
 install_requires = [
     'ansiwrap>=0.8.3',
     'appdirs>=1.4.3',
+    'Brotli>=0.6.0',
     'click>=6.7',
     'colorama>=0.3.9',
     'fonttools>=3.13.1',
@@ -38,12 +39,15 @@ def parse_version():
 setup(
     name='fonty',
     version=parse_version(),
-    packages=['fonty'],
+    packages=find_packages(),
     install_requires=install_requires,
     entry_points='''
       [console_scripts]
       fonty=fonty.fonty:main
     ''',
     author='James Ooi',
-    author_email='wengteikooi@gmail.com'
+    author_email='wengteikooi@gmail.com',
+    url='https://github.com/jamesssooi/fonty',
+    description='fonty is a simple command line tool for installing, managing and converting fonts.',
+    keywords='font fonts typeface cli tool install uninstall convert manage'
 )

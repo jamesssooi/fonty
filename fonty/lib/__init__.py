@@ -1,1 +1,1 @@
-'''Fonty library'''
+'''fonty.lib'''
