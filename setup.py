@@ -41,6 +41,7 @@ setup(
     version=parse_version(),
     packages=find_packages(),
     install_requires=install_requires,
+    include_package_data=True,
     entry_points='''
       [console_scripts]
       fonty=fonty.fonty:main

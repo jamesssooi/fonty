@@ -1,0 +1,5 @@
+include fonty/ext/fontreg/x32/FontReg.exe
+include fonty/ext/fontreg/x32/FontReg.md5
+include fonty/ext/fontreg/x64/FontReg.exe
+include fonty/ext/fontreg/x64/FontReg.md5
+include fonty/ext/fontreg/readme.txt
