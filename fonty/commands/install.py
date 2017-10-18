@@ -108,7 +108,7 @@ def cli_install(ctx, name, output, variants):
     installed_typeface: Typeface = typeface.install(variants=variants, path=output)
 
     # Done!
-    message = 'Installed {}'.format(colored(typeface.name, COLOR_INPUT))
+    message = "Installed '{}'".format(colored(typeface.name, COLOR_INPUT))
     if output:
         message += ' to {}'.format(output)
     task.stop(status=TaskStatus.SUCCESS, message=message)
