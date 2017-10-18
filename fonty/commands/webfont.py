@@ -7,9 +7,12 @@ import timeit
 import click
 from termcolor import colored
 from fonty.lib.constants import COLOR_INPUT
+from fonty.lib.task import Task, TaskStatus
+from fonty.lib.progress import ProgressBar
 from fonty.lib.variants import FontAttribute
 from fonty.models.manifest import Manifest
 from fonty.models.font import Font, FontFormat
+
 
 @click.command('webfont', short_help='Generate webfonts')
 @click.argument(
@@ -23,7 +26,7 @@ from fonty.models.font import Font, FontFormat
     help='Specify an existing installed font.')
 @click.option(
     '--output', '-o',
-    type=click.Path(file_okay=False, dir_okay=True, writable=True, resolve_path=True),
+    type=click.Path(file_okay=False, dir_okay=True, writable=True),
     help='Output the converted webfonts in this directory.')
 @click.pass_context
 def cli_webfont(ctx, files: str, typeface: str, output: str):
@@ -87,11 +90,17 @@ def cli_webfont(ctx, files: str, typeface: str, output: str):
     # Create font objects
     fonts = [Font(local_path=font_path) for font_path in font_paths]
 
+    # Print task message
+    task = Task('Generating webfonts for ({}) fonts...'.format(len(fonts)))
+    bar = ProgressBar(total=len(fonts) * 2)
+
     # Convert files to web-compatible formats (woff, woff2 and otf/ttf)
     output_dir = output if output else os.getcwd()
     results = []
-
     for font in fonts:
+
+        filename, ext = os.path.splitext(os.path.basename(font.local_path))
+
         # Get family and variant name
         family_name_preferred = font.get_name_data_from_id('16')
         family_name = family_name_preferred if family_name_preferred else font.get_name_data_from_id('1')
@@ -107,13 +116,16 @@ def cli_webfont(ctx, files: str, typeface: str, output: str):
         paths = []
 
         # Default (TTF/OTF)
-        _, ext = os.path.splitext(font.local_path)
         paths.append({'path': font.convert(output_dir), 'format': ext[1:]})
 
         # Convert to WOFF
+        bar.increment()
+        task.message = 'Converting {}.woff... {}'.format(filename, bar)
         paths.append({'path': font.convert(output_dir, FontFormat.WOFF), 'format': 'woff'})
 
         # Convert to WOFF2
+        bar.increment()
+        task.message = 'Converting {}.woff2... {}'.format(filename, bar)
         paths.append({'path': font.convert(output_dir, FontFormat.WOFF2), 'format': 'woff2'})
 
         results.append({
@@ -124,7 +136,10 @@ def cli_webfont(ctx, files: str, typeface: str, output: str):
             'formats': paths
         })
 
+    task.stop(message='Converted ({}) font file(s)'.format(len(fonts)))
+
     # Create @font-face declaration
+    task = Task(message='Creating @font-face declaration(s)...')
     declarations = []
     for font in results:
         sources = [
@@ -149,6 +164,30 @@ def cli_webfont(ctx, files: str, typeface: str, output: str):
     with open(file=css_path, mode='w+') as f:
         f.write(META)
         f.write('\n'.join(declarations))
+
+    task.stop(message='Generated @font-face declaration(s) in styles.css')
+
+    # Print completion message
+    if typeface:
+        task = Task(
+            message="Generated webfonts for '{typeface}' in {output}".format(
+                typeface=colored(typeface, COLOR_INPUT),
+                output=os.path.abspath(output_dir)
+            ),
+            asynchronous=False,
+            status=TaskStatus.SUCCESS
+        )
+    else:
+        task = Task(
+            message="Generated webfonts in {output}".format(output=os.path.abspath(output_dir)),
+            asynchronous=False,
+            status=TaskStatus.SUCCESS
+        )
+
+    # Calculate execution time
+    end_time = timeit.default_timer()
+    total_time = end_time - start_time
+    click.echo('Done in {}s'.format(round(total_time, 2)))
 
 
 # ==============================================================================
