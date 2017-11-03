@@ -6,7 +6,7 @@ from setuptools import setup, find_packages
 install_requires = [
     'ansiwrap>=0.8.3',
     'appdirs>=1.4.3',
-    'Brotli>=0.6.0',
+    'brotlipy>=0.7.0',
     'click>=6.7',
     'colorama>=0.3.9',
     'fonttools>=3.13.1',
