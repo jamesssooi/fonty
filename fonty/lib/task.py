@@ -7,6 +7,7 @@ from enum import Enum
 from ansiwrap import shorten, ansilen
 from termcolor import colored
 from fonty.lib.terminal_size import get_terminal_size
+from fonty.lib.constants import IS_WINDOWS, ICON_WAITING, ICON_SUCCESS, ICON_ERROR
 
 TaskStatus = Enum('TaskStatus', 'SUCCESS ERROR WAITING WARNING')
 
@@ -26,9 +27,6 @@ class Task(object):
 
         ERROR: `✗ Unicorns do not exist`
     '''
-    STATUS_SUCCESS = '✓'
-    STATUS_ERROR = '✗'
-    STATUS_WAITING = ["⠄", "⠆", "⠇", "⠋", "⠙", "⠸", "⠰", "⠠", "⠰", "⠸", "⠙", "⠋", "⠇", "⠆"]
     STATUS_WARNING = '!'
     DELAY = 0.2
 
@@ -47,6 +45,11 @@ class Task(object):
         self.message = message
         self.status = status
         self.truncate = truncate
+
+        # Determine status icons/animations
+        self.STATUS_WAITING = ICON_WAITING['WINDOWS'] if IS_WINDOWS else ICON_WAITING['OSX']
+        self.STATUS_ERROR = ICON_ERROR['WINDOWS'] if IS_WINDOWS else ICON_ERROR['OSX']
+        self.STATUS_SUCCESS = ICON_SUCCESS['WINDOWS'] if IS_WINDOWS else ICON_SUCCESS['OSX']
 
         if asynchronous:
             threading.Thread(target=self.loop, daemon=True).start()

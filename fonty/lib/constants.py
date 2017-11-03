@@ -26,6 +26,23 @@ ACTION_ERR = colored('✗', COLOR_ERR)
 
 # System
 IS_x64 = sys.maxsize > 2**32
+IS_WINDOWS = os.name == 'nt'
 
 # Configuration
 JSON_DUMP_OPTS = {'indent': 2, 'separators': (',', ': ')}
+
+# Icons
+ICON_WAITING = {
+    'WINDOWS': ['|', '/', '-','\\'],
+    'OSX': ["⠄", "⠆", "⠇", "⠋", "⠙", "⠸", "⠰", "⠠", "⠰", "⠸", "⠙", "⠋", "⠇", "⠆"]
+}
+
+ICON_ERROR = {
+    'WINDOWS': 'X',
+    'OSX': '✗'
+}
+
+ICON_SUCCESS = {
+    'WINDOWS': '√',
+    'OSX': '✓'
+}
