@@ -3,6 +3,7 @@ import os
 import sys
 import inspect
 import click
+import colorama
 
 from fonty.version import __version__
 
@@ -13,6 +14,8 @@ from fonty.commands.source import cli_source
 from fonty.commands.list import cli_list
 from fonty.commands.webfont import cli_webfont
 
+# Enable colored output on Windows
+colorama.init()
 
 @click.group(invoke_without_command=True)
 @click.option('--version', '-v', is_flag=True, help="Show the version number.")
