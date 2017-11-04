@@ -30,12 +30,12 @@ def add(url):
 
     # Index fonts
     task = Task("Indexing {count} typeface(s) in '{repo}'".format(
-        count=len(repo.typefaces),
+        count=len(repo.families),
         repo=colored(repo.name, COLOR_INPUT)
     ))
     search.index_fonts(repo, sub.local_path)
     task.complete("Indexed {count} new typeface(s)".format(
-        count=colored(len(repo.typefaces), COLOR_INPUT)
+        count=colored(len(repo.families), COLOR_INPUT)
     ))
 
     print('')

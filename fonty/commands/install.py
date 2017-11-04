@@ -67,7 +67,7 @@ def cli_install(ctx, name, output, variants):
     if not subscriptions:
         Task(
             status=TaskStatus.ERROR,
-            message="You are not subscribed to any font sources.",
+            message="You are not subscribed to any font sources",
             asynchronous=False
         )
         click.echo("\nEnter '{command}' to add a new font source.".format(
