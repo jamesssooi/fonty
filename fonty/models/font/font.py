@@ -23,12 +23,12 @@ class Font(object):
         # Get variant
         self.variant = variant if variant else self.get_variant()
 
-    def install(self, path=None):
+    def install(self):
         '''Installs this font to the system.'''
         from fonty.lib.install import install_fonts
 
         # Install the font on to the system
-        installed_font = install_fonts(self, path)
+        installed_font = install_fonts(self)
 
         return installed_font
 

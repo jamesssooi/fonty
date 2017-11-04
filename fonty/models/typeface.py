@@ -36,11 +36,11 @@ class Typeface(object):
 
         return fonts
 
-    def install(self, path: str = None, variants: List[str] = None):
+    def install(self, variants: List[str] = None):
         '''Install this typeface.'''
         fonts = self.get_fonts(variants)
         for font in fonts:
-            font.install(path)
+            font.install()
 
         return Typeface(
             name=self.name,
@@ -50,25 +50,16 @@ class Typeface(object):
 
     def uninstall(self, variants: List[str] = None):
         '''Uninstall this typeface.'''
-        from fonty.models.manifest import Manifest
-
-        # Uninstall fonts
         fonts = self.get_fonts(variants)
-        success, failed = uninstall_fonts(fonts)
+        for font in fonts:
+            font.uninstall()
 
-        # Update manifest file
-        if success:
-            uninstalled_variants = [str(font.variant) for font in success]
-            manifest = Manifest.load()
-            manifest.remove(self, uninstalled_variants)
-            manifest.save()
+        return True
 
-        return success, failed
-
-    def get_fonts(self, variants: List[str] = None):
+    def get_fonts(self, variants: List[FontAttribute] = None):
         '''Returns the list of fonts in this typeface.'''
         if variants:
-            return [font for font in self.fonts if str(font.variant) in variants]
+            return [font for font in self.fonts if font.variant in variants]
         else:
             return self.fonts
 

@@ -112,7 +112,7 @@ def cli_install(ctx, name, output, variants):
     # Install into local computer and update font manifest
     if not output:
         task = Task('Installing ({}) fonts...'.format(len(local_fonts)))
-        installed_fonts = install_fonts(fonts=local_fonts, path=output)
+        installed_fonts = install_fonts(fonts=local_fonts)
         installed_families = Typeface.from_font_list(installed_fonts)
 
         manifest = Manifest.load()
