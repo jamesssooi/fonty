@@ -13,6 +13,7 @@ from fonty.commands.uninstall import cli_uninstall
 from fonty.commands.source import cli_source
 from fonty.commands.list import cli_list
 from fonty.commands.webfont import cli_webfont
+from fonty.commands.test import test
 
 # Enable colored output on Windows
 colorama.init()
@@ -62,3 +63,4 @@ main.add_command(cli_uninstall)
 main.add_command(cli_source)
 main.add_command(cli_list)
 main.add_command(cli_webfont)
+main.add_command(test)

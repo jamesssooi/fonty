@@ -16,6 +16,7 @@ install_requires = [
     'termcolor>=1.1.0',
     'textwrap3>=0.9.1',
     'timeago>=1.0.7',
+    'winshell>=0.6.0',
     'Whoosh>=2.7.4',
     'wrapt>=1.10.10'
 ]
