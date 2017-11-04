@@ -7,7 +7,8 @@ import requests
 from fontTools.ttLib import TTFont
 from fonty.lib.install import install_fonts
 from fonty.lib.variants import FontAttribute
-
+from fonty.lib.font_name_ids import FONT_NAMEID_FAMILY, FONT_NAMEID_FAMILY_PREFFERED, \
+                                    FONT_NAMEID_VARIANT, FONT_NAMEID_VARIANT_PREFFERED
 
 class Font(object):
     '''Class to manage individual fonts.'''
@@ -50,7 +51,17 @@ class Font(object):
 
     def install(self, path=None):
         '''Installs this font to the system.'''
-        install_fonts(self, path)
+        from fonty.models.manifest import Manifest
+
+        # Install the font on to the system
+        font_path = install_fonts(self, path)
+
+        # Update manifest file
+        manifest = Manifest.load()
+        manifest.add(self)
+        manifest.save()
+
+        return font_path
 
     def parse(self) -> 'Font':
         '''Parse the font's metadata from the font's name table.'''
@@ -81,9 +92,29 @@ class Font(object):
             self.parse()
         return self.name_table.get(name_id, None)
 
+    def get_family_name(self) -> str:
+        '''Get family name from the font's name tables.'''
+        if self.name_table is None:
+            self.parse()
+
+        family_name = self.get_name_data_from_id(FONT_NAMEID_FAMILY)
+        family_name_preferred = self.get_name_data_from_id(FONT_NAMEID_FAMILY_PREFFERED)
+
+        return family_name_preferred if family_name_preferred else family_name
+
+    def get_variant(self) -> FontAttribute:
+        '''Get the font attributes from the font's name tables.'''
+        if self.name_table is None:
+            self.parse()
+
+        variant = self.get_name_data_from_id(FONT_NAMEID_VARIANT)
+        variant_preferred = self.get_name_data_from_id(FONT_NAMEID_VARIANT_PREFFERED)
+        variant = variant_preferred if variant_preferred else variant
+
+        return FontAttribute.parse(variant)
+
     def convert(self, path: str, font_format: 'FontFormat' = None) -> str:
         '''Converts this font to either woff or woff2 formats.'''
-        from fontTools.ttLib import TTFont
         filename, ext = os.path.splitext(os.path.basename(self.local_path))
         font = TTFont(file=self.local_path)
 

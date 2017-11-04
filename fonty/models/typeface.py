@@ -36,24 +36,15 @@ class Typeface(object):
 
     def install(self, path: str = None, variants: List[str] = None):
         '''Install this typeface.'''
-        from fonty.models.manifest import Manifest
-
-        # Install fonts
         fonts = self.get_fonts(variants)
-        installed_fonts = install_fonts(fonts, path)
+        for font in fonts:
+            font.install(path)
 
-        # Update manifest file
-        manifest = Manifest.load()
-        for font in installed_fonts:
-            manifest.add(font)
-        manifest.save()
-
-        # Installed typeface
-        installed_typeface = Typeface(name=self.name,
-                                      category=self.category,
-                                      fonts=installed_fonts)
-
-        return installed_typeface
+        return Typeface(
+            name=self.name,
+            category=self.category,
+            fonts=fonts
+        )
 
     def uninstall(self, variants: List[str] = None):
         '''Uninstall this typeface.'''
