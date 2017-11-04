@@ -65,9 +65,11 @@ def cli_install(ctx, name, output, variants):
     # Compare local and remote repository hash
     subscriptions = Subscription.load_entries()
     if not subscriptions:
-        Task(message="You are not subscribed to any font sources.",
-             status=TaskStatus.ERROR,
-             asynchronous=False)
+        Task(
+            status=TaskStatus.ERROR,
+            message="You are not subscribed to any font sources.",
+            asynchronous=False
+        )
         click.echo("\nEnter '{command}' to add a new font source.".format(
             command=colored('fonty source add <url>', color='cyan')
         ))
@@ -78,36 +80,30 @@ def cli_install(ctx, name, output, variants):
     try:
         repo, remote_family = search.search(name)
     except search.SearchNotFound as e:
-        task.stop(status=TaskStatus.ERROR,
-                  message="No results found for '{}'".format(colored(name, 'green')))
+        task.error("No results found for '{}'".format(colored(name, 'green')))
         if e.suggestion:
             click.echo("Did you mean '{}'?".format(e.suggestion))
         sys.exit(1)
 
-    task.stop(status=TaskStatus.SUCCESS,
-              message="Found '{family}' in {repo}".format(
-                  family=colored(remote_family.name, COLOR_INPUT),
-                  repo=repo.name
-              ))
+    task.complete("Found '{family}' in {repo}".format(
+        family=colored(remote_family.name, COLOR_INPUT),
+        repo=repo.name
+    ))
 
     # Check if variants exists
     invalid_variants = [x for x in variants if x not in remote_family.variants]
     if invalid_variants:
-        task.stop(status=TaskStatus.ERROR,
-                  message='Variant(s) [{}] not available'.format(
-                      colored(', '.join(invalid_variants), COLOR_INPUT)
-                  ))
+        task.error('Variant(s) [{}] not available'.format(
+            colored(', '.join(invalid_variants), COLOR_INPUT)
+        ))
         sys.exit(1)
-        return # TODO: Raise exception
-
 
     # Download font files
     remote_fonts = remote_family.get_variants(variants)
     task = Task("Downloading ({}) font files...".format(len(remote_fonts)))
     task_printer = create_task_printer(task)
     local_fonts = [font.download(path=output, handler=task_printer) for font in remote_fonts]
-    task.stop(message="Downloaded ({}) font file(s)".format(len(local_fonts)))
-
+    task.complete("Downloaded ({}) font file(s)".format(len(local_fonts)))
 
     # Install into local computer and update font manifest
     if not output:
@@ -124,8 +120,9 @@ def cli_install(ctx, name, output, variants):
 
     # Done!
     message = "Installed '{}'".format(colored(', '.join([f.name for f in installed_families]), COLOR_INPUT))
-    if output: message += ' to {}'.format(output)
-    task.stop(message=message)
+    if output:
+        message += ' to {}'.format(output)
+    task.complete(message)
 
     # Print typeface contents
     for family in installed_families:
@@ -144,8 +141,7 @@ def create_task_printer(task):
         '''A generator function that is yielded for every byte packet received.'''
         total_size = int(request.headers['Content-Length'])
         current_size = 0
-        bar = ProgressBar(total=total_size,
-                          desc='Downloading {}'.format(font.filename))
+        bar = ProgressBar(total=total_size, desc='Downloading {}'.format(font.filename))
         while True:
             current_size = yield
             bar.update(current_size)
