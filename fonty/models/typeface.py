@@ -43,10 +43,10 @@ class Typeface(object):
         installed_fonts = install_fonts(fonts, path)
 
         # Update manifest file
-        if installed_fonts and path is None:
-            manifest = Manifest.load()
-            manifest.add(self, installed_fonts)
-            manifest.save()
+        manifest = Manifest.load()
+        for font in installed_fonts:
+            manifest.add(font)
+        manifest.save()
 
         # Installed typeface
         installed_typeface = Typeface(name=self.name,

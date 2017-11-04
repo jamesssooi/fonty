@@ -17,42 +17,38 @@ class Manifest:
         self.typefaces = typefaces
         self.last_updated = utils.parse_date(last_updated)
 
-    def add(self, typeface: Typeface, fonts: List[Font]):
+    def add(self, font: Font):
         '''Add a font to the manifest.'''
 
-        # Retrieve existing Typeface data or create a new one if it doesn't exist
-        typeface_idx = next((
-            idx for idx, val in enumerate(self.typefaces) if val.name == typeface.name
-        ), None)
-        if typeface_idx is None:
-            data = Typeface(name=typeface.name,
-                            category=typeface.category)
-        else:
-            data = self.typefaces[typeface_idx]
+        family_name = font.get_family_name()
 
-        # Process font files
-        existing_variants = [str(variant) for variant in data.get_variants()]
-        for font in fonts:
-            if str(font.variant) in existing_variants:
-                continue
-            if not font.local_path or not font.variant:
-                raise Exception
-            data.fonts.append(font)
+        # Load existing or create a Typeface object
+        typeface = self.get(family_name)
+        typeface_idx = self.get_index(family_name)
+        if typeface is None:
+            typeface = Typeface(name=family_name)
+
+        # Check if font is already in manifest
+        existing_variants = [str(variant) for variant in typeface.get_variants()]
+        variant = str(font.get_variant())
+        if variant in existing_variants:
+            return None
+
+        # Add font to Typeface object
+        typeface.fonts.append(font)
 
         # Update manifest instance
         if typeface_idx is None:
-            self.typefaces.append(data)
+            self.typefaces.append(typeface)
         else:
-            self.typefaces[typeface_idx] = data
+            self.typefaces[typeface_idx] = typeface
 
         return self
 
     def remove(self, typeface: Typeface, variants: List[str] = None) -> int:
         '''Remove a font or an entire family from the manifest.'''
-
-        typeface_idx = next((
-            idx for idx, val in enumerate(self.typefaces) if val.name == typeface.name
-        ), None)
+        
+        typeface_idx = self.get_index(typeface.name)
         if typeface_idx is None:
             raise Exception
 
@@ -82,13 +78,15 @@ class Manifest:
 
         return count
 
-    def get(self, name: str):
+    def get(self, name: str) -> Typeface:
         '''Load a typeface from the manifest.'''
         typeface = next((val for val in self.typefaces if val.name.lower() == name.lower()), None)
-        if typeface is None:
-            return None
-
         return typeface
+
+    def get_index(self, name: str) -> int:
+        '''Get the index position of the typeface in the manifest.'''
+        typeface_idx = next((idx for idx, val in enumerate(self.typefaces) if val.name.lower() == name.lower()), None)
+        return typeface_idx
 
     def save(self, path: str = None) -> str:
         '''Save the manifest list to disk.'''
