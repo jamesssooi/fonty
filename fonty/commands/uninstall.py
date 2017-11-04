@@ -56,26 +56,22 @@ def cli_uninstall(ctx, name, variants):
         task = Task("Generating font manifest...")
         manifest = Manifest.generate()
         manifest.save()
-        task = task.stop(message='Generated font manifest file')
+        task = task.complete('Generated font manifest file')
 
     # Get typeface from system
     task = Task("Searching for {}".format(colored(name, COLOR_INPUT)))
     typeface = manifest.get(name)
     if typeface is None:
-        task.stop(status=TaskStatus.ERROR,
-                  message="No typeface found with the name '{}'".format(
-                      colored(name, COLOR_INPUT)
-                  ))
+        task.error("No typeface found with the name '{}'".format(colored(name, COLOR_INPUT)))
         sys.exit(1)
 
     # Check if variants exists
     if variants:
         invalid_variants = [x for x in variants if x not in typeface.variants]
         if invalid_variants:
-            task.stop(status=TaskStatus.ERROR,
-                      message="Variant(s) [{}] not available".format(
-                          colored(', '.join([str(v) for v in invalid_variants]), COLOR_INPUT)
-                     ))
+            task.error("Variant(s) [{}] not available".format(
+                colored(', '.join([str(v) for v in invalid_variants]), COLOR_INPUT)
+            ))
             sys.exit(1)
 
     if not variants:
@@ -105,4 +101,4 @@ def cli_uninstall(ctx, name, variants):
             ) for family in uninstalled_families
         ])
     )
-    task.stop(message=message)
+    task.complete(message)
