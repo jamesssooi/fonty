@@ -12,6 +12,12 @@ def uninstall_win32(fonts: List[InstalledFont]) -> List[InstalledFont]:
     '''Uninstall fonts on a Windows system'''
     uninstalled_fonts = []
 
+    # Store a copy of the registry in memory
+    reg_path = 'SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Fonts'
+    font_reg = winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE, reg_path)
+    value_count = winreg.QueryInfoKey(font_reg)[1]
+    registry_values = [winreg.EnumValue(font_reg, i) for i in range(0, value_count)]
+
     for font in fonts:
         # Firstly, we call the RemoveFontResource Win32 API to remove the font
         # from the current session.
@@ -19,10 +25,17 @@ def uninstall_win32(fonts: List[InstalledFont]) -> List[InstalledFont]:
         gdi32.RemoveFontResourceW.argtype = (ctypes.c_wchar_p,)
         gdi32.RemoveFontResourceW(ctypes.c_wchar_p(font.path_to_font))
 
+        # Find the registry value name to delete
+        registry_value = os.path.basename(font.path_to_font)
+        registry_value_name = next((
+            val[0] for val in registry_values if val[1] == registry_value
+        ), None)
+        print(registry_value_name)
+
         # Then we remove the font from the registry
         reg_path = 'SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Fonts'
         font_reg = winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE, reg_path, 0, winreg.KEY_WRITE)
-        winreg.DeleteValue(font_reg, font.registry_name)
+        winreg.DeleteValue(font_reg, registry_value_name)
 
         # Then we broadcast a message to all top-level windows that the font
         # list has changed.
