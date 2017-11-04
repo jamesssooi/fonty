@@ -3,7 +3,7 @@ import os
 from typing import List
 from fonty.models.font import Font, InstalledFont
 
-def install_osx(fonts: List[Font]) -> List[InstalledFont]:
+def install_osx(fonts: List[InstalledFont]) -> List[InstalledFont]:
     '''Install fonts on an OSX system.
 
     Installing fonts on OSX systems is a breeze. The only action required is to
