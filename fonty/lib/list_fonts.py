@@ -38,15 +38,13 @@ def _get_user_fonts_osx() -> List[Typeface]:
 
     # Convert typeface data into Typeface instances
     typefaces = []
-    for _, val in data.items():
-        fonts = []
-        for font in val['fonts']:
-            fonts.append(Font(variant=font['variant'],
-                              local_path=font['local_path']))
+    for family_name, val in data.items():
+        fonts = [Font(
+            path_to_font=font['local_path'],
+            family=family_name,
+            variant=font['variant']
+        ) for font in val['fonts']]
         typefaces.append(Typeface(name=val['name'], fonts=fonts))
-
-    # with open(os.path.expanduser('~/Desktop/manifest.json'), 'w') as f:
-    #     json.dump(typefaces, f, **JSON_DUMP_OPTS)
 
     return typefaces
 

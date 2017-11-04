@@ -1,11 +1,11 @@
 '''font.py: Class to manage individual fonts.'''
 import os
 import codecs
-from enum import Enum
+import abc
+from typing import Union, Callable
 
-import requests
+from .font_format import FontFormat
 from fontTools.ttLib import TTFont
-from fonty.lib.install import install_fonts
 from fonty.lib.variants import FontAttribute
 from fonty.lib.font_name_ids import FONT_NAMEID_FAMILY, FONT_NAMEID_FAMILY_PREFFERED, \
                                     FONT_NAMEID_VARIANT, FONT_NAMEID_VARIANT_PREFFERED
@@ -13,62 +13,45 @@ from fonty.lib.font_name_ids import FONT_NAMEID_FAMILY, FONT_NAMEID_FAMILY_PREFF
 class Font(object):
     '''Class to manage individual fonts.'''
 
-    def __init__(self, filename=None, local_path=None, remote_path=None,
-                 variant=None, raw_bytes=None):
-        self.filename = filename
-        self.local_path = local_path
-        self.remote_path = remote_path
-        self.bytes = raw_bytes
+    def __init__(self, path_to_font: str, family: str = None, variant: FontAttribute = None) -> None:
+        self.path_to_font = path_to_font
         self.name_table = None
 
-        if variant and not isinstance(variant, FontAttribute):
-            variant = FontAttribute.parse(variant)
-        self.variant = variant
+        # Get family name
+        self.family = family if family else self.get_family_name()
 
-    def download(self, handler=None):
-        '''Download this font and return its bytes. Also appends the bytes as a property to self.'''
-
-        if not self.remote_path:
-            raise Exception # TODO: Raise Exception
-
-        request = requests.get(self.remote_path, stream=True)
-        if handler:
-            iterator = handler(self, request)
-            next(iterator)
-
-        self.bytes = b''
-        for bytes_ in request.iter_content(128):
-            if bytes_:
-                self.bytes += bytes_
-
-                # Send total bytes downloaded to the handler. We use
-                # `request.raw.tell()` instead of `len(bytes_)` to
-                # account for requests with gzip compression.
-                if handler:
-                    iterator.send(request.raw.tell()) # total bytes received
-
-        return self.bytes
+        # Get variant
+        self.variant = variant if variant else self.get_variant()
 
     def install(self, path=None):
         '''Installs this font to the system.'''
-        from fonty.models.manifest import Manifest
+        from fonty.lib.install import install_fonts
 
         # Install the font on to the system
-        font_path = install_fonts(self, path)
+        installed_font = install_fonts(self, path)
 
-        # Update manifest file
-        manifest = Manifest.load()
-        manifest.add(self)
-        manifest.save()
+        return installed_font
 
-        return font_path
+    def generate_filename(self) -> str:
+        '''Generate a suitable filename from this font's name tables.'''
+        family_name = self.get_family_name()
+        variant = self.get_variant()
+
+        _, ext = os.path.splitext(self.path_to_font)
+        ext = ext if ext is not '' else '.otf' # Fallback to .otf
+
+        return '{family}-{variant}{ext}'.format(
+            family=family_name,
+            variant=variant.print(long=True),
+            ext=ext
+        )
 
     def parse(self) -> 'Font':
         '''Parse the font's metadata from the font's name table.'''
-        if not self.local_path or not os.path.isfile(self.local_path):
+        if not self.path_to_font or not os.path.isfile(self.path_to_font):
             raise Exception
 
-        font = TTFont(file=self.local_path)
+        font = TTFont(file=self.path_to_font)
         if self.name_table is None:
             self.name_table = {}
 
@@ -115,8 +98,8 @@ class Font(object):
 
     def convert(self, path: str, font_format: 'FontFormat' = None) -> str:
         '''Converts this font to either woff or woff2 formats.'''
-        filename, ext = os.path.splitext(os.path.basename(self.local_path))
-        font = TTFont(file=self.local_path)
+        filename, ext = os.path.splitext(os.path.basename(self.path_to_font))
+        font = TTFont(file=self.path_to_font)
 
         # Get font flavor
         if font_format:
@@ -147,10 +130,3 @@ class Font(object):
         font.save(file=output_path)
 
         return output_path
-
-
-class FontFormat(Enum):
-    WOFF = 'woff'
-    WOFF2 = 'woff2'
-    TTF = 'ttf'
-    OTF = 'otf'

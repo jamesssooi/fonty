@@ -1,15 +1,18 @@
 '''install.py: Functions to install fonts on systems'''
-
 import os
 import shutil
 import sys
 import subprocess
 import platform
+from typing import List, Union
+
 from fonty.lib.constants import APP_DIR, ROOT_DIR, IS_x64
+from fonty.models.font import Font, InstalledFont
+
 
 platform_ = sys.platform
 
-def install_fonts(fonts, path=None):
+def install_fonts(fonts: Union[List[Font], Font], path=None) -> InstalledFont:
     '''OS agnostic function to install fonts on systems.'''
 
     if not isinstance(fonts, list):
@@ -28,25 +31,21 @@ def install_fonts(fonts, path=None):
     else:
         return install_to_dir(fonts, path)
 
-def install_osx(fonts):
+def install_osx(fonts: List['Font']):
     '''Install a font on an OSX system.
 
     Installing fonts on OSX systems is a breeze. The only action required is to
     place the font files in `~/Library/Fonts/` and OSX will take care of the rest.
     '''
     font_dir = os.path.expanduser('~/Library/Fonts/')
-    for idx, _ in enumerate(fonts):
-        font = fonts[idx]
-        if not font.bytes:
-            raise Exception # TODO: Raise Exception
+    installed_fonts = []
 
-        path = os.path.join(font_dir, font.filename)
-        with open(path, 'wb+') as f:
-            f.write(font.bytes)
+    for font in fonts:
+        install_path = os.path.join(font_dir, font.generate_filename())
+        os.rename(font.path_to_font, install_path)
+        installed_fonts.append(InstalledFont(installed_path=install_path))
 
-        fonts[idx].local_path = path
-
-    return fonts
+    return installed_fonts
 
 def install_win32(fonts):
     '''Install a font on a Windows system.

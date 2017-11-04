@@ -181,7 +181,7 @@ class Subscription:
         name = colored(repo.name, 'cyan') if ansi else repo.name
         url = colored(self.remote_path, attrs=['dark']) if ansi else self.remote_path
         id_ = colored(self.id_, attrs=['dark']) if ansi else self.id_
-        count = colored(len(repo.typefaces), attrs=['dark']) if ansi else len(repo.typefaces)
+        count = colored(len(repo.families), attrs=['dark']) if ansi else len(repo.families)
 
         last_updated = timeago.format(self.last_updated)
         last_updated = colored(last_updated, attrs=['dark']) if ansi else last_updated

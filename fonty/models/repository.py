@@ -2,7 +2,9 @@
 import json
 from typing import List
 
-from fonty.models.typeface import Typeface
+from fonty.lib.variants import FontAttribute
+from fonty.models.font import RemoteFont
+from fonty.models.typeface import Typeface, RemoteFontFamily
 
 class Repository(object):
     '''`Repository` is a class that provides an interface to manage a repository
@@ -12,18 +14,16 @@ class Repository(object):
     `Subscriptions` model instead.
 
     Attributes:
-        `typefaces` (List[Typeface]): Typefaces available in this repository.
+        `families` (List[RemoteFontFamily]): Font families available in this repository.
     '''
 
-    def __init__(self, name: str, typefaces: List[Typeface] = None):
+    def __init__(self, name: str, families: List[RemoteFontFamily] = None):
         self.name = name
-        self.typefaces = typefaces
+        self.families = families
 
-    def get_typeface(self, name):
-        '''Returns a Typeface object.'''
-        typeface = next((x for x in self.typefaces if x.name == name), None)
-        if typeface is None:
-            raise Exception
+    def get_family(self, name):
+        '''Returns a RemoteFontFamily object.'''
+        typeface = next((f for f in self.families if f.name == name), None)
 
         return typeface
 
@@ -34,13 +34,25 @@ class Repository(object):
         if not isinstance(json_data, dict):
             repo = json.loads(json_data)
 
-        # Convert all typefaces into `Typeface` instances
-        typefaces = []
-        for typeface in repo['typefaces']:
-            typefaces.append(Typeface.load_from_json(typeface))
+        # Convert all typefaces into `RemoteFontFamily` instances
+        remote_families = []
+        for family in repo['typefaces']:
+            remote_families.append(RemoteFontFamily(
+                name=family['name'],
+                fonts=[
+                    RemoteFont(
+                        remote_path=data['url'],
+                        filename=data['filename'],
+                        family=family['name'],
+                        variant=FontAttribute.parse(variant)
+                    ) for variant, data in family['fonts'].items()
+                ]
+            ))
 
-        return Repository(name=repo['name'],
-                          typefaces=typefaces)
+        return Repository(
+            name=repo['name'],
+            families=remote_families
+        )
 
     @staticmethod
     def load_from_path(path):

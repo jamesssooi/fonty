@@ -3,21 +3,22 @@ import json
 from datetime import datetime
 from typing import List, Union
 
-from fonty.models.font import Font
+from fonty.models.font import InstalledFont
 from fonty.models.typeface import Typeface
 from fonty.lib.constants import APP_DIR, MANIFEST_PATH, JSON_DUMP_OPTS
 from fonty.lib.list_fonts import get_user_fonts
 from fonty.lib.json_encoder import FontyJSONEncoder
+from fonty.lib.variants import FontAttribute
 from fonty.lib import utils
 
 class Manifest:
     '''Manifest is a class to manage a manifest list of installed fonts on the user's system.'''
 
-    def __init__(self, typefaces, last_updated: Union[str, datetime] = None):
+    def __init__(self, typefaces: List[Typeface], last_updated: Union[str, datetime] = None):
         self.typefaces = typefaces
         self.last_updated = utils.parse_date(last_updated)
 
-    def add(self, font: Font):
+    def add(self, font: InstalledFont):
         '''Add a font to the manifest.'''
 
         family_name = font.get_family_name()
@@ -91,8 +92,7 @@ class Manifest:
     def save(self, path: str = None) -> str:
         '''Save the manifest list to disk.'''
         utils.check_dirs(APP_DIR)
-        if path is None:
-            path = MANIFEST_PATH
+        path = path if path else MANIFEST_PATH
 
         data = {
             'lastUpdated': datetime.now().isoformat(),
@@ -106,36 +106,28 @@ class Manifest:
     @staticmethod
     def load(path: str = None) -> 'Manifest':
         '''Load the manifest file from disk.'''
-        if not path:
-            path = MANIFEST_PATH
+        path = path if path else MANIFEST_PATH
 
         with open(path, encoding='utf-8') as f:
             data = json.loads(f.read())
 
-        # Convert data into Typefaces and Font instances
-        typefaces = []
-        for typeface_json in data['typefaces']:
-            fonts = []
-            for font_json in typeface_json['fonts']:
-                d = {'variant': font_json['variant'],
-                     'local_path': font_json['localPath']}
-                if 'remotePath' in font_json:
-                    d['remote_path'] = font_json['remotePath']
-                if 'filename' in font_json:
-                    d['filename'] = font_json['filename']
-                fonts.append(Font(**d))
+        # Create FontFamily instances
+        families = []
+        for family in data['typefaces']:
+            fonts = [InstalledFont(
+                installed_path=font.get('localPath'),
+                registry_path=font.get('registryPath', None),
+                family=family.get('name'),
+                variant=FontAttribute.parse(font.get('variant'))
+            ) for font in family['fonts']]
+            families.append(Typeface(name=family.get('name'), fonts=fonts))
 
-            typefaces.append(
-                Typeface(name=typeface_json.get('name'),
-                         category=typeface_json.get('category', None),
-                         fonts=fonts)
-            )
-
-        return Manifest(typefaces=typefaces,
-                        last_updated=data['lastUpdated'])
+        return Manifest(typefaces=families, last_updated=data['lastUpdated'])
 
     @staticmethod
     def generate() -> 'Manifest':
         '''Generate a manifest list from the user's installed fonts.'''
-        return Manifest(typefaces=get_user_fonts(),
-                        last_updated=datetime.now())
+        return Manifest(
+            typefaces=get_user_fonts(),
+            last_updated=datetime.now()
+        )
