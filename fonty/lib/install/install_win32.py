@@ -1,9 +1,9 @@
 '''install_win32.py: Install fonts on Windows'''
 import os
 import ctypes
-import shutil
 from typing import List
 
+import winshell
 import winreg
 import win32api
 import win32con
@@ -29,7 +29,7 @@ def install_win32(fonts: List[Font]) -> List[InstalledFont]:
     for font in fonts:
         # Firstly, we copy the font files into the %WINDIR%/Fonts directory.
         installed_path = os.path.join(font_dir, os.path.basename(font.path_to_font))
-        shutil.move(font.path_to_font, installed_path)
+        winshell.move_file(font.path_to_font, installed_path)
 
         # Then we call the AddFontResource Win32 API to make the font available
         # in the current session
