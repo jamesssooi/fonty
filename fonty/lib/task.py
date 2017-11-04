@@ -93,9 +93,7 @@ class Task(object):
 
             time.sleep(self.DELAY)
 
-    def stop(self,
-             status: TaskStatus = TaskStatus.SUCCESS,
-             message: str = None) -> None:
+    def stop(self, message: str = None, status: TaskStatus = TaskStatus.SUCCESS) -> None:
         '''Stop this task.'''
 
         self.active = False
@@ -110,6 +108,14 @@ class Task(object):
         # any subsequent print statements.
         while not self._done:
             pass
+
+    def complete(self, message: str = None) -> None:
+        '''Stop this task with a success status.'''
+        self.stop(message=message, status=TaskStatus.SUCCESS)
+
+    def error(self, message: str = None) -> None:
+        '''Stop this task with an error status.'''
+        self.stop(status=TaskStatus.ERROR, message=message)
 
     def get_indicator(self) -> str:
         '''Returns the current active indicator.'''
