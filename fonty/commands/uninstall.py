@@ -5,7 +5,9 @@ import sys
 import click
 from termcolor import colored
 from fonty.lib.task import Task, TaskStatus
+from fonty.lib.variants import FontAttribute
 from fonty.lib.constants import COLOR_INPUT
+from fonty.lib.uninstall import uninstall_fonts
 from fonty.models.manifest import Manifest
 
 @click.command('uninstall', short_help='Uninstall a font')
@@ -40,6 +42,7 @@ def cli_uninstall(ctx, name, variants):
     name = ' '.join(str(x) for x in name)
     if variants:
         variants = (','.join(str(x) for x in variants)).split(',')
+        variants = [FontAttribute.parse(variant) for variant in variants]
 
     if not name:
         click.echo(ctx.get_help())
@@ -65,52 +68,45 @@ def cli_uninstall(ctx, name, variants):
         sys.exit(1)
 
     # Check if variants exists
-    available_variants = [str(variant) for variant in typeface.get_variants()]
-    invalid_variants = [x for x in variants if x not in available_variants]
-    if invalid_variants:
-        task.stop(status=TaskStatus.ERROR,
-                  message="Variant(s) [{}] not available".format(
-                      colored(', '.join(invalid_variants), COLOR_INPUT)
-                  ))
-        sys.exit(1)
+    if variants:
+        invalid_variants = [x for x in variants if x not in typeface.variants]
+        if invalid_variants:
+            task.stop(status=TaskStatus.ERROR,
+                      message="Variant(s) [{}] not available".format(
+                          colored(', '.join([str(v) for v in invalid_variants]), COLOR_INPUT)
+                     ))
+            sys.exit(1)
+
     if not variants:
-        variants = available_variants
+        variants = typeface.variants
 
     # Uninstall this typeface
+    local_fonts = typeface.get_fonts(variants)
     task.message = "Uninstalling {name} ({variants})".format(
         name=colored(typeface.name, COLOR_INPUT),
-        variants=colored(', '.join(variants), 'green')
+        variants=colored(', '.join([str(v) for v in variants]), 'green')
     )
-    success, failed = typeface.uninstall(variants)
-    uninstalled_variants = [str(font.variant) for font in success]
+    result = uninstall_fonts(local_fonts)
 
-    if success and failed:
-        task.stop(status=TaskStatus.WARNING,
-                  message="Uninstalled {name}({variants}) with errors".format(
-                      name=colored(typeface.name, COLOR_INPUT),
-                      variants=colored(', '.join(uninstalled_variants), 'green')
-                  ))
-        click.echo("\nUnable to find the following font files:\n{errors}".format(
-            errors='\n'.join('- ' + font.local_path for font in failed)
-        ))
-        click.echo("\nRebuild your manifest file by running '{command}' to fix this.".format(
-            command=colored('fonty list --rebuild', 'cyan')
-        ))
-    elif success:
-        task.stop(status=TaskStatus.SUCCESS,
-                  message="Uninstalled {name}({variants})".format(
-                      name=colored(typeface.name, COLOR_INPUT),
-                      variants=colored(', '.join(variants), 'green')
-                  ))
-    elif failed:
-        task.stop(status=TaskStatus.ERROR,
-                  message="Failed to uninstall {name}({variants})".format(
-                      name=colored(typeface.name, COLOR_INPUT),
-                      variants=colored(', '.join(variants), 'green')
-                  ))
-        click.echo("\nUnable to find the following font files:\n{errors}".format(
-            errors='\n'.join('- ' + font.local_path for font in failed)
-        ))
-        click.echo("\nRebuild your manifest file by running '{command}' to fix this.".format(
-            command=colored('fonty list -f', 'cyan')
-        ))
+    # Update the font manifest
+    manifest = Manifest.load()
+    for font in local_fonts:
+        manifest.remove(font)
+    manifest.save()
+
+    if result:
+        task.stop(
+            status=TaskStatus.SUCCESS,
+            message="Uninstalled {name}({variants})".format(
+                name=colored(typeface.name, COLOR_INPUT),
+                variants=colored(', '.join([str(v) for v in variants]), 'green')
+            )
+        )
+    else:
+        task.stop(
+            status=TaskStatus.ERROR,
+            message="Failed to uninstall {name}({variants})".format(
+                name=colored(typeface.name, COLOR_INPUT),
+                variants=colored(', '.join([str(v) for v in variants]), 'green')
+            )
+        )

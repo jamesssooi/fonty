@@ -10,4 +10,5 @@ class InstalledFont(Font):
 
     def uninstall(self) -> bool:
         '''Uninstall this font from the system.'''
-        pass
+        from fonty.lib.uninstall import uninstall_fonts
+        return uninstall_fonts(self)

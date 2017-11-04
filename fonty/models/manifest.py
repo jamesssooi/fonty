@@ -18,7 +18,7 @@ class Manifest:
         self.typefaces = typefaces
         self.last_updated = utils.parse_date(last_updated)
 
-    def add(self, font: InstalledFont):
+    def add(self, font: InstalledFont) -> 'Manifest':
         '''Add a font to the manifest.'''
 
         family_name = font.get_family_name()
@@ -46,38 +46,30 @@ class Manifest:
 
         return self
 
-    def remove(self, typeface: Typeface, variants: List[str] = None) -> int:
-        '''Remove a font or an entire family from the manifest.'''
-        
-        typeface_idx = self.get_index(typeface.name)
-        if typeface_idx is None:
-            raise Exception
+    def remove(self, font: InstalledFont) -> 'Manifest':
+        '''Remove a font from the manifest.'''
 
-        data = self.typefaces[typeface_idx]
+        # Load typeface
+        typeface = self.get(font.family)
+        typeface_idx = self.get_index(font.family)
+        if typeface is None:
+            return self
 
-        if variants is None:
-            count = len(self.typefaces[typeface_idx].fonts)
-            self.typefaces(typeface_idx)
+        # Remove font from typeface
+        font_idx = next((
+            i for i, val in enumerate(typeface.fonts) if val.variant == font.variant
+        ), None)
+        if font_idx is None:
+            return self
+        del typeface.fonts[font_idx]
+
+        # Update the instance with the updated typeface
+        if typeface.fonts:
+            self.typefaces[typeface_idx] = typeface
         else:
-            count = 0
-            for variant in variants:
-                font_idx = next((
-                    idx for idx, val in enumerate(typeface.fonts)
-                    if str(val.variant) in variants
-                ), None)
+            del self.typefaces[typeface_idx]
 
-                if font_idx is None:
-                    raise Exception
-
-                data.fonts.pop(font_idx)
-                count += 1
-
-            if not data.fonts:
-                self.typefaces.pop(typeface_idx)
-            else:
-                self.typefaces[typeface_idx] = data
-
-        return count
+        return self
 
     def get(self, name: str) -> Typeface:
         '''Load a typeface from the manifest.'''
@@ -116,7 +108,7 @@ class Manifest:
         for family in data['typefaces']:
             fonts = [InstalledFont(
                 installed_path=font.get('localPath'),
-                registry_path=font.get('registryPath', None),
+                registry_name=font.get('registryName', None),
                 family=family.get('name'),
                 variant=FontAttribute.parse(font.get('variant'))
             ) for font in family['fonts']]
