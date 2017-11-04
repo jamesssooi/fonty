@@ -9,6 +9,7 @@ from fonty.lib.variants import FontAttribute
 from fonty.lib.constants import COLOR_INPUT
 from fonty.lib.uninstall import uninstall_fonts
 from fonty.models.manifest import Manifest
+from fonty.models.typeface import Typeface
 
 @click.command('uninstall', short_help='Uninstall a font')
 @click.argument(
@@ -86,27 +87,22 @@ def cli_uninstall(ctx, name, variants):
         name=colored(typeface.name, COLOR_INPUT),
         variants=colored(', '.join([str(v) for v in variants]), 'green')
     )
-    result = uninstall_fonts(local_fonts)
+    uninstalled_fonts = uninstall_fonts(local_fonts)
+    uninstalled_families = Typeface.from_font_list(uninstalled_fonts)
 
     # Update the font manifest
     manifest = Manifest.load()
-    for font in local_fonts:
+    for font in uninstalled_fonts:
         manifest.remove(font)
     manifest.save()
 
-    if result:
-        task.stop(
-            status=TaskStatus.SUCCESS,
-            message="Uninstalled {name}({variants})".format(
-                name=colored(typeface.name, COLOR_INPUT),
-                variants=colored(', '.join([str(v) for v in variants]), 'green')
-            )
-        )
-    else:
-        task.stop(
-            status=TaskStatus.ERROR,
-            message="Failed to uninstall {name}({variants})".format(
-                name=colored(typeface.name, COLOR_INPUT),
-                variants=colored(', '.join([str(v) for v in variants]), 'green')
-            )
-        )
+    # Print success message
+    message = "Uninstalled {}".format(
+        ', '.join([
+            '{family}({variant})'.format(
+                family=colored(family.name, COLOR_INPUT),
+                variant=colored(', '.join([str(v) for v in family.variants]), 'green')
+            ) for family in uninstalled_families
+        ])
+    )
+    task.stop(message=message)
