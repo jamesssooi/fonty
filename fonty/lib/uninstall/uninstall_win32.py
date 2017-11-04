@@ -8,8 +8,9 @@ import win32api
 import win32con
 from fonty.models.font import InstalledFont
 
-def uninstall_win32(fonts: List[InstalledFont]) -> bool:
+def uninstall_win32(fonts: List[InstalledFont]) -> List[InstalledFont]:
     '''Uninstall fonts on a Windows system'''
+    uninstalled_fonts = []
 
     for font in fonts:
         # Firstly, we call the RemoveFontResource Win32 API to remove the font
@@ -29,5 +30,6 @@ def uninstall_win32(fonts: List[InstalledFont]) -> bool:
 
         # Finally, we remove the font file
         os.remove(font.path_to_font)
+        uninstalled_fonts.append(font)
 
-    return True
+    return uninstalled_fonts
