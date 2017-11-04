@@ -14,13 +14,10 @@ class FontyJSONEncoder(JSONEncoder):
             return d
 
         if isinstance(o, Font):
-            d = {'variant': str(o.variant)}
-            if o.local_path is not None:
-                d['localPath'] = o.local_path
-            if o.remote_path is not None:
-                d['remotePath'] = o.remote_path
-            if o.filename is not None:
-                d['filename'] = o.filename
+            d = {
+                'variant': str(o.variant),
+                'localPath': o.path_to_font
+            }
             return d
 
         else:

@@ -2,13 +2,15 @@
 
 import json
 import hashlib
-from typing import List
+from typing import List, Callable
+from functools import reduce
 
 from click import style
 from termcolor import colored
+from fonty.lib.variants import FontAttribute
 from fonty.lib.install import install_fonts
 from fonty.lib.uninstall import uninstall_fonts
-from fonty.models.font import Font
+from fonty.models.font import Font, RemoteFont
 from fonty.lib import utils
 
 class Typeface(object):
@@ -36,24 +38,15 @@ class Typeface(object):
 
     def install(self, path: str = None, variants: List[str] = None):
         '''Install this typeface.'''
-        from fonty.models.manifest import Manifest
-
-        # Install fonts
         fonts = self.get_fonts(variants)
-        installed_fonts = install_fonts(fonts, path)
+        for font in fonts:
+            font.install(path)
 
-        # Update manifest file
-        if installed_fonts and path is None:
-            manifest = Manifest.load()
-            manifest.add(self, installed_fonts)
-            manifest.save()
-
-        # Installed typeface
-        installed_typeface = Typeface(name=self.name,
-                                      category=self.category,
-                                      fonts=installed_fonts)
-
-        return installed_typeface
+        return Typeface(
+            name=self.name,
+            category=self.category,
+            fonts=fonts
+        )
 
     def uninstall(self, variants: List[str] = None):
         '''Uninstall this typeface.'''
@@ -94,7 +87,7 @@ class Typeface(object):
         # Font files
         fonts = [{
             'variant': font.variant.print(long=True),
-            'path': colored(font.local_path, attrs=['dark'])
+            'path': colored(font.path_to_font, attrs=['dark'])
         } for font in self.fonts]
         font_lines = utils.tabularize(fonts, join=False)
 
@@ -153,3 +146,42 @@ class Typeface(object):
             raise e # TODO: Implement exception
 
         return manifest.get(name)
+
+    @staticmethod
+    def from_font_list(fonts: List[Font]) -> List['Typeface']:
+        '''Create typeface instance(s) from a list of fonts.'''
+
+        family_names = list(set([font.family for font in fonts]))
+
+        families = [
+            Typeface(
+                name=family,
+                fonts=[font for font in fonts if font.family == family]
+            ) for family in family_names
+        ]
+
+        return families
+
+class RemoteFontFamily(object):
+    '''Class to manage a remote font family.'''
+
+    def __init__(self, name: str, fonts: RemoteFont):
+        self.name = name
+        self.fonts = fonts
+
+    @property
+    def variants(self) -> List[FontAttribute]:
+        '''Gets the variants available for this remote font family.'''
+        return [font.variant for font in self.fonts]
+
+    def get_variants(self, variants: List[FontAttribute]=None) -> List[RemoteFont]:
+        '''Get fonts of the specified variants.'''
+        if variants:
+            return [font for font in self.fonts if font.variant in variants]
+        else:
+            return self.fonts
+
+    def generate_id(self, source):
+        '''Generates a unique id.'''
+        unique_str = '{source}-{name}'.format(source=source, name=self.name)
+        return hashlib.md5(unique_str.encode('utf-8')).hexdigest()

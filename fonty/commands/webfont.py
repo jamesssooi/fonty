@@ -88,7 +88,7 @@ def cli_webfont(ctx, files: str, typeface: str, output: str):
         sys.exit(1)
 
     # Create font objects
-    fonts = [Font(local_path=font_path) for font_path in font_paths]
+    fonts = [Font(path_to_font=font_path) for font_path in font_paths]
 
     # Print task message
     task = Task('Generating webfonts for ({}) fonts...'.format(len(fonts)))
@@ -99,7 +99,7 @@ def cli_webfont(ctx, files: str, typeface: str, output: str):
     results = []
     for font in fonts:
 
-        filename, ext = os.path.splitext(os.path.basename(font.local_path))
+        filename, ext = os.path.splitext(os.path.basename(font.path_to_font))
 
         # Get family and variant name
         family_name_preferred = font.get_name_data_from_id('16')

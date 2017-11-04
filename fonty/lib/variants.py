@@ -39,6 +39,14 @@ class FontAttribute:
 
     def __str__(self):
         return self.print()
+
+    def __eq__(self, other):
+        if (isinstance(other, self.__class__)):
+            return str(self) == str(other)
+        return False
+    
+    def __ne__(self, other):
+        return not self.__eq__(other)
     
     def print(self, long: bool = False, output: bool = False) -> str:
         '''Print this font's attributes'''

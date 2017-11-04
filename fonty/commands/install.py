@@ -5,11 +5,15 @@ import sys
 import click
 from termcolor import colored
 from fonty.lib import search
+from fonty.lib.variants import FontAttribute
 from fonty.lib.task import Task, TaskStatus
 from fonty.lib.progress import ProgressBar
 from fonty.lib.constants import COLOR_INPUT
+from fonty.lib.install import install_fonts
 from fonty.models.subscription import Subscription
 from fonty.models.typeface import Typeface
+from fonty.models.font import Font
+from fonty.models.manifest import Manifest
 
 @click.command('install', short_help='Install a font')
 @click.argument(
@@ -52,6 +56,7 @@ def cli_install(ctx, name, output, variants):
     name = ' '.join(str(x) for x in name)
     if variants:
         variants = (','.join(str(x) for x in variants)).split(',')
+        variants = [FontAttribute.parse(variant) for variant in variants]
 
     if not name:
         click.echo(ctx.get_help())
@@ -68,10 +73,10 @@ def cli_install(ctx, name, output, variants):
         ))
         return
 
-    # Search for typeface in local repositories
+    # Search for family in local repositories
     task = Task("Searching for '{}'...".format(colored(name, 'green')))
     try:
-        repo, typeface = search.search(name)
+        repo, remote_family = search.search(name)
     except search.SearchNotFound as e:
         task.stop(status=TaskStatus.ERROR,
                   message="No results found for '{}'".format(colored(name, 'green')))
@@ -80,14 +85,13 @@ def cli_install(ctx, name, output, variants):
         sys.exit(1)
 
     task.stop(status=TaskStatus.SUCCESS,
-              message="Found '{typeface}' in {repo}".format(
-                  typeface=colored(typeface.name, COLOR_INPUT),
+              message="Found '{family}' in {repo}".format(
+                  family=colored(remote_family.name, COLOR_INPUT),
                   repo=repo.name
               ))
 
     # Check if variants exists
-    available_variants = [str(variant) for variant in typeface.get_variants()]
-    invalid_variants = [x for x in variants if x not in available_variants]
+    invalid_variants = [x for x in variants if x not in remote_family.variants]
     if invalid_variants:
         task.stop(status=TaskStatus.ERROR,
                   message='Variant(s) [{}] not available'.format(
@@ -95,26 +99,37 @@ def cli_install(ctx, name, output, variants):
                   ))
         sys.exit(1)
         return # TODO: Raise exception
-    variants_count = len(variants) if variants else len(available_variants)
+
 
     # Download font files
-    task = Task("Downloading ({}) font files...".format(variants_count))
-    fonts = typeface.download(variants, create_download_task_handler(task))
-    task.stop(status=TaskStatus.SUCCESS,
-              message="Downloaded ({}) font file(s)".format(len(fonts)))
+    remote_fonts = remote_family.get_variants(variants)
+    task = Task("Downloading ({}) font files...".format(len(remote_fonts)))
+    task_printer = create_task_printer(task)
+    local_fonts = [font.download(path=output, handler=task_printer) for font in remote_fonts]
+    task.stop(message="Downloaded ({}) font file(s)".format(len(local_fonts)))
 
-    # Install into local computer
-    task = Task('Installing ({}) fonts...'.format(len(fonts)))
-    installed_typeface: Typeface = typeface.install(variants=variants, path=output)
+
+    # Install into local computer and update font manifest
+    if not output:
+        task = Task('Installing ({}) fonts...'.format(len(local_fonts)))
+        installed_fonts = install_fonts(fonts=local_fonts, path=output)
+        installed_families = Typeface.from_font_list(installed_fonts)
+
+        manifest = Manifest.load()
+        for font in installed_fonts:
+            manifest.add(font)
+        manifest.save()
+    else:
+        installed_families = Typeface.from_font_list(local_fonts)
 
     # Done!
-    message = "Installed '{}'".format(colored(typeface.name, COLOR_INPUT))
-    if output:
-        message += ' to {}'.format(output)
-    task.stop(status=TaskStatus.SUCCESS, message=message)
+    message = "Installed '{}'".format(colored(', '.join([f.name for f in installed_families]), COLOR_INPUT))
+    if output: message += ' to {}'.format(output)
+    task.stop(message=message)
 
     # Print typeface contents
-    installed_typeface.print(suppress_name=True)
+    for family in installed_families:
+        family.print(suppress_name=True)
 
     # Calculate execution time
     end_time = timeit.default_timer()
@@ -122,7 +137,7 @@ def cli_install(ctx, name, output, variants):
     click.echo('Done in {}s'.format(round(total_time, 2)))
 
 
-def create_download_task_handler(task):
+def create_task_printer(task):
     '''Create a download handler that prints a progress bar to a Task instance.'''
 
     def download_handler(font, request):
