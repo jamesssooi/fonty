@@ -119,7 +119,7 @@ Generate webfonts from an already installed font
 
 ---
 
-### [2.3 &nbsp;&nbsp; Managing font sources](#)
+### [2.4 &nbsp;&nbsp; Managing font sources](#)
 **fonty** searches and downloads fonts from your list of subscribed sources. Upon installation, fonty automatically subscribes to a few [default sources](#). Here's how you can manage your subscriptions:
 
 Adding a new font source:
@@ -151,3 +151,18 @@ Updating sources:
 ---
 
 ## [3 &nbsp;&nbsp; Commands Reference](#)
+
+### [3.1 &nbsp;&nbsp; `fonty install`](#)
+```bash
+› fonty install <FONT NAME> [OPTIONS]
+```
+
+#### Options
+
+**`-v`/`--variants`** _text_
+
+A list of comma separated values with no spaces in between using the [Fonty Attribute](#) format.
+
+**`-o`/`--output`** _path_
+
+Output fonts into this directory. If supplied, the fonts won't be installed into the system.
