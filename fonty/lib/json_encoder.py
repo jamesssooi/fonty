@@ -1,24 +1,16 @@
 '''json_encoder.py'''
 from json import JSONEncoder
-from fonty.models.typeface import Typeface
-from fonty.models.font import Font
+from fonty.models.font import Font, FontFamily
 
 class FontyJSONEncoder(JSONEncoder):
     '''Extends JSONEncoder to support the encoding of Fonty's data structures.'''
 
     def default(self, o):
-        if isinstance(o, Typeface):
-            d = {'name': o.name, 'fonts': o.fonts}
-            if o.category is not None:
-                d['category'] = o.category
-            return d
+        if isinstance(o, FontFamily):
+            return {'name': o.name, 'fonts': o.fonts}
 
         if isinstance(o, Font):
-            d = {
-                'variant': str(o.variant),
-                'localPath': o.path_to_font
-            }
-            return d
+            return {'variant': str(o.variant), 'localPath': o.path_to_font}
 
         else:
             return JSONEncoder.default(self, o)

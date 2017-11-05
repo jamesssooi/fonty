@@ -9,7 +9,7 @@ from fonty.lib.variants import FontAttribute
 from fonty.lib.constants import COLOR_INPUT
 from fonty.lib.uninstall import uninstall_fonts
 from fonty.models.manifest import Manifest
-from fonty.models.typeface import Typeface
+from fonty.models.font import FontFamily
 
 @click.command('uninstall', short_help='Uninstall a font')
 @click.argument(
@@ -58,16 +58,16 @@ def cli_uninstall(ctx, name, variants):
         manifest.save()
         task = task.complete('Generated font manifest file')
 
-    # Get typeface from system
+    # Get font family from system
     task = Task("Searching for {}".format(colored(name, COLOR_INPUT)))
-    typeface = manifest.get(name)
-    if typeface is None:
-        task.error("No typeface found with the name '{}'".format(colored(name, COLOR_INPUT)))
+    family = manifest.get(name)
+    if family is None:
+        task.error("No font family found with the name '{}'".format(colored(name, COLOR_INPUT)))
         sys.exit(1)
 
     # Check if variants exists
     if variants:
-        invalid_variants = [x for x in variants if x not in typeface.variants]
+        invalid_variants = [x for x in variants if x not in family.variants]
         if invalid_variants:
             task.error("Variant(s) [{}] not available".format(
                 colored(', '.join([str(v) for v in invalid_variants]), COLOR_INPUT)
@@ -75,16 +75,16 @@ def cli_uninstall(ctx, name, variants):
             sys.exit(1)
 
     if not variants:
-        variants = typeface.variants
+        variants = family.variants
 
-    # Uninstall this typeface
-    local_fonts = typeface.get_fonts(variants)
+    # Uninstall this font family
+    local_fonts = family.get_fonts(variants)
     task.message = "Uninstalling {name} ({variants})".format(
-        name=colored(typeface.name, COLOR_INPUT),
+        name=colored(family.name, COLOR_INPUT),
         variants=colored(', '.join([str(v) for v in variants]), 'green')
     )
     uninstalled_fonts = uninstall_fonts(local_fonts)
-    uninstalled_families = Typeface.from_font_list(uninstalled_fonts)
+    uninstalled_families = FontFamily.from_font_list(uninstalled_fonts)
 
     # Update the font manifest
     manifest = Manifest.load()

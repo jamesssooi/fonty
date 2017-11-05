@@ -3,12 +3,11 @@ import json
 from typing import List
 
 from fonty.lib.variants import FontAttribute
-from fonty.models.font import RemoteFont
-from fonty.models.typeface import Typeface, RemoteFontFamily
+from fonty.models.font import FontFamily, RemoteFontFamily, RemoteFont
 
 class Repository(object):
     '''`Repository` is a class that provides an interface to manage a repository
-    and its list of typefaces.
+    and its list of families.
 
     The `Repository` class does not manage subscriptions. For that, refer to the
     `Subscriptions` model instead.
@@ -23,9 +22,7 @@ class Repository(object):
 
     def get_family(self, name):
         '''Returns a RemoteFontFamily object.'''
-        typeface = next((f for f in self.families if f.name == name), None)
-
-        return typeface
+        return next((f for f in self.families if f.name == name), None)
 
     @staticmethod
     def load_from_json(json_data):
@@ -34,7 +31,7 @@ class Repository(object):
         if not isinstance(json_data, dict):
             repo = json.loads(json_data)
 
-        # Convert all typefaces into `RemoteFontFamily` instances
+        # Convert all families into `RemoteFontFamily` instances
         remote_families = []
         for family in repo['typefaces']:
             remote_families.append(RemoteFontFamily(

@@ -172,7 +172,7 @@ class Subscription:
         format_ = [
             '{name} @ {url}',
             '- ID: {id_}',
-            '- Typeface(s) available: {count}',
+            '- Families available: {count}',
             '- Last updated: {last_updated}',
         ]
 

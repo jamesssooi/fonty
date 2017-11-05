@@ -44,8 +44,8 @@ def cli_list(name: str, rebuild: bool):
     if rebuild:
         manifest = Manifest.generate()
         manifest.save()
-        click.echo('Manifest rebuilded with {count} typefaces found.'.format(
-            count=len(manifest.typefaces)
+        click.echo('Manifest rebuilded with {count} font families found.'.format(
+            count=len(manifest.families)
         ))
         sys.exit(0)
 
@@ -56,7 +56,7 @@ def cli_list(name: str, rebuild: bool):
         manifest = Manifest.generate()
         manifest.save()
 
-    # List all installed fonts if no typeface name is specified
+    # List all installed fonts if no font family name is specified
     if not name:
         list_all_fonts(manifest)
     else:
@@ -67,9 +67,9 @@ def list_all_fonts(manifest: Manifest):
 
     # Get font list
     entries = ['{name} {variants}'.format(
-        name=typeface.name,
-        variants=colored('({})'.format(len(typeface.get_variants())), attrs=['dark'])
-    ) for typeface in manifest.typefaces]
+        name=family.name,
+        variants=colored('({})'.format(len(family.get_variants())), attrs=['dark'])
+    ) for family in manifest.families]
     entries.sort()
 
     # Find the optimal column count. How it works:
@@ -114,16 +114,16 @@ def list_all_fonts(manifest: Manifest):
         click.echo(s)
 
     # Print count
-    click.echo('\n{count} typefaces installed.'.format(count=len(entries)))
+    click.echo('\n{count} font families installed.'.format(count=len(entries)))
 
 def list_font(manifest: Manifest, name: str):
-    '''Show details for a particular typeface family.'''
+    '''Show details for a particular font family.'''
 
-    typeface = manifest.get(name)
-    if not typeface:
+    family = manifest.get(name)
+    if not family:
         click.echo("No results found for '{name}'".format(
             name=colored(name, COLOR_INPUT)
         ))
         sys.exit(1)
 
-    typeface.print()
+    family.print()
