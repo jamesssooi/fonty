@@ -152,17 +152,17 @@ Updating sources:
 
 ## [3 &nbsp;&nbsp; Commands Reference](#)
 
-### [3.1 &nbsp;&nbsp; `fonty install`](#)
+#### [3.1 &nbsp;&nbsp; `fonty install`](#)
 ```bash
+# Default
 › fonty install <FONT NAME> [OPTIONS]
+
+# With --files flag
+› fonty install --files <FONT FILES> [OPTIONS]
 ```
 
-#### Options
+##### Options
 
-**`-v`/`--variants`** _text_
+**`-v`/`--variants [text]`** A list of comma separated values with no spaces in between using the [Fonty Attribute](#) format.
 
-* A list of comma separated values with no spaces in between using the [Fonty Attribute](#) format.
-
-**`-o`/`--output`** _path_
-
-* Output fonts into this directory. If supplied, the fonts won't be installed into the system.
+**`-o`/`--output [path]`** Output fonts into this directory. If supplied, the fonts won't be installed into the system.
