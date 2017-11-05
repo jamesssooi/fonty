@@ -44,28 +44,28 @@ $ fonty [command] --help
 #### [1.1&nbsp;&nbsp;Installing fonts](#)
 Downloading and installing a font from [subscribed sources](#):
 ```bash
-$ fonty install Lato
+› fonty install Lato
 ```
 
 Downloading a font into a directory:
 ```bash
-$ fonty install Lato -o "~/Desktop/Lato"
+› fonty install Lato -o "~/Desktop/Lato"
 ```
 
 Download only the bold and bold italic variants of a font:
 ```bash
-$ fonty install Lato -v 700,700i
+› fonty install Lato -v 700,700i
 ```
 *__Note__: List of variants must be comma-separated values with no space*
 
 #### [1.2&nbsp;&nbsp;Uninstalling fonts](#)
 Uninstalling a font family from your computer:
 ```bash
-$ fonty uninstall Lato
+› fonty uninstall Lato
 ```
 
 Uninstalling only a specific variant:
 ```bash
 # This only removes the 900i (Black Italic) variant of the font
-$ fonty uninstall Lato -v 900i
+› fonty uninstall Lato -v 900i
 ```
