@@ -1,16 +1,12 @@
 '''list_fonts.py: Cross-platform module to get list of installed fonts.'''
 import os
 import sys
-import json
 import codecs
-from pprint import pprint
 from typing import List
 
 from fontTools.ttLib import TTFont, TTLibError
-from fonty.lib.constants import JSON_DUMP_OPTS
 from fonty.lib.variants import FontAttribute
-from fonty.models.typeface import Typeface
-from fonty.models.font import Font
+from fonty.models.font import Font, FontFamily
 
 FONT_NAMEID_FAMILY = 1
 FONT_NAMEID_VARIANT = 2
@@ -26,7 +22,7 @@ def get_user_fonts():
     elif platform_ == 'win32' or platform_ == 'cygwin': # Windows
         return _get_user_fonts_win()
 
-def _get_user_fonts_osx() -> List[Typeface]:
+def _get_user_fonts_osx() -> List[FontFamily]:
     '''Returns the list of installed user fonts in this OSX system.'''
     font_dir = os.path.join(os.path.expanduser('~/Library/Fonts'))
     font_files = [os.path.join(font_dir, f) for f in os.listdir(font_dir)
@@ -36,19 +32,19 @@ def _get_user_fonts_osx() -> List[Typeface]:
     # Parse font files
     data = parse_fonts(font_files)
 
-    # Convert typeface data into Typeface instances
-    typefaces = []
+    # Convert font family data into FontFamily instances
+    families = []
     for family_name, val in data.items():
         fonts = [Font(
             path_to_font=font['local_path'],
             family=family_name,
             variant=font['variant']
         ) for font in val['fonts']]
-        typefaces.append(Typeface(name=val['name'], fonts=fonts))
+        families.append(FontFamily(name=val['name'], fonts=fonts))
 
-    return typefaces
+    return families
 
-def _get_user_fonts_win() -> List[Typeface]:
+def _get_user_fonts_win() -> List[FontFamily]:
     '''Returns the list of installed fonts in this Windows system.'''
     font_dir = os.path.join(os.environ['WINDIR'], 'Fonts')
     font_files = [os.path.join(font_dir, f) for f in os.listdir(font_dir)
@@ -58,21 +54,21 @@ def _get_user_fonts_win() -> List[Typeface]:
     # Parse font files
     data = parse_fonts(font_files)
 
-    # Convert typeface data into Typeface instances
-    typefaces = []
+    # Convert font family data into FontFamily instances
+    families = []
     for family_name, val in data.items():
         fonts = [Font(
             path_to_font=font['local_path'],
             family=family_name,
             variant=font['variant']
         ) for font in val['fonts']]
-        typefaces.append(Typeface(name=val['name'], fonts=fonts))
+        families.append(FontFamily(name=val['name'], fonts=fonts))
 
-    return typefaces
+    return families
 
 def parse_fonts(fonts: List[str]):
     '''Parse a list of font paths and group them into their families.'''
-    typefaces = {}
+    families = {}
 
     for font_path in fonts:
         try:
@@ -105,13 +101,13 @@ def parse_fonts(fonts: List[str]):
         if variant is not None:
             variant = FontAttribute.parse(variant)
 
-        # Append to typefaces object
-        if family not in typefaces:
-            typefaces[family] = {'name': family, 'fonts': []}
+        # Append to families object
+        if family not in families:
+            families[family] = {'name': family, 'fonts': []}
 
-        typefaces[family]['fonts'].append({
+        families[family]['fonts'].append({
             'variant': variant,
             'local_path': font_path
         })
 
-    return typefaces
+    return families

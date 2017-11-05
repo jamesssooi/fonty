@@ -29,12 +29,12 @@ def add(url):
     task.complete("Loaded '{}'".format(colored(repo.name, COLOR_INPUT)))
 
     # Index fonts
-    task = Task("Indexing {count} typeface(s) in '{repo}'".format(
+    task = Task("Indexing {count} font families in '{repo}'".format(
         count=len(repo.families),
         repo=colored(repo.name, COLOR_INPUT)
     ))
     search.index_fonts(repo, sub.local_path)
-    task.complete("Indexed {count} new typeface(s)".format(
+    task.complete("Indexed {count} new font families".format(
         count=colored(len(repo.families), COLOR_INPUT)
     ))
 
@@ -72,7 +72,7 @@ def remove(ctx, identifier: str):
     # Reindex fonts
     task = Task('Reindexing fonts...')
     count = search.unindex_fonts(sub.local_path)
-    task.complete("Removed {} typeface(s) from index".format(colored(count, 'cyan')))
+    task.complete("Removed {} font families from index".format(colored(count, 'cyan')))
 
 
 @cli_source.command(name='list', short_help='List subscribed sources')

@@ -11,8 +11,7 @@ from fonty.lib.progress import ProgressBar
 from fonty.lib.constants import COLOR_INPUT
 from fonty.lib.install import install_fonts
 from fonty.models.subscription import Subscription
-from fonty.models.typeface import Typeface
-from fonty.models.font import Font
+from fonty.models.font import FontFamily
 from fonty.models.manifest import Manifest
 
 @click.command('install', short_help='Install a font')
@@ -109,14 +108,14 @@ def cli_install(ctx, name, output, variants):
     if not output:
         task = Task('Installing ({}) fonts...'.format(len(local_fonts)))
         installed_fonts = install_fonts(fonts=local_fonts)
-        installed_families = Typeface.from_font_list(installed_fonts)
+        installed_families = FontFamily.from_font_list(installed_fonts)
 
         manifest = Manifest.load()
         for font in installed_fonts:
             manifest.add(font)
         manifest.save()
     else:
-        installed_families = Typeface.from_font_list(local_fonts)
+        installed_families = FontFamily.from_font_list(local_fonts)
 
     # Done!
     message = "Installed '{}'".format(colored(', '.join([f.name for f in installed_families]), COLOR_INPUT))
@@ -124,7 +123,7 @@ def cli_install(ctx, name, output, variants):
         message += ' to {}'.format(output)
     task.complete(message)
 
-    # Print typeface contents
+    # Print font family contents
     for family in installed_families:
         family.print(suppress_name=True)
 
