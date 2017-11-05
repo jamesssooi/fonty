@@ -40,9 +40,9 @@ Append any command with `--help` for a detailed help text of what you can do.
 $ fonty [command] --help
 ```
 
-### Installing and uninstalling fonts
-#### Installing fonts
-Downloading and installing a font from subscribed sources:
+### [1&nbsp;&nbsp;Installing and uninstalling fonts](#)
+#### [1.1&nbsp;&nbsp;Installing fonts](#)
+Downloading and installing a font from [subscribed sources](#):
 ```bash
 $ fonty install Lato
 ```
@@ -58,7 +58,7 @@ $ fonty install Lato -v 700,700i
 ```
 *__Note__: List of variants must be comma-separated values with no space*
 
-#### Uninstalling fonts
+#### [1.2&nbsp;&nbsp;Uninstalling fonts](#)
 Uninstalling a font family from your computer:
 ```bash
 $ fonty uninstall Lato
