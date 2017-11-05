@@ -163,6 +163,7 @@ Updating sources:
 
 ##### Options
 
-**`-v`/`--variants [text]`** A list of comma separated values with no spaces in between using the [Fonty Attribute](#) format.
-
-**`-o`/`--output [path]`** Output fonts into this directory. If supplied, the fonts won't be installed into the system.
+* **`-v`/`--variants`** *`text`*
+    * A list of comma separated values with no spaces in between using the [Fonty Attribute](#) format.
+* **`-o`/`--output`** *`path`*
+    * Output fonts into this directory. If supplied, the fonts won't be installed into the system.
