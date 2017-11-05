@@ -8,16 +8,20 @@
 ## Table of Contents
 * [Installation](#installation)
 * [Basic Usage](#)
-    * [Installing and Uninstalling Fonts](#)
-    * [Listing Installed Fonts](#)
-    * [Generating Webfonts](#)
-    * [Managing Font Sources](#)
+    * [Installing and uninstalling fonts](#)
+    * [Listing installed fonts](#)
+    * [Generating webfonts](#)
+    * [Managing font sources](#)
 * [Commands](#)
     * [`fonty install`](#)
     * [`fonty uninstall`](#)
     * [`fonty list`](#)
     * [`fonty webfont`](#)
     * [`fonty source`](#)
+* [Font Sources](#)
+    * [Default sources](#)
+    * [Hosting your own source](#)
+* [Roadmap](#)
 * [Contributing](#)
 * [License](#)
 
@@ -31,7 +35,37 @@ $ pip install fonty
 **fonty** is only available for macOS and Windows for now. Linux support is planned.
 
 ## Basic Usage
-### Installing fonts
+Append any command with `--help` for a detailed help text of what you can do.
 ```bash
-$ fonty install 'Open Sans'
+$ fonty [command] --help
+```
+
+### Installing and uninstalling fonts
+#### Installing fonts
+Downloading and installing a font from subscribed sources:
+```bash
+$ fonty install Lato
+```
+
+Downloading a font into a directory:
+```bash
+$ fonty install Lato -o "~/Desktop/Lato"
+```
+
+Download only the bold and bold italic variants of a font:
+```bash
+$ fonty install Lato -v 700,700i
+```
+*__Note__: List of variants must be comma-separated values with no space*
+
+#### Uninstalling fonts
+Uninstalling a font family from your computer:
+```bash
+$ fonty uninstall Lato
+```
+
+Uninstalling only a specific variant:
+```bash
+# This only removes the 900i (Black Italic) variant of the font
+$ fonty uninstall Lato -v 900i
 ```
