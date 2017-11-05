@@ -4,8 +4,16 @@
 
 <h3 align="center">A friendly CLI tool for installing, managing and converting fonts</h3>
 
----
+**fonty** is a command line interface that helps you simplify your font management workflow by allowing you to install and uninstall fonts like a package manager (think npm, apt-get, chocolatey). It can also help you create webfonts and generate @font-face declarations so that you can focus on building great websites.
 
-Lorem ipsum dolor sit amet consectetur adipisicing elit. Repudiandae, placeat perspiciatis veniam commodi tempora, error quae voluptas enim nesciunt dolore sapiente minus. Expedita totam provident voluptate, laboriosam commodi dolorem harum.
+## Installation
+**fonty** is built on Python 3 and can be downloaded using `pip`
+```bash
+$ pip install fonty
+```
 
-
+## Usage
+### Installing fonts
+```bash
+$ fonty install 'Open Sans'
+```
