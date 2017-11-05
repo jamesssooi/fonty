@@ -40,7 +40,6 @@ def main(ctx, version: bool):
       Create webfonts of an existing installed font from this computer:
       >>> fonty webfont --typeface "Open Sans"
     '''
-    from fonty.lib.constants import ROOT_DIR
     if ctx.invoked_subcommand:
         return
 
