@@ -10,13 +10,14 @@ install_requires = [
     'click>=6.7',
     'colorama>=0.3.9',
     'fonttools>=3.13.1',
+    'pypiwin32>=220; platform_system=="Windows"',
     'python-dateutil>=2.6.0',
     'requests>=2.17.3',
-    'Send2Trash>=1.3.0',
+    'Send2Trash>=1.3.0; platform_system=="Darwin"',
     'termcolor>=1.1.0',
     'textwrap3>=0.9.1',
     'timeago>=1.0.7',
-    'winshell>=0.6.0',
+    'winshell>=0.6.0; platform_system=="Windows"',
     'Whoosh>=2.7.4',
     'wrapt>=1.10.10'
 ]
