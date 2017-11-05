@@ -1,10 +1,8 @@
 '''uninstall_win32.py: Uninstall fonts on Windows'''
 import os
-import sys
 import ctypes
 import shutil
 import errno
-from subprocess import Popen
 from typing import List
 
 import winreg
@@ -30,7 +28,7 @@ def uninstall_win32(fonts: List[InstalledFont]) -> List[InstalledFont]:
     gdi32.RemoveFontResourceW.argtype = (ctypes.c_wchar_p,)
     for font in fonts:
         gdi32.RemoveFontResourceW(ctypes.c_wchar_p(font.path_to_font))
-    
+
     # Delete font files
     deleted_fonts = []
     flags = shellcon.FOF_WANTMAPPINGHANDLE | shellcon.FOF_ALLOWUNDO | shellcon.FOF_SILENT
@@ -44,20 +42,20 @@ def uninstall_win32(fonts: List[InstalledFont]) -> List[InstalledFont]:
             (0, shellcon.FO_DELETE, font.path_to_font, '', flags, None, None)
         )
 
-        if return_code != 0:
+        if return_code != 0 or aborted:
             current_font = font
             break
         else:
-            deleted_fonts.append({'font': font, 'copy': path_to_copy })
+            deleted_fonts.append({'original': font.path_to_font, 'copy': path_to_copy})
 
     # If font deletion fails (file in use, etc), re-add the fonts into the
     # current session to revert to previous state
-    if return_code != 0:
-        for font in deleted_fonts:
-            winshell.move_file(font['copy'], font['font'].path_to_font)
+    if return_code != 0 or aborted:
+        for deleted_font in deleted_fonts:
+            winshell.move_file(deleted_font['copy'], deleted_font['original'])
         for font in fonts:
             gdi32.AddFontResourceW(ctypes.c_wchar_p(font.path_to_font))
-        
+
         if return_code == 124: # Font file in use
             raise IOError(
                 errno.EACCES,
@@ -82,8 +80,8 @@ def uninstall_win32(fonts: List[InstalledFont]) -> List[InstalledFont]:
             winreg.DeleteValue(font_reg, registry_value_name)
 
     # Remove temporary files
-    for font in deleted_fonts:
-        winshell.delete_file(font['copy'])
+    for deleted_font in deleted_fonts:
+        winshell.delete_file(deleted_font['copy'])
 
     # Broadcast message to all top-level windows that the font list has changed.
     win32api.PostMessage(win32con.HWND_BROADCAST, win32con.WM_FONTCHANGE)
