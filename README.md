@@ -154,16 +154,39 @@ Updating sources:
 
 #### [3.1 &nbsp;&nbsp; `fonty install`](#)
 ```bash
-# Default
 › fonty install <FONT NAME> [OPTIONS]
-
-# With --files flag
 › fonty install --files <FONT FILES> [OPTIONS]
 ```
 
 ##### Options
 
-* **`-v`/`--variants`** *`text`*
+* **`-v`/`--variants`** `text`
     * A list of comma separated values with no spaces in between using the [Fonty Attribute](#) format.
-* **`-o`/`--output`** *`path`*
+* **`-o`/`--output`** `path`
     * Output fonts into this directory. If supplied, the fonts won't be installed into the system.
+* **`--files`** `flag`
+    * If provided, read arguments as a list of font files to be installed. Files can be a glob pattern.
+
+---
+
+#### [3.2 &nbsp;&nbsp; `fonty uninstall`](#)
+```bash
+› fonty uninstall <FONT NAME> [OPTIONS]
+```
+
+##### Options
+
+* **`-v`/`--variants`** `text`
+    * A list of comma separated values with no spaces in between using the [Fonty Attribute](#) format.
+
+---
+
+#### [3.3 &nbsp;&nbsp; `fonty list`](#)
+```bash
+› fonty list <FONT NAME?> [OPTIONS]
+```
+
+##### Options
+
+* **`--rebuild`** `flag`
+    * If provided, rebuild the font manifest file.
