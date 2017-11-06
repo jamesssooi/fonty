@@ -190,3 +190,51 @@ Updating sources:
 
 * **`--rebuild`** `flag`
     * If provided, rebuild the font manifest file.
+
+---
+
+#### [3.3 &nbsp;&nbsp; `fonty webfont`](#)
+```bash
+› fonty webfont <FONT FILES> [OPTIONS]
+› fonty webfont --download <FONT NAME> [OPTIONS]
+› fonty webfont --installed <FONT NAME> [OPTIONS]
+```
+
+##### Options
+
+* **`--download`** `flag`
+    * If provided, download font from subscribed sources and convert.
+
+* **`--installed`** `flag`
+    * If provided, convert an existing font installed on the system.
+
+* **`-o`/`--output`** `path`
+    * Output webfonts into a specific directory.
+
+---
+
+#### [3.4 &nbsp;&nbsp; `fonty source`](#)
+```bash
+› fonty source add <SOURCE URL>
+```
+---
+
+```bash
+> fonty source remove <SOURCE ID or SOURCE URL>
+```
+
+---
+
+```bash
+> fonty source list
+```
+
+---
+
+```bash
+> fonty source update [OPTIONS]
+```
+
+**Options:**
+* **`f`/`--force`** `flag`
+    * If provided, force all sources to update and rebuild search index.
