@@ -157,6 +157,9 @@ Updating sources:
 > fonty install <FONT NAME> [OPTIONS]
 > fonty install --files <FONT FILES> [OPTIONS]
 ```
+**Install a font into the computer or into a directory.**
+
+**fonty** will download the fonts from the list of [subscribed sources](#). If a `--files` flag is passed, **fonty** will install fonts from the list of files provided.
 
 ##### Options
 
