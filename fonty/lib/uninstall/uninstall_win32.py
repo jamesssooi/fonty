@@ -31,7 +31,7 @@ def uninstall_win32(fonts: List[InstalledFont]) -> List[InstalledFont]:
 
     # Delete font files
     deleted_fonts = []
-    flags = shellcon.FOF_WANTMAPPINGHANDLE | shellcon.FOF_ALLOWUNDO | shellcon.FOF_SILENT
+    flags = shellcon.FOF_WANTMAPPINGHANDLE | shellcon.FOF_ALLOWUNDO | shellcon.FOF_SILENT | shellcon.FOF_NOCONFIRMATION
     for font in fonts:
         # Make a temp copy
         path_to_copy = os.path.join(TMP_DIR, os.path.basename(font.path_to_font))
@@ -81,7 +81,7 @@ def uninstall_win32(fonts: List[InstalledFont]) -> List[InstalledFont]:
 
     # Remove temporary files
     for deleted_font in deleted_fonts:
-        winshell.delete_file(deleted_font['copy'])
+        winshell.delete_file(deleted_font['copy'], no_confirm=True)
 
     # Broadcast message to all top-level windows that the font list has changed.
     win32api.PostMessage(win32con.HWND_BROADCAST, win32con.WM_FONTCHANGE)
