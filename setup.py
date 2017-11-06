@@ -52,5 +52,18 @@ setup(
     author_email='wengteikooi@gmail.com',
     url='https://github.com/jamesssooi/fonty',
     description='fonty is a simple command line tool for installing, managing and converting fonts.',
-    keywords='font fonts typeface cli tool install uninstall convert manage'
+    keywords='font fonts typeface cli tool install uninstall convert manage',
+    classifiers=[
+        'Development Status :: 4 - Beta',
+        'Environment :: Console',
+        'Intended Audience :: Developers',
+        'Intended Audience :: End Users/Desktop',
+        'Intended Audience :: System Administrators',
+        'Operating System :: MacOS',
+        'Operating System :: Microsoft :: Windows',
+        'Programming Language :: Python :: 3 :: Only',
+        'Topic :: Multimedia :: Graphics',
+        'Topic :: Terminals',
+        'Topic :: Utilities'
+    ]
 )
