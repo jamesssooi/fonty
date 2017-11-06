@@ -44,17 +44,17 @@ $ fonty [command] --help
 #### [2.1.1 &nbsp;&nbsp; Installing fonts](#)
 Downloading and installing a font from [subscribed sources](#):
 ```bash
-› fonty install Lato
+> fonty install Lato
 ```
 
 Downloading a font into a directory:
 ```bash
-› fonty install Lato -o "~/Desktop/Lato"
+> fonty install Lato -o "~/Desktop/Lato"
 ```
 
 Download only the bold and bold italic variants of a font:
 ```bash
-› fonty install Lato -v 700,700i
+> fonty install Lato -v 700,700i
 ```
 
 *__Further reading__: [`fonty install`](#)*
@@ -64,13 +64,13 @@ Download only the bold and bold italic variants of a font:
 #### [2.1.2 &nbsp;&nbsp; Uninstalling fonts](#)
 Uninstalling a font family from your computer:
 ```bash
-› fonty uninstall Lato
+> fonty uninstall Lato
 ```
 
 Uninstalling only a specific variant:
 ```bash
 # This only removes the 900i (Black Italic) variant of the font
-› fonty uninstall Lato -v 900i
+> fonty uninstall Lato -v 900i
 ```
 
 *__Further reading__: [`fonty uninstall`](#)*
@@ -80,12 +80,12 @@ Uninstalling only a specific variant:
 ### [2.2 &nbsp;&nbsp; Listing installed fonts](#)
 List all installed fonts
 ```bash
-› fonty list
+> fonty list
 ```
 
 List further details about a specific installed font
 ```bash
-› fonty list Lato
+> fonty list Lato
 ```
 
 *__Further reading__: [`fonty list`](#)*
@@ -97,22 +97,22 @@ List further details about a specific installed font
 
 Download font from subscribed sources and generate webfonts into the current directory:
 ```bash
-› fonty webfont Lato
+> fonty webfont Lato
 ```
 
 Generate webfonts into a specific directory:
 ```bash
-› fonty webfont Lato -o ./webfonts
+> fonty webfont Lato -o ./webfonts
 ```
 
 Generate webfonts from `ttf`/`otf` files
 ```bash
-› fonty webfont --files Lato.ttf Lato-Regular.ttf
+> fonty webfont --files Lato.ttf Lato-Regular.ttf
 ```
 
 Generate webfonts from an already installed font
 ```bash
-› fonty webfont --installed Lato
+> fonty webfont --installed Lato
 ```
 
 *__Further reading__: [`fonty webfont`](#)*
@@ -124,26 +124,26 @@ Generate webfonts from an already installed font
 
 Adding a new font source:
 ```bash
-› fonty source add http://url/to/source.json
+> fonty source add http://url/to/source.json
 ```
 
 Removing a font source:
 ```bash
 # Deleting by URL
-› fonty source remove http://url/to/source.json
+> fonty source remove http://url/to/source.json
 
 # Deleting by ID
-› fonty source remove e0f9cbd9977479825e1cd38aafb1660d
+> fonty source remove e0f9cbd9977479825e1cd38aafb1660d
 ```
 
 Show list of subscribed sources:
 ```bash
-› fonty source list
+> fonty source list
 ```
 
 Updating sources:
 ```bash
-› fonty source update
+> fonty source update
 ```
 
 *__Further reading__: [`fonty source`](#), [Font Sources](#)*
@@ -154,8 +154,8 @@ Updating sources:
 
 #### [3.1 &nbsp;&nbsp; `fonty install`](#)
 ```bash
-› fonty install <FONT NAME> [OPTIONS]
-› fonty install --files <FONT FILES> [OPTIONS]
+> fonty install <FONT NAME> [OPTIONS]
+> fonty install --files <FONT FILES> [OPTIONS]
 ```
 
 ##### Options
@@ -171,7 +171,7 @@ Updating sources:
 
 #### [3.2 &nbsp;&nbsp; `fonty uninstall`](#)
 ```bash
-› fonty uninstall <FONT NAME> [OPTIONS]
+> fonty uninstall <FONT NAME> [OPTIONS]
 ```
 
 ##### Options
@@ -183,7 +183,7 @@ Updating sources:
 
 #### [3.3 &nbsp;&nbsp; `fonty list`](#)
 ```bash
-› fonty list <FONT NAME?> [OPTIONS]
+> fonty list <FONT NAME?> [OPTIONS]
 ```
 
 ##### Options
@@ -195,9 +195,9 @@ Updating sources:
 
 #### [3.3 &nbsp;&nbsp; `fonty webfont`](#)
 ```bash
-› fonty webfont <FONT FILES> [OPTIONS]
-› fonty webfont --download <FONT NAME> [OPTIONS]
-› fonty webfont --installed <FONT NAME> [OPTIONS]
+> fonty webfont <FONT FILES> [OPTIONS]
+> fonty webfont --download <FONT NAME> [OPTIONS]
+> fonty webfont --installed <FONT NAME> [OPTIONS]
 ```
 
 ##### Options
@@ -215,7 +215,7 @@ Updating sources:
 
 #### [3.4 &nbsp;&nbsp; `fonty source`](#)
 ```bash
-› fonty source add <SOURCE URL>
+> fonty source add <SOURCE URL>
 ```
 ---
 
@@ -235,6 +235,5 @@ Updating sources:
 > fonty source update [OPTIONS]
 ```
 
-**Options:**
 * **`f`/`--force`** `flag`
     * If provided, force all sources to update and rebuild search index.
