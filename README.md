@@ -165,18 +165,12 @@ Updating sources:
 ```
 **Installs a font into the computer or into a directory.**
 
-**fonty** can install fonts from a variety of sources. By default, **fonty** searches through your [subscribed sources](#) to find, download and install the font. Alternatively, it can also support downloading `.ttf`/`.otf` files directly, or if a `--files` flag is passed, **fonty** can help you install local font files on your computer.
-
-##### Example Usage
-
-* `fonty install Lato`
-* `fonty install http://url/to/Lato.ttf`
-* `fonty install —files *.ttf`
+In it's default behaviour, **fonty** searches through your [subscribed sources](#) to download and install the specified font automatically. Alternatively, it can also support downloading `.ttf`/`.otf` files directly, or if a `--files` flag is passed, **fonty** can help you install local font files on your computer.
 
 ##### Options
 
 * **`-v`/`--variants`** `text`
-    * A list of comma separated values with no spaces in between using the [Fonty Attribute](#) format.
+    * A comma separated list of the [Fonty Attribute](#) format, with no spaces in between.
 * **`-o`/`--output`** `path`
     * Output fonts into this directory. If supplied, the fonts won't be installed into the system.
 * **`--files`** `flag`
@@ -189,6 +183,10 @@ Updating sources:
 > fonty uninstall <FONT NAME> [OPTIONS]
 ```
 
+**Uninstalls a font from this computer.**
+
+This command uninstalls the specified font from the computer and deletes them into the Trash or Recycle Bin.
+
 ##### Options
 
 * **`-v`/`--variants`** `text`
@@ -198,8 +196,15 @@ Updating sources:
 
 #### [3.3 &nbsp;&nbsp; `fonty list`](#)
 ```bash
-> fonty list <FONT NAME?> [OPTIONS]
+> fonty list [OPTIONS]
+> fonty list <FONT NAME> [OPTIONS]
 ```
+
+**Show a list of installed fonts**.
+
+This command shows a list of all installed fonts in this computer, scanned through the user's font directory.
+
+If a specific font name is specified, then this command prints a list of all the font files of that particular family.
 
 ##### Options
 
@@ -214,6 +219,14 @@ Updating sources:
 > fonty webfont --download <FONT NAME> [OPTIONS]
 > fonty webfont --installed <FONT NAME> [OPTIONS]
 ```
+
+**Convert fonts to webfonts and generate @font-face declarations**.
+
+This command convert fonts to `.woff` and `.woff2` formats, as well as generate their @font-face CSS declaration into a file named `styles.css`.
+
+**fonty's** default behaviour is to convert a list of font files that you have provided. Alternative, it can also download fonts using the `—download` flag, or use an existing installed font on your computer using the `—installed` flag.
+
+The [Web Open Font Format (WOFF)](#) is a widely supported font format for web browsers, and should be sufficient for a large majority of use cases. You can read the compatibility tables on [caniuse.com](https://caniuse.com/#search=woff).
 
 ##### Options
 
@@ -232,11 +245,17 @@ Updating sources:
 ```bash
 > fonty source add <SOURCE URL>
 ```
+**Adds a new font source.**
+
+This command allows you to add and subscribe to a new font source. This allows you to have instant access to all of the source's fonts through the `fonty install` command.
+
 ---
 
 ```bash
 > fonty source remove <SOURCE ID or SOURCE URL>
 ```
+
+**Removes a subscribed font source.**
 
 ---
 
@@ -244,11 +263,19 @@ Updating sources:
 > fonty source list
 ```
 
+**Print a list of subscribed font sources.**
+
+This command shows a list of all subscribed sources, along with their IDs, update status, and number of available fonts.
+
 ---
 
 ```bash
 > fonty source update [OPTIONS]
 ```
 
+**Check all subscribed sources for available updates.**
+
+When font sources are subscribed to, a local copy of the source is downloaded into your computer, which will result in the local copy being outdated when the font source is updated. By default, **fonty** will automatically check for available updates periodically. This command however, offers you a way to force all sources to check for available updates.
+
 * **`f`/`--force`** `flag`
-    * If provided, force all sources to update and rebuild search index.
+    * If provided, force all sources to be redownloaded and rebuild the search index.
