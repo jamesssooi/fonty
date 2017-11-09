@@ -155,11 +155,12 @@ Updating sources:
 #### [3.1 &nbsp;&nbsp; `fonty install`](#)
 ```bash
 > fonty install <FONT NAME> [OPTIONS]
+> fonty install <FONT URL> [OPTIONS]
 > fonty install --files <FONT FILES> [OPTIONS]
 ```
-**Install a font into the computer or into a directory.**
+**Installs a font into the computer or into a directory.**
 
-**fonty** will download the fonts from the list of [subscribed sources](#). If a `--files` flag is passed, **fonty** will install fonts from the list of files provided.
+**fonty** can install fonts from a variety of sources. By default, **fonty** searches through your [subscribed sources](#) to find, download and install the font. Alternatively, it can also support downloading `.ttf`/`.otf` files directly. If a `--files` flag is passed, **fonty** can also help to install local font files on your computer.
 
 ##### Options
 
