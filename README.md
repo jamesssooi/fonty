@@ -93,7 +93,7 @@ List further details about a specific installed font
 ---
 
 ### [2.3 &nbsp;&nbsp; Generating webfonts](#)
-**fonty** can help you convert fonts to `woff` and `woff2` formats, which is supported by all major browsers (IE9 and above) as well as generate their `@fontface` declarations.
+**fonty** can help you convert fonts to `woff` and `woff2` formats, which is supported by all major browsers (IE9 and above) as well as generate their `@font-face` declarations.
 
 Download font from subscribed sources and generate webfonts into the current directory:
 ```bash
@@ -279,3 +279,32 @@ When font sources are subscribed to, a local copy of the source is downloaded in
 
 * **`f`/`--force`** `flag`
     * If provided, force all sources to be redownloaded and rebuild the search index.
+
+
+## [4 &nbsp;&nbsp; Font Sources](#)
+
+**fonty** relies on font sources to resolve, download and install fonts. A font source is simply a JSON file containing an index of its fonts, and where to download them.
+
+With **fonty**, you can subscribe to multiple font sources at the same time to have instant access to a wide variety of fonts through the `fonty install` command.
+
+### [4.1 &nbsp;&nbsp; Default sources](#)
+
+Right out of the box, **fonty** is automatically subscribed to a few default font sources so you can enjoy the benefits of using **fonty** rightaway. These default sources are:
+
+1. **fonty's Google Fonts Repository**
+    * The entire [Google Fonts](#) repository, in a format that **fonty** understands.
+    * **URL:** https://sources.fonty.io/googlefonts
+
+2. **fonty's Open Source Fonts Repository**
+    * A self-maintained list of open source fonts across the web.
+    * **URL**: https://sources.fonty.io/fontyfonts
+
+You can unsubscribe and subscribe from these sources at anytime. See the [`fonty source`](#) command.
+
+### [4.2 &nbsp;&nbsp; Hosting your own](#)
+
+You may wish to host your own repository for your personal usage, or perhaps you might want to make a set of fonts available for your entire team. A repository of fonts is a powerful concept that allows people to share and use fonts effortlessly.
+
+Creating your own font sources is incredibly simple. At its core, a font source is simply a publicly accessible JSON file containing an index of its fonts and where to download them from.
+
+You can check out the specification of the [fonty json source](#) format.
