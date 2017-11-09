@@ -160,7 +160,13 @@ Updating sources:
 ```
 **Installs a font into the computer or into a directory.**
 
-**fonty** can install fonts from a variety of sources. By default, **fonty** searches through your [subscribed sources](#) to find, download and install the font. Alternatively, it can also support downloading `.ttf`/`.otf` files directly. If a `--files` flag is passed, **fonty** can also help to install local font files on your computer.
+**fonty** can install fonts from a variety of sources. By default, **fonty** searches through your [subscribed sources](#) to find, download and install the font. Alternatively, it can also support downloading `.ttf`/`.otf` files directly, or if a `--files` flag is passed, **fonty** can help you install local font files on your computer.
+
+##### Example Usage
+
+* `fonty install Lato`
+* `fonty install http://url/to/Lato.ttf`
+* `fonty install —files *.ttf`
 
 ##### Options
 
