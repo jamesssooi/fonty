@@ -155,8 +155,13 @@ Updating sources:
 #### [3.1 &nbsp;&nbsp; `fonty install`](#)
 ```bash
 > fonty install <FONT NAME> [OPTIONS]
+# Example: `fonty install Lato`
+
 > fonty install <FONT URL> [OPTIONS]
+# Example: `fonty install http://url/to/Lato.ttf`
+
 > fonty install --files <FONT FILES> [OPTIONS]
+# Example: `fonty install --files *.ttf`
 ```
 **Installs a font into the computer or into a directory.**
 
