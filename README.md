@@ -308,3 +308,11 @@ You may wish to host your own repository for your personal usage, or perhaps you
 Creating your own font sources is incredibly simple. At its core, a font source is simply a publicly accessible JSON file containing an index of its fonts and where to download them from.
 
 You can check out the specification of the [fonty json source](#) format.
+
+## [5 &nbsp;&nbsp; Specifying Font Variants](#)
+
+**fonty** uses a custom, CSS inspired syntax to notate font variants such as font weights, italicisation, obliqueness, stretchness, and etc. The goal is to create a notation that is short and concise (for easier input), while mantaining clarity.
+
+
+
+
