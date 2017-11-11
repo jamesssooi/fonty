@@ -1,13 +1,36 @@
 '''remote_font.py'''
 import os
+from collections import namedtuple
+from enum import Enum
+from typing import NamedTuple
 
 import requests
 from fonty.lib.variants import FontAttribute
-from fonty.lib.constants import APP_DIR, TMP_DIR
+from fonty.lib.constants import TMP_DIR
 
 class RemoteFont(object):
+    '''Represents a remote font.'''
 
-    def __init__(self, remote_path: str, filename: str, family: str, variant: FontAttribute):
+    # Meta Classes ----------------------------------------------------------- #
+    class Path:
+        '''Represents a font path.'''
+        class Type(Enum):
+            '''Represents the type of the font path.'''
+            LOCAL = 1
+            HTTP_REMOTE = 2
+
+        def __init__(self, path: str, type: 'Type') -> None:
+            self.path = path
+            self.type = type
+
+    # Constructor ------------------------------------------------------------ #
+    def __init__(
+            self,
+            remote_path: 'Path',
+            filename: str,
+            family: str,
+            variant: FontAttribute
+        ) -> None:
         self.remote_path = remote_path
         self.filename = filename
         self.family = family
@@ -16,11 +39,12 @@ class RemoteFont(object):
         # Internal properties
         self._tmp_path = None
 
+    # Class Methods ---------------------------------------------------------- #
     def download(self, path: str = None, handler = None):
         '''Download this font into a tmp directory and return a Font instance.'''
         from .font import Font
 
-        request = requests.get(self.remote_path, stream=True)
+        request = requests.get(self.remote_path.path, stream=True)
         if handler:
             iterator = handler(self, request)
             next(iterator)
