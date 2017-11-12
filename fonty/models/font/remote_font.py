@@ -5,6 +5,7 @@ from enum import Enum
 from urllib.parse import urlparse
 
 import requests
+from . import Font
 from fonty.lib.variants import FontAttribute
 from fonty.lib.constants import TMP_DIR
 
@@ -44,6 +45,11 @@ class RemoteFont(object):
         self.filename = filename
         self.family = family
         self.variant = variant
+
+        # Parse variant if possible
+        if variant is None and remote_path.type == RemoteFont.Path.Type.LOCAL:
+            font = Font(path_to_font=self.remote_path.path)
+            self.variant = font.variant
 
         # Internal properties
         self._tmp_path = None

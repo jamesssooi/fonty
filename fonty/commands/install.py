@@ -102,14 +102,24 @@ def cli_install(ctx, args, output, variants, is_files):
         arg = ' '.join(str(arg) for arg in args)
         remote_fonts = resolve_download(arg, print_task=True)
 
+    # Filter out variants
+    # We will need to filter the variants again after downloading because
+    # we might not have the font's variants data at this point.
+    if variants:
+        remote_fonts = [font for font in remote_fonts if font.variant in variants]
+
     # Load fonts
     task = Task("Resolving ({}) font files...".format(len(remote_fonts)))
     task_printer = create_task_printer(task, remote_fonts)
     local_fonts = [font.load(handler=task_printer) for font in remote_fonts]
     task.complete("Resolved ({}) font file(s)".format(len(local_fonts)))
 
+    # Filter out variants again
+    if variants:
+        local_fonts = [font for font in local_fonts if font.variant in variants]
+
     # Install into local computer and update font manifest
-    task = Task('Installing ({}) fonts...'.format(len(local_fonts)))
+    task = Task('Installing ({}) font(s)...'.format(len(local_fonts)))
     installed_fonts = install_fonts(fonts=local_fonts, output_dir=output)
     installed_families = FontFamily.from_font_list(installed_fonts)
 
