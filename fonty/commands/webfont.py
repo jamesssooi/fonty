@@ -202,6 +202,11 @@ def cli_webfont(ctx, args: List[str], is_installed: bool, is_download: bool, out
         asynchronous=False
     )
 
+    # Remove temporary files
+    if 'remote_fonts' in locals():
+        for font in remote_fonts:
+            font.clear()
+
     # Calculate execution time
     end_time = timeit.default_timer()
     total_time = end_time - start_time

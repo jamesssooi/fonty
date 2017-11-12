@@ -104,4 +104,10 @@ class RemoteFont(object):
             if handler:
                 iterator.close()
 
+        self._tmp_path = path_to_font
         return Font(path_to_font=path_to_font)
+
+    def clear(self) -> None:
+        '''Remove temporary files.'''
+        if self._tmp_path and os.path.isfile(self._tmp_path):
+            os.unlink(self._tmp_path)

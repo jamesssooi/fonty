@@ -139,6 +139,10 @@ def cli_install(ctx, args, output, variants, is_files):
     for family in installed_families:
         family.print(suppress_name=True)
 
+    # Remove temporary files
+    for font in remote_fonts:
+        font.clear()
+
     # Calculate execution time
     end_time = timeit.default_timer()
     total_time = end_time - start_time
