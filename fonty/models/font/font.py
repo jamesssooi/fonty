@@ -1,21 +1,31 @@
 '''font.py: Class to manage individual fonts.'''
 import os
 import codecs
-import abc
-from typing import Union, Callable
+from typing import Dict, Any, Optional
 
-from .font_format import FontFormat
 from fontTools.ttLib import TTFont
 from fonty.lib.variants import FontAttribute
 from fonty.lib.font_name_ids import FONT_NAMEID_FAMILY, FONT_NAMEID_FAMILY_PREFFERED, \
                                     FONT_NAMEID_VARIANT, FONT_NAMEID_VARIANT_PREFFERED
+from .font_format import FontFormat
 
 class Font(object):
     '''Class to manage individual fonts.'''
 
-    def __init__(self, path_to_font: str, family: str = None, variant: FontAttribute = None) -> None:
+    # Class Properties ------------------------------------------------------- #
+    path_to_font: str
+    family: str
+    variant: FontAttribute
+    name_table: Optional[Dict[Any, Any]] = None
+
+    # Constructor ------------------------------------------------------------ #
+    def __init__(
+            self,
+            path_to_font: str,
+            family: str = None,
+            variant: FontAttribute = None
+        ) -> None:
         self.path_to_font = path_to_font
-        self.name_table = None
 
         # Get family name
         self.family = family if family else self.get_family_name()
@@ -23,6 +33,7 @@ class Font(object):
         # Get variant
         self.variant = variant if variant else self.get_variant()
 
+    # Class Methods ----------------------------------------------------------- #
     def install(self):
         '''Installs this font to the system.'''
         from fonty.lib.install import install_fonts
