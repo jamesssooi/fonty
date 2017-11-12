@@ -3,33 +3,43 @@ import os
 import sys
 import glob
 import timeit
+from typing import List
 
 import click
 from termcolor import colored
 from fonty.lib.constants import COLOR_INPUT
 from fonty.lib.task import Task, TaskStatus
 from fonty.lib.progress import ProgressBar
-from fonty.lib.variants import FontAttribute
 from fonty.models.manifest import Manifest
 from fonty.models.font import Font, FontFormat
-
+from fonty.commands.install import resolve_download, create_task_printer
 
 @click.command('webfont', short_help='Generate webfonts')
 @click.argument(
-    'files',
+    'args',
     nargs=-1,
     required=False,
+    metavar='[FILES]',
     type=click.STRING)
 @click.option(
-    '--typeface', '-t',
-    type=click.STRING,
-    help='Specify an existing installed font.')
+    '--installed', '-i', 'is_installed',
+    type=click.BOOL,
+    is_flag=True,
+    default=False,
+    help='Convert an existing installed font.')
+@click.option(
+    '--download', '-d', 'is_download',
+    type=click.BOOL,
+    is_flag=True,
+    default=False,
+    help='Download font from subscribed sources.'
+)
 @click.option(
     '--output', '-o',
     type=click.Path(file_okay=False, dir_okay=True, writable=True),
     help='Output the converted webfonts in this directory.')
 @click.pass_context
-def cli_webfont(ctx, files: str, typeface: str, output: str):
+def cli_webfont(ctx, args: List[str], is_installed: bool, is_download: bool, output: str):
     '''Generate webfonts and its @font-face declarations.
 
     Fonts are converted to .woff and .woff2 formats. Their respective @font-face
@@ -54,41 +64,39 @@ def cli_webfont(ctx, files: str, typeface: str, output: str):
 
     start_time = timeit.default_timer()
 
-    # Get list of files
-    if typeface:
-        try:
-            manifest = Manifest.load()
-        except FileNotFoundError:
-            manifest = Manifest.generate()
-            manifest.save()
+    if len(args) < 1:
+        click.echo(ctx.get_help())
+        sys.exit(1)
 
-        typeface_result = manifest.get(typeface)
-        if typeface_result is None:
-            click.echo(
-                "No typeface found with the name '{typeface}'.\nDid you forget to wrap the name in quotes?".format(
-                    typeface=colored(typeface, COLOR_INPUT)
-                )
-            )
-            sys.exit(1)
+    # Resolve fonts
+    if is_download:
+        arg = ' '.join(str(s) for s in args)
+        remote_fonts = resolve_download(arg, print_task=True)
 
-        font_paths = [font.local_path for font in typeface_result.get_fonts()]
-    elif files:
+        # Download fonts
+        task = Task("Downloading ({}) font files...".format(len(remote_fonts)))
+        task_printer = create_task_printer(task, remote_fonts)
+        fonts = [font.load(handler=task_printer) for font in remote_fonts]
+        task.complete("Downloaded ({}) font files".format(len(fonts)))
+
+    elif is_installed:
+        arg = ' '.join(str(s) for s in args)
+        manifest = Manifest.load()
+        family = manifest.get(arg)
+        fonts = family.fonts
+
+    else:
         # On Unix based systems, a glob argument of *.ttf will be automatically
         # expanded by the shell. Meanwhile on Windows systems or if the pattern
         # is surrounded with quotes, it will be passed to this function as is.
         # Here we iterate through it and run the glob function anyway to be safe
-        font_paths = [glob.glob(path) for path in files]
+        font_paths = [glob.glob(arg) for arg in args]
         font_paths = [item for sublist in font_paths for item in sublist] # Flatten list
         font_paths = [os.path.abspath(path) for path in font_paths] # Get absolute paths
         if not font_paths:
-            click.echo("No font files found with the pattern '{}'".format(colored(files[0], COLOR_INPUT)))
+            task.error("No font files found with the pattern '{}'".format(colored(args[0], COLOR_INPUT)))
             sys.exit(1)
-    else:
-        click.echo(ctx.get_help())
-        sys.exit(1)
-
-    # Create font objects
-    fonts = [Font(path_to_font=font_path) for font_path in font_paths]
+        fonts = [Font(path_to_font=path) for path in font_paths]
 
     # Print task message
     task = Task('Generating webfonts for ({}) fonts...'.format(len(fonts)))
@@ -99,16 +107,19 @@ def cli_webfont(ctx, files: str, typeface: str, output: str):
     results = []
     for font in fonts:
 
-        filename, ext = os.path.splitext(os.path.basename(font.path_to_font))
+        completed_count_str = colored('({count}/{total})'.format(
+            count=len(results),
+            total=len(fonts)
+        ), attrs=['dark'])
+
+        _, ext = os.path.splitext(os.path.basename(font.path_to_font))
+        filename = font.generate_filename(ext='')
 
         # Get family and variant name
-        family_name_preferred = font.get_name_data_from_id('16')
-        family_name = family_name_preferred if family_name_preferred else font.get_name_data_from_id('1')
-        variant_preferred = font.get_name_data_from_id('17')
-        variant = variant_preferred if variant_preferred else font.get_name_data_from_id('2')
+        family_name = font.get_family_name()
+        variant = font.get_variant()
 
         # Parse variant
-        variant = FontAttribute.parse(variant)
         font_weight = variant.weight.value.css
         font_style = variant.style.value.css
         font_stretch = variant.stretch.value.css
@@ -120,12 +131,20 @@ def cli_webfont(ctx, files: str, typeface: str, output: str):
 
         # Convert to WOFF
         bar.increment()
-        task.message = 'Converting {}.woff... {}'.format(filename, bar)
+        task.message = '{count} Converting {filename}.woff... {bar}'.format(
+            count=completed_count_str,
+            filename=filename,
+            bar=bar
+        )
         paths.append({'path': font.convert(output_dir, FontFormat.WOFF), 'format': 'woff'})
 
         # Convert to WOFF2
         bar.increment()
-        task.message = 'Converting {}.woff2... {}'.format(filename, bar)
+        task.message = '{count} Converting {filename}.woff2... {bar}'.format(
+            count=completed_count_str,
+            filename=filename,
+            bar=bar
+        )
         paths.append({'path': font.convert(output_dir, FontFormat.WOFF2), 'format': 'woff2'})
 
         results.append({
@@ -168,21 +187,16 @@ def cli_webfont(ctx, files: str, typeface: str, output: str):
     task.stop(message='Generated @font-face declaration(s) in styles.css')
 
     # Print completion message
-    if typeface:
-        task = Task(
-            message="Generated webfonts for '{typeface}' in {output}".format(
-                typeface=colored(typeface, COLOR_INPUT),
-                output=os.path.abspath(output_dir)
-            ),
-            asynchronous=False,
-            status=TaskStatus.SUCCESS
-        )
-    else:
-        task = Task(
-            message="Generated webfonts in {output}".format(output=os.path.abspath(output_dir)),
-            asynchronous=False,
-            status=TaskStatus.SUCCESS
-        )
+    family_names = list(set([font.family for font in fonts]))
+    task = Task(
+        message="Generated webfonts for {families} in {output}".format(
+            families=', '.join("'{}'".format(colored(name, COLOR_INPUT)) for name in family_names),
+            output=os.path.abspath(output_dir)
+        ),
+        status=TaskStatus.SUCCESS,
+        truncate=False,
+        asynchronous=False
+    )
 
     # Calculate execution time
     end_time = timeit.default_timer()
@@ -190,10 +204,9 @@ def cli_webfont(ctx, files: str, typeface: str, output: str):
     click.echo('Done in {}s'.format(round(total_time, 2)))
 
 
-# ==============================================================================
 # TEMPLATES
-# ==============================================================================
-META = '''/* Auto-generated by Fonty, a friendly CLI tool for fonts. */\n\n'''
+# ============================================================================ #
+META = '''/* Auto-generated by fonty, a CLI tool for installing, managing and converting fonts.\n\n*/'''
 
 FONT_FACE_TEMPLATE = \
 '''\

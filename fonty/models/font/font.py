@@ -32,13 +32,14 @@ class Font(object):
 
         return installed_font
 
-    def generate_filename(self) -> str:
+    def generate_filename(self, ext: str = None) -> str:
         '''Generate a suitable filename from this font's name tables.'''
         family_name = self.get_family_name()
         variant = self.get_variant()
 
-        _, ext = os.path.splitext(self.path_to_font)
-        ext = ext if ext is not '' else '.otf' # Fallback to .otf
+        if ext is None:
+            _, ext = os.path.splitext(self.path_to_font)
+            ext = ext if ext is not '' else '.otf' # Fallback to .otf
 
         return '{family}-{variant}{ext}'.format(
             family=family_name,
@@ -98,7 +99,7 @@ class Font(object):
 
     def convert(self, path: str, font_format: 'FontFormat' = None) -> str:
         '''Converts this font to either woff or woff2 formats.'''
-        filename, ext = os.path.splitext(os.path.basename(self.path_to_font))
+        _, ext = os.path.splitext(os.path.basename(self.path_to_font))
         font = TTFont(file=self.path_to_font)
 
         # Get font flavor
@@ -120,11 +121,7 @@ class Font(object):
             path = os.path.join(path, '') # Append trailing slash
 
         # Generate output paths
-        output_path = '{dir}/{filename}{ext}'.format(
-            dir=os.path.dirname(path),
-            filename=filename,
-            ext=ext
-        )
+        output_path = os.path.join(os.path.dirname(path), self.generate_filename(ext))
 
         # Convert and save
         font.save(file=output_path)
