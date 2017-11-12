@@ -38,7 +38,10 @@ class Repository(object):
                 name=family['name'],
                 fonts=[
                     RemoteFont(
-                        remote_path=data['url'],
+                        remote_path=RemoteFont.Path(
+                            path=data['url'],
+                            type=RemoteFont.Path.Type.HTTP_REMOTE
+                        ),
                         filename=data['filename'],
                         family=family['name'],
                         variant=FontAttribute.parse(variant)

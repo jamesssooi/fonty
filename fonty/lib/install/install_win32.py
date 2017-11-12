@@ -27,8 +27,8 @@ def install_win32(fonts: List[Font]) -> List[InstalledFont]:
     installed_fonts: List[InstalledFont] = []
 
     for font in fonts:
-        # Firstly, we copy the font files into the %WINDIR%/Fonts directory.
-        installed_path = os.path.join(font_dir, os.path.basename(font.path_to_font))
+        # Firstly, we copy the font files into the %WINDIR%/Fonts directory
+        installed_path = os.path.join(font_dir, font.generate_filename())
         winshell.move_file(font.path_to_font, installed_path, rename_on_collision=False, no_confirm=True)
 
         # Then we call the AddFontResource Win32 API to make the font available
@@ -38,7 +38,7 @@ def install_win32(fonts: List[Font]) -> List[InstalledFont]:
         gdi32.AddFontResourceW(ctypes.c_wchar_p(installed_path))
 
         # Then we add the font into the registry so that it is persistent across
-        # system reboots.
+        # system reboots
         reg_value_name = '{family} {variant}'.format(
             family=font.family,
             variant=font.variant.print(long=True)
@@ -48,13 +48,12 @@ def install_win32(fonts: List[Font]) -> List[InstalledFont]:
         font_reg = winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE, reg_path, 0, winreg.KEY_WRITE)
         winreg.SetValueEx(font_reg, reg_value_name, 0, winreg.REG_SZ, reg_value)
 
-        # And then finally, we broadcast a message to all top-level windows that
-        # the font list has changed
-        win32api.PostMessage(win32con.HWND_BROADCAST, win32con.WM_FONTCHANGE)
-
         installed_fonts.append(InstalledFont(
             installed_path=installed_path,
             registry_name=(reg_value_name)
         ))
+
+    # Broadcast a message to all top-level windows that the fonts has changed
+    win32api.PostMessage(win32con.HWND_BROADCAST, win32con.WM_FONTCHANGE)
 
     return installed_fonts
