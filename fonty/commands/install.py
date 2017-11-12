@@ -20,8 +20,9 @@ from fonty.models.manifest import Manifest
 
 @click.command('install', short_help='Install a font')
 @click.argument(
-    'name',
+    'args',
     nargs=-1,
+    metavar='[NAME]',
     type=click.STRING)
 @click.option(
     '--output', '-o',
@@ -39,7 +40,7 @@ from fonty.models.manifest import Manifest
     default=False
 )
 @click.pass_context
-def cli_install(ctx, name, output, variants, is_files):
+def cli_install(ctx, args, output, variants, is_files):
     '''Install a font into this computer or a directory.
 
     \b
@@ -67,7 +68,7 @@ def cli_install(ctx, name, output, variants, is_files):
         variants = (','.join(str(x) for x in variants)).split(',')
         variants = [FontAttribute.parse(variant) for variant in variants]
 
-    if not name:
+    if not args:
         click.echo(ctx.get_help())
         sys.exit(1)
 
@@ -84,8 +85,19 @@ def cli_install(ctx, name, output, variants, is_files):
         ))
         return
 
-    # Resolve fonts
-    remote_fonts = resolve_fonts(args=name, is_files=is_files, print_task=True)
+    # Find fonts
+    if is_files:
+        remote_fonts = [RemoteFont(
+            remote_path=RemoteFont.Path(path=path, type=RemoteFont.Path.Type.LOCAL),
+            filename=os.path.basename(path),
+            family=None,
+            variant=None
+        ) for path in args]
+    else:
+        arg = ' '.join(str(arg) for arg in args)
+        remote_fonts = resolve_download(arg, print_task=True)
+
+    # Load fonts
     task = Task("Resolving ({}) font files...".format(len(remote_fonts)))
     task_printer = create_task_printer(task, remote_fonts)
     local_fonts = [font.load(handler=task_printer) for font in remote_fonts]
@@ -188,53 +200,37 @@ def create_task_printer(task: Task, remote_fonts: List[RemoteFont]):
 
     return load_handler
 
-def resolve_fonts(
-        args: List[str],
-        is_files: bool,
-        print_task: bool = True
-    ) -> List[RemoteFont]:
-    '''Resolve provided arguments into a list of RemoteFonts.'''
-    fonts = []
+def resolve_download(arg, print_task: bool = True) -> List[RemoteFont]:
+    '''Resolve if provided argument is a font name or a HTTP download link.'''
 
-    if is_files:
-        fonts.extend([RemoteFont(
-            remote_path=RemoteFont.Path(path=path, type=RemoteFont.Path.Type.LOCAL),
-            filename=os.path.basename(path),
+    # Check if argument is a URL path to font
+    if re.search(r'^https?:\/\/', arg):
+        fonts = [RemoteFont(
+            remote_path=RemoteFont.Path(path=arg, type=RemoteFont.Path.Type.HTTP_REMOTE),
+            filename=os.path.basename(urlparse(arg).path),
             family=None,
             variant=None
-        ) for path in args])
+        )]
+
+    # Argument is a font name to be searched in font sources
     else:
-        arg = ' '.join(str(arg) for arg in args)
+        if print_task:
+            task = Task("Searching for '{}'...".format(colored(arg, COLOR_INPUT)))
 
-        # Argument is a URL path to font
-        if re.search(r'^https?:\/\/', arg):
-            filename = os.path.basename(urlparse(arg).path)
-            fonts.append(RemoteFont(
-                remote_path=RemoteFont.Path(path=arg, type=RemoteFont.Path.Type.HTTP_REMOTE),
-                filename=filename,
-                family=None,
-                variant=None
+        # Search for font family in local repositories
+        try:
+            source, remote_family = search.search(arg)
+            fonts = remote_family.fonts
+        except search.SearchNotFound as e:
+            task.error("No results found for '{}'".format(colored(arg, COLOR_INPUT)))
+            if e.suggestion:
+                click.echo("Did you mean '{}'".format(e.suggestion))
+            sys.exit(1)
+
+        if task:
+            task.complete("Found '{family}' in {source}".format(
+                family=colored(remote_family.name, COLOR_INPUT),
+                source=source.name
             ))
-
-        # Argument is a font name to be searched in font sources
-        else:
-            if print_task:
-                task = Task("Searching for '{}'...".format(colored(arg, 'green')))
-
-            # Search for font family in local repositories
-            try:
-                source, remote_family = search.search(arg)
-                fonts = remote_family.fonts
-            except search.SearchNotFound as e:
-                task.error("No results found for '{}'".format(colored(arg, 'green')))
-                if e.suggestion:
-                    click.echo("Did you mean '{}'".format(e.suggestion))
-                sys.exit(1)
-
-            if task:
-                task.complete("Found '{family}' in {source}".format(
-                    family=colored(remote_family.name, COLOR_INPUT),
-                    source=source.name
-                ))
 
     return fonts
