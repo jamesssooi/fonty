@@ -1,10 +1,9 @@
 '''fonty.commands.uninstall.py: Command-line interface to uninstall fonts.'''
-import time
 import sys
 
 import click
 from termcolor import colored
-from fonty.lib.task import Task, TaskStatus
+from fonty.lib.task import Task
 from fonty.lib.variants import FontAttribute
 from fonty.lib.constants import COLOR_INPUT
 from fonty.lib.uninstall import uninstall_fonts

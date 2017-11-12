@@ -28,8 +28,8 @@ def get_terminal_size():
     if tuple_xy is None:
         tuple_xy = (80, 25)      # default value
     return tuple_xy
- 
- 
+
+
 def _get_terminal_size_windows():
     try:
         from ctypes import windll, create_string_buffer
@@ -48,7 +48,7 @@ def _get_terminal_size_windows():
             return sizex, sizey
     except:
         pass
- 
+
 
 def _get_terminal_size_tput():
     # get terminal width
