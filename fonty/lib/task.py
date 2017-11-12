@@ -3,13 +3,21 @@ import sys
 import time
 import threading
 from enum import Enum
+from typing import Union, List
 
 from ansiwrap import shorten, ansilen
 from termcolor import colored
 from fonty.lib.terminal_size import get_terminal_size
 from fonty.lib.constants import IS_WINDOWS, ICON_WAITING, ICON_SUCCESS, ICON_ERROR
 
-TaskStatus = Enum('TaskStatus', 'SUCCESS ERROR WAITING WARNING')
+
+class TaskStatus(Enum):
+    '''Represents a task status.'''
+    SUCCESS = 1
+    ERROR = 2
+    WAITING = 3
+    WARNING = 4
+
 
 class Task(object):
     '''`Task` is an utility class that prints a pretty, elegant, and animating
@@ -27,29 +35,37 @@ class Task(object):
 
         ERROR: `✗ Unicorns do not exist`
     '''
-    STATUS_WARNING = '!'
-    DELAY = 0.2
 
-    status = TaskStatus.WAITING
-    active = True
-    current_message = ''
+    # Class Properties ------------------------------------------------------- #
+    STATUS_WAITING: Union[str, List[str]] = ICON_WAITING['WINDOWS'] \
+        if IS_WINDOWS else ICON_WAITING['OSX']
+    STATUS_ERROR: Union[str, List[str]] = ICON_ERROR['WINDOWS'] \
+        if IS_WINDOWS else ICON_ERROR['OSX']
+    STATUS_SUCCESS: Union[str, List[str]] = ICON_SUCCESS['WINDOWS'] \
+        if IS_WINDOWS else ICON_SUCCESS['OSX']
+    STATUS_WARNING: Union[str, List[str]] = '!'
+    DELAY: float = 0.2
 
-    _indicator_iteration = 0
-    _done = False
+    message: str
+    status: TaskStatus = TaskStatus.WAITING
+    active: bool = True
+    truncate: bool = True
+    current_message: str = ''
 
-    def __init__(self,
-                 message: str,
-                 status: TaskStatus = TaskStatus.WAITING,
-                 asynchronous: bool = True,
-                 truncate: bool = True) -> None:
+    _indicator_iteration: int = 0
+    _done: bool = False
+
+    # Constructor ------------------------------------------------------------ #
+    def __init__(
+            self,
+            message: str,
+            status: TaskStatus = TaskStatus.WAITING,
+            asynchronous: bool = True,
+            truncate: bool = True
+        ) -> None:
         self.message = message
         self.status = status
         self.truncate = truncate
-
-        # Determine status icons/animations
-        self.STATUS_WAITING = ICON_WAITING['WINDOWS'] if IS_WINDOWS else ICON_WAITING['OSX']
-        self.STATUS_ERROR = ICON_ERROR['WINDOWS'] if IS_WINDOWS else ICON_ERROR['OSX']
-        self.STATUS_SUCCESS = ICON_SUCCESS['WINDOWS'] if IS_WINDOWS else ICON_SUCCESS['OSX']
 
         if asynchronous:
             threading.Thread(target=self.loop, daemon=True).start()
@@ -57,6 +73,7 @@ class Task(object):
             self.active = False
             self.loop() # Prints only one iteration
 
+    # Class Methods ---------------------------------------------------------- #
     def loop(self) -> None:
         '''Main print loop.'''
 
