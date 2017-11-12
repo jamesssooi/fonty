@@ -19,7 +19,7 @@ from fonty.commands.install import resolve_download, create_task_printer
     'args',
     nargs=-1,
     required=False,
-    metavar='[FILES]',
+    metavar='[FILES|NAME]',
     type=click.STRING)
 @click.option(
     '--installed', '-i', 'is_installed',
@@ -54,12 +54,16 @@ def cli_webfont(ctx, args: List[str], is_installed: bool, is_download: bool, out
       >>> fonty webfont *.ttf
 
     \b
-      Create webfonts of an existing installed font from this computer:
-      >>> fonty webfont --typeface "Open Sans"
+      Output converted webfonts into a specific directory
+      >>> fonty webfont *.ttf -o ./webfonts
 
     \b
-      Create and output webfonts into a directory named "fonts":
-      >>> fonty webfont --typeface "Open Sans" --output ./fonts
+      Download and convert from subscribed sources:
+      >>> fonty webfont --download "Open Sans"
+
+    \b
+      Convert an existing installed font from your system:
+      >>> fonty webfont --installed "Open Sans"
     '''
 
     start_time = timeit.default_timer()
