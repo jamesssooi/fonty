@@ -22,7 +22,7 @@ from fonty.models.manifest import Manifest
 @click.argument(
     'args',
     nargs=-1,
-    metavar='[NAME]',
+    metavar='[NAME|FILES|URL]',
     type=click.STRING)
 @click.option(
     '--output', '-o',
@@ -37,7 +37,8 @@ from fonty.models.manifest import Manifest
     '--files', '-f', 'is_files',
     type=click.BOOL,
     is_flag=True,
-    default=False
+    default=False,
+    help='Install from a list of font files.'
 )
 @click.pass_context
 def cli_install(ctx, args, output, variants, is_files):
@@ -58,6 +59,10 @@ def cli_install(ctx, args, output, variants, is_files):
     \b
       Install only the bold and bold italic variants of Open Sans:
       >>> fonty install "Open Sans" -v 700,700i
+
+    \b
+      Install all .ttf files in this directory:
+      >>> fonty install --files *.ttf
     '''
 
     start_time = timeit.default_timer()
