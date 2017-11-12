@@ -5,12 +5,22 @@ import math
 from fonty.lib import utils
 
 class ProgressBar(object):
-    DEFAULT_FORMAT = '{desc}{bar} {percentage}'
+    '''A simple, printable text-based progress bar.'''
+
+    # Default Properties ----------------------------------------------------- #
+    DEFAULT_FORMAT = '{desc}|{bar}| {percentage}'
     value = 0
 
-    def __init__(self, total, desc=None, cols=15,
-                 bar_format=DEFAULT_FORMAT,
-                 filled_char='█', empty_char='░'):
+    # Constructor ------------------------------------------------------------ #
+    def __init__(
+            self,
+            total: int,
+            desc: str = None,
+            cols: int = 15,
+            bar_format: str = DEFAULT_FORMAT,
+            filled_char: str = '█',
+            empty_char: str = '░'
+        ) -> None:
         self.total = total
         self.desc = desc
         self.cols = cols
@@ -18,13 +28,14 @@ class ProgressBar(object):
         self.empty_char = empty_char
         self.bar_format = bar_format
 
-    def __str__(self):
+    # Class Methods ---------------------------------------------------------- #
+    def __str__(self) -> str:
         percentage = self.value / self.total
 
         # Draw bar
         fill_count = math.ceil(min(percentage, 1) * self.cols)
         empty_count = self.cols - fill_count
-        bar = '|{fill}{empty}|'.format(
+        bar = '{fill}{empty}'.format(
             fill=self.filled_char * int(fill_count),
             empty=self.empty_char * int(empty_count)
         )
@@ -38,8 +49,10 @@ class ProgressBar(object):
 
         return s
 
-    def increment(self, n=1):
+    def increment(self, n: int = 1) -> None:
+        '''Increments the value of the progress bar by n. Defaults to 1.'''
         self.value += n
 
-    def update(self, n):
+    def update(self, n: int) -> None:
+        '''Set the value of the progress bar.'''
         self.value = n
