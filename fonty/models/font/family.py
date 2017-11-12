@@ -11,15 +11,22 @@ from . import Font, RemoteFont
 class FontFamily(object):
     '''Class to manage a family of fonts.'''
 
+    # Class Properties ------------------------------------------------------- #
+    name: str
+    fonts: List[Font]
+
+    # Constructor ------------------------------------------------------------ #
     def __init__(self, name: str, fonts: List[Font]) -> None:
         self.name = name
         self.fonts = fonts
 
+    # Property Accessors ----------------------------------------------------- #
     @property
     def variants(self):
         '''Gets the variations available for this font family.'''
         return [font.variant for font in self.fonts]
 
+    # Class Methods ---------------------------------------------------------- #
     def get_fonts(self, variants: List[FontAttribute] = None) -> List[Font]:
         '''Returns the list of fonts in this font family.'''
         if variants:
@@ -86,22 +93,29 @@ class FontFamily(object):
 class RemoteFontFamily(object):
     '''Class to manage a remote font family.'''
 
+    # Class Properties ------------------------------------------------------- #
+    name: str
+    fonts: List[RemoteFont]
+
+    # Constructor ------------------------------------------------------------ #
     def __init__(self, name: str, fonts: List[RemoteFont]) -> None:
         self.name = name
         self.fonts = fonts
 
+    # Property Accessors ----------------------------------------------------- #
     @property
     def variants(self) -> List[FontAttribute]:
         '''Gets the variants available for this remote font family.'''
         return [font.variant for font in self.fonts]
 
+    # Class Methods ---------------------------------------------------------- #
     def get_variants(self, variants: List[FontAttribute] = None) -> List[RemoteFont]:
         '''Get fonts of the specified variants.'''
         if variants:
             return [font for font in self.fonts if font.variant in variants]
         return self.fonts
 
-    def generate_id(self, source):
+    def generate_id(self, source: str) -> str:
         '''Generates a unique id.'''
         unique_str = '{source}-{name}'.format(source=source, name=self.name)
         return hashlib.md5(unique_str.encode('utf-8')).hexdigest()
