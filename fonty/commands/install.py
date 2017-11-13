@@ -38,8 +38,7 @@ from fonty.models.manifest import Manifest
     type=click.BOOL,
     is_flag=True,
     default=False,
-    help='Install from a list of font files.'
-)
+    help='Install from a list of font files.')
 @click.pass_context
 def cli_install(ctx, args, output, variants, is_files):
     '''Install a font into this computer or a directory.
@@ -68,7 +67,6 @@ def cli_install(ctx, args, output, variants, is_files):
     start_time = timeit.default_timer()
 
     # Process arguments and options
-    # name = ' '.join(str(x) for x in name)
     if variants:
         variants = (','.join(str(x) for x in variants)).split(',')
         variants = [FontAttribute.parse(variant) for variant in variants]
