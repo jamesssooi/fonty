@@ -37,8 +37,8 @@ def main(ctx, version: bool):
       >>> fonty uninstall "Open Sans"
 
     \b
-      Create webfonts of an existing installed font from this computer:
-      >>> fonty webfont --typeface "Open Sans"
+      Download and convert Open Sans to webfonts:
+      >>> fonty webfont --download "Open Sans"
     '''
     if ctx.invoked_subcommand:
         return
