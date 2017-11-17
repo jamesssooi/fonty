@@ -99,22 +99,22 @@ List further details about a specific installed font
 ### [2.3 &nbsp;&nbsp; Generating webfonts](#)
 **fonty** can help you convert fonts to `woff` and `woff2` formats, which is supported by all major browsers (IE9 and above) as well as generate their `@font-face` declarations.
 
-Download font from subscribed sources and generate webfonts into the current directory:
+Convert all *.ttf fonts in this directory to webfonts:
 ```bash
-> fonty webfont Lato
+> fonty webfont *.ttf
 ```
 
 Generate webfonts into a specific directory:
 ```bash
-> fonty webfont Lato -o ./webfonts
+> fonty webfont *.ttf -o ./webfonts
 ```
 
-Generate webfonts from `ttf`/`otf` files
+Download a font from your [subscribed sources](#) and convert:
 ```bash
-> fonty webfont --files Lato.ttf Lato-Regular.ttf
+> fonty webfont --download Lato
 ```
 
-Generate webfonts from an already installed font
+Convert an existing installed font on your computer:
 ```bash
 > fonty webfont --installed Lato
 ```
