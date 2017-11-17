@@ -228,7 +228,7 @@ If a specific font name is specified, then this command prints a list of all the
 
 This command convert fonts to `.woff` and `.woff2` formats, as well as generate their @font-face CSS declaration into a file named `styles.css`.
 
-**fonty's** default behaviour is to convert a list of font files that you have provided. Alternative, it can also download fonts using the `—download` flag, or use an existing installed font on your computer using the `—installed` flag.
+**fonty's** default behaviour is to convert a list of font files that you have provided. You can specify glob patterns for your file paths. Alternatively, it can also download fonts using the `--download` flag, or use an existing installed font on your computer using the `--installed` flag.
 
 The [Web Open Font Format (WOFF)](#) is a widely supported font format for web browsers, and should be sufficient for a large majority of use cases. You can read the compatibility tables on [caniuse.com](https://caniuse.com/#search=woff).
 
