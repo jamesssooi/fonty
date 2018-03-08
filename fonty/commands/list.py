@@ -88,7 +88,7 @@ def list_all_fonts(manifest: Manifest):
         cols = utils.split_list(entries, col_count)
 
         # Get the longest word for each column
-        longest = [max(col, key=ansilen) for col in cols]
+        longest = [max(col, key=ansilen) for col in cols if len(col) > 0]
 
         # Calculate the maximum line length of this iteration
         line_length = reduce(lambda x, y: x + ansilen(y) + PADDING, longest, 0)
@@ -103,7 +103,7 @@ def list_all_fonts(manifest: Manifest):
         col_count -= 1
 
     # Print list
-    col_widths = [len(max(col, key=len)) for col in cols]
+    col_widths = [len(max(col, key=len)) for col in cols if len(col) > 0]
     for line in zip_longest(*cols):
         line = filter(None, line)
         separator = ' ' * PADDING
