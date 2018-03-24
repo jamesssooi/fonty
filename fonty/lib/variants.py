@@ -175,6 +175,7 @@ WEIGHT_MAP = {
     'normal'     : FONT_WEIGHT.REGULAR,
     'demibold'   : FONT_WEIGHT.SEMIBOLD,
     'negreta'    : FONT_WEIGHT.BOLD,
+    'negrita'    : FONT_WEIGHT.BOLD,
     'ultrabold'  : FONT_WEIGHT.EXTRABOLD,
     'heavy'      : FONT_WEIGHT.BLACK,
     'script'     : FONT_WEIGHT.REGULAR,

@@ -128,10 +128,8 @@ def cli_webfont(ctx, args: List[str], is_installed: bool, is_download: bool, out
         font_style = variant.style.value.css
         font_stretch = variant.stretch.value.css
 
-        paths = []
-
         # Default (TTF/OTF)
-        paths.append({'path': font.convert(output_dir), 'format': ext[1:]})
+        format_default = {'path': font.convert(output_dir), 'format': ext[1:]}
 
         # Convert to WOFF
         bar.increment()
@@ -140,7 +138,7 @@ def cli_webfont(ctx, args: List[str], is_installed: bool, is_download: bool, out
             filename=filename,
             bar=bar
         )
-        paths.append({'path': font.convert(output_dir, FontFormat.WOFF), 'format': 'woff'})
+        format_woff = {'path': font.convert(output_dir, FontFormat.WOFF), 'format': 'woff'}
 
         # Convert to WOFF2
         bar.increment()
@@ -149,14 +147,14 @@ def cli_webfont(ctx, args: List[str], is_installed: bool, is_download: bool, out
             filename=filename,
             bar=bar
         )
-        paths.append({'path': font.convert(output_dir, FontFormat.WOFF2), 'format': 'woff2'})
+        format_woff2 = {'path': font.convert(output_dir, FontFormat.WOFF2), 'format': 'woff2'}
 
         results.append({
             'family_name': family_name,
             'font_weight': font_weight,
             'font_style': font_style,
             'font_stretch': font_stretch,
-            'formats': paths
+            'formats': [format_woff2, format_woff, format_default]
         })
 
     task.stop(message='Converted ({}) font file(s)'.format(len(fonts)))
