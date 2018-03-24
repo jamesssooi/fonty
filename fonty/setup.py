@@ -4,7 +4,6 @@ import json
 import shutil
 
 import click
-import ansiwrap
 from termcolor import colored
 from fonty.lib.constants import APP_DIR, ROOT_DIR, COLOR_INPUT
 from fonty.lib.task import Task
@@ -13,6 +12,7 @@ from fonty.models.manifest import Manifest
 from fonty.lib import search
 
 def initial_setup() -> None:
+    '''Perform initial fonty setup.'''
 
     # Print welcome message
     initial_setup_message = '\n'.join([
@@ -33,6 +33,8 @@ def initial_setup() -> None:
     click.echo("")
 
 def generate_manifest() -> None:
+    '''Generate a manifest list from the user's installed fonts.'''
+
     task = Task("Generating initial font manifest...")
 
     # Generate new manifest
@@ -43,6 +45,7 @@ def generate_manifest() -> None:
     task.complete()
 
 def generate_default_subscriptions() -> None:
+    '''Subscribe to all default sources.'''
 
     # Get list of default sources
     path_to_defaults = os.path.join(ROOT_DIR, 'defaults', 'sources.json')
@@ -52,7 +55,9 @@ def generate_default_subscriptions() -> None:
 
     # Subscribe to each default sources
     for source in sources:
-        task = Task("Subscribing to default source '{}'...".format(colored(source['name'], COLOR_INPUT)))
+        task = Task(
+            "Subscribing to default source '{}'...".format(colored(source['name'], COLOR_INPUT))
+        )
 
         # Subscribe to source
         sub = Subscription.load_from_url(source['url'])
