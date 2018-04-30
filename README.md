@@ -2,7 +2,7 @@
   <img src="https://github.com/jamesssooi/fonty/raw/master/art/logo.png" alt="Logo of fonty">
 </p>
 
-<h3 align="center">A friendly CLI tool for installing, managing and converting fonts</h3>
+<h3 align="center">A command-line tool to download, manage and convert fonts</h3>
 
 <p align="center">
   <img src="https://raw.githubusercontent.com/jamesssooi/fonty/feat/readme/art/hero.png" alt="Screenshot of fonty commands">
@@ -10,24 +10,23 @@
 
 **fonty** is a command line interface that helps you simplify your font management workflow by allowing you to install and uninstall fonts like a package manager (think npm, apt-get, chocolatey). It can also help you create webfonts and generate @font-face declarations so that you can focus on building great websites.
 ## Table of Contents
-* [Installation](#installation)
-* [Basic Usage](#)
-    * [Installing and uninstalling fonts](#)
-    * [Listing installed fonts](#)
-    * [Generating webfonts](#)
-    * [Managing font sources](#)
-* [Commands](#)
-    * [`fonty install`](#)
-    * [`fonty uninstall`](#)
-    * [`fonty list`](#)
-    * [`fonty webfont`](#)
-    * [`fonty source`](#)
-* [Font Sources](#)
-    * [Default sources](#)
-    * [Hosting your own source](#)
-* [Roadmap](#)
-* [Contributing](#)
-* [License](#)
+* [Installation](#1--installation)
+* [Basic Usage](#2--basic-usage)
+    * [Installing and uninstalling fonts](#21--installing-and-uninstalling-fonts)
+    * [Listing installed fonts](#22--listing-installed-fonts)
+    * [Generating webfonts](#23--generating-webfonts)
+    * [Managing font sources](#24--managing-font-sources)
+* [Commands](#3--commands)
+    * [`fonty install`](#31--fonty-install)
+    * [`fonty uninstall`](#32--fonty-uninstall)
+    * [`fonty list`](#33--fonty-list)
+    * [`fonty webfont`](#34--fonty-webfont)
+    * [`fonty source`](#35--fonty-source)
+* [Font Sources](#4--font-sources)
+    * [Default sources](#41--default-sources)
+    * [Hosting your own](#42--hosting-your-own)
+* [Roadmap](#5--roadmap)
+* [Licensing](#6--licensing)
 
 ## 1 &nbsp;&nbsp; Installation
 *__Prerequisites__: Please make sure you have at least [Python 3](https://www.python.org/downloads/) installed*
@@ -154,7 +153,7 @@ Updating sources:
 
 ---
 
-## 3 &nbsp;&nbsp; Commands Reference
+## 3 &nbsp;&nbsp; Commands
 
 #### 3.1 &nbsp;&nbsp; `fonty install`
 ```bash
@@ -279,7 +278,7 @@ This command shows a list of all subscribed sources, along with their IDs, updat
 
 **Check all subscribed sources for available updates.**
 
-When font sources are subscribed to, a local copy of the source is downloaded into your computer, which will result in the local copy being outdated when the font source is updated. By default, **fonty** will automatically check for available updates periodically. This command however, offers you a way to force all sources to check for available updates.
+When font sources are subscribed to, a local copy of the source is downloaded into your computer. Running this command updates your local copy with the latest one.
 
 * **`f`/`--force`** `flag`
     * If provided, force all sources to be redownloaded and rebuild the search index.
@@ -309,10 +308,14 @@ You can unsubscribe and subscribe from these sources at anytime. See the [`fonty
 
 You may wish to host your own repository for your personal usage, or perhaps you might want to make a set of fonts available for your entire team. A repository of fonts is a powerful concept that allows people to share and use fonts effortlessly.
 
-While **fonty** is still in alpha, the schema and specifications for hosting your own font sources is still largely a work in progress. As such until **fonty** is fully released, it is not encouraged for you to host your own font sources yet as the schema might go through a huge amount of changes before it is finalised.
+While **fonty** is still in alpha, the schema and specifications for font sources is still largely a work in progress. As such until **fonty** is fully released, it is not encouraged for you to host your own font sources yet as the schema might go through a large amount of changes before it is finalised.
 
+## 5 &nbsp;&nbsp; Roadmap
+[ ] Implement command to disable/enable fonts
+[ ] Finalise fonty sources schema and specifications
+[ ] Add support for installation via `homebrew`
 
-## 5 Licensing
+## 6 &nbsp;&nbsp; Licensing
 
 Copyright © 2018 [James] Ooi Weng Teik. **fonty** is released under the [Apache License, Version 2.0](https://github.com/jamesssooi/fonty/blob/master/LICENSE).
 
