@@ -29,7 +29,7 @@
 * [Contributing](#)
 * [License](#)
 
-## [1 &nbsp;&nbsp; Installation](#)
+## 1 &nbsp;&nbsp; Installation
 *__Prerequisites__: Please make sure you have at least [Python 3](https://www.python.org/downloads/) installed*
 
 ```bash
@@ -38,14 +38,14 @@ $ pip install fonty
 
 **fonty** is only available for macOS and Windows for now. Linux support is planned.
 
-## [2 &nbsp;&nbsp; Basic Usage](#)
+## 2 &nbsp;&nbsp; Basic Usage
 Append any command with `--help` for a detailed help text of what you can do.
 ```bash
 $ fonty [command] --help
 ```
 
-### [2.1 &nbsp;&nbsp; Installing and uninstalling fonts](#)
-#### [2.1.1 &nbsp;&nbsp; Installing fonts](#)
+### 2.1 &nbsp;&nbsp; Installing and uninstalling fonts
+#### 2.1.1 &nbsp;&nbsp; Installing fonts
 Downloading and installing a font from [subscribed sources](#):
 ```bash
 > fonty install Lato
@@ -65,7 +65,7 @@ Download only the bold and bold italic variants of a font:
 
 ---
 
-#### [2.1.2 &nbsp;&nbsp; Uninstalling fonts](#)
+#### 2.1.2 &nbsp;&nbsp; Uninstalling fonts
 Uninstalling a font family from your computer:
 ```bash
 > fonty uninstall Lato
@@ -81,7 +81,7 @@ Uninstalling only a specific variant:
 
 ---
 
-### [2.2 &nbsp;&nbsp; Listing installed fonts](#)
+### 2.2 &nbsp;&nbsp; Listing installed fonts
 List all installed fonts
 ```bash
 > fonty list
@@ -96,7 +96,7 @@ List further details about a specific installed font
 
 ---
 
-### [2.3 &nbsp;&nbsp; Generating webfonts](#)
+### 2.3 &nbsp;&nbsp; Generating webfonts
 **fonty** can help you convert fonts to `woff` and `woff2` formats, which is supported by all major browsers (IE9 and above) as well as generate their `@font-face` declarations.
 
 Convert all *.ttf fonts in this directory to webfonts:
@@ -123,7 +123,7 @@ Convert an existing installed font on your computer:
 
 ---
 
-### [2.4 &nbsp;&nbsp; Managing font sources](#)
+### 2.4 &nbsp;&nbsp; Managing font sources
 **fonty** searches and downloads fonts from your list of subscribed sources. Upon installation, fonty automatically subscribes to a few [default sources](#). Here's how you can manage your subscriptions:
 
 Adding a new font source:
@@ -154,9 +154,9 @@ Updating sources:
 
 ---
 
-## [3 &nbsp;&nbsp; Commands Reference](#)
+## 3 &nbsp;&nbsp; Commands Reference
 
-#### [3.1 &nbsp;&nbsp; `fonty install`](#)
+#### 3.1 &nbsp;&nbsp; `fonty install`
 ```bash
 > fonty install <FONT NAME> [OPTIONS]
 # Example: `fonty install Lato`
@@ -182,7 +182,7 @@ In it's default behaviour, **fonty** searches through your [subscribed sources](
 
 ---
 
-#### [3.2 &nbsp;&nbsp; `fonty uninstall`](#)
+#### 3.2 &nbsp;&nbsp; `fonty uninstall`
 ```bash
 > fonty uninstall <FONT NAME> [OPTIONS]
 ```
@@ -198,7 +198,7 @@ This command uninstalls the specified font from the computer and deletes them in
 
 ---
 
-#### [3.3 &nbsp;&nbsp; `fonty list`](#)
+#### 3.3 &nbsp;&nbsp; `fonty list`
 ```bash
 > fonty list [OPTIONS]
 > fonty list <FONT NAME> [OPTIONS]
@@ -217,7 +217,7 @@ If a specific font name is specified, then this command prints a list of all the
 
 ---
 
-#### [3.3 &nbsp;&nbsp; `fonty webfont`](#)
+#### 3.3 &nbsp;&nbsp; `fonty webfont`
 ```bash
 > fonty webfont <FONT FILES> [OPTIONS]
 > fonty webfont --download <FONT NAME> [OPTIONS]
@@ -245,7 +245,7 @@ The [Web Open Font Format (WOFF)](#) is a widely supported font format for web b
 
 ---
 
-#### [3.4 &nbsp;&nbsp; `fonty source`](#)
+#### 3.4 &nbsp;&nbsp; `fonty source`
 ```bash
 > fonty source add <SOURCE URL>
 ```
@@ -285,13 +285,13 @@ When font sources are subscribed to, a local copy of the source is downloaded in
     * If provided, force all sources to be redownloaded and rebuild the search index.
 
 
-## [4 &nbsp;&nbsp; Font Sources](#)
+## 4 &nbsp;&nbsp; Font Sources
 
 **fonty** relies on font sources to resolve, download and install fonts. A font source is simply a JSON file containing an index of its fonts, and where to download them.
 
 With **fonty**, you can subscribe to multiple font sources at the same time to have instant access to a wide variety of fonts through the `fonty install` command.
 
-### [4.1 &nbsp;&nbsp; Default sources](#)
+### 4.1 &nbsp;&nbsp; Default sources
 
 Right out of the box, **fonty** is automatically subscribed to a few default font sources so you can enjoy the benefits of using **fonty** rightaway. These default sources are:
 
@@ -305,17 +305,16 @@ Right out of the box, **fonty** is automatically subscribed to a few default fon
 
 You can unsubscribe and subscribe from these sources at anytime. See the [`fonty source`](#) command.
 
-### [4.2 &nbsp;&nbsp; Hosting your own](#)
+### 4.2 &nbsp;&nbsp; Hosting your own
 
 You may wish to host your own repository for your personal usage, or perhaps you might want to make a set of fonts available for your entire team. A repository of fonts is a powerful concept that allows people to share and use fonts effortlessly.
 
-Creating your own font sources is incredibly simple. At its core, a font source is simply a publicly accessible JSON file containing an index of its fonts and where to download them from.
+While **fonty** is still in alpha, the schema and specifications for hosting your own font sources is still largely a work in progress. As such until **fonty** is fully released, it is not encouraged for you to host your own font sources yet as the schema might go through a huge amount of changes before it is finalised.
 
-You can check out the specification of the [fonty json source](#) format.
 
-## [5 &nbsp;&nbsp; Specifying Font Variants](#)
+## 5 Licensing
 
-**fonty** uses a custom, CSS inspired syntax to notate font variants such as font weights, italicisation, obliqueness, stretchness, and etc. The goal is to create a notation that is short and concise (for easier input), while mantaining clarity.
+Copyright © 2018 [James] Ooi Weng Teik. **fonty** is released under the [Apache License, Version 2.0](https://github.com/jamesssooi/fonty/blob/master/LICENSE).
 
 
 
