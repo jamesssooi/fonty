@@ -320,5 +320,6 @@ While **fonty** is still in alpha, the schema and specifications for font source
 
 Copyright © 2018 [James] Ooi Weng Teik.
 
-
-
+---
+[![forthebadge](https://forthebadge.com/images/badges/made-with-python.svg)](https://forthebadge.com)
+[![forthebadge](https://forthebadge.com/images/badges/60-percent-of-the-time-works-every-time.svg)](https://forthebadge.com)
