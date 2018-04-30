@@ -311,14 +311,14 @@ You may wish to host your own repository for your personal usage, or perhaps you
 While **fonty** is still in alpha, the schema and specifications for font sources is still largely a work in progress. As such until **fonty** is fully released, it is not encouraged for you to host your own font sources yet as the schema might go through a large amount of changes before it is finalised.
 
 ## 5 &nbsp;&nbsp; Roadmap
-[ ] Implement command to disable/enable fonts
-[ ] Finalise fonty sources schema and specifications
-[ ] Add support for installation via `homebrew`
+- [ ] Implement command to disable/enable fonts
+- [ ] Finalise fonty sources schema and specifications
+- [ ] Add support for installation via `homebrew`
 
 ## 6 &nbsp;&nbsp; Licensing
+**fonty** is released under the [Apache License, Version 2.0](https://github.com/jamesssooi/fonty/blob/master/LICENSE).  
 
-Copyright © 2018 [James] Ooi Weng Teik. **fonty** is released under the [Apache License, Version 2.0](https://github.com/jamesssooi/fonty/blob/master/LICENSE).
-
+Copyright © 2018 [James] Ooi Weng Teik.
 
 
 
