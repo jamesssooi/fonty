@@ -72,7 +72,7 @@ def _get_user_fonts_win() -> List[FontFamily]:
 
 def parse_fonts(fonts: List[str]):
     '''Parse a list of font paths and group them into their families.'''
-    families = {}
+    families: dict = {}
 
     for font_path in fonts:
         try:
