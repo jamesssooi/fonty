@@ -1,11 +1,11 @@
 <p align="center">
-  <img src="https://github.com/jamesssooi/fonty/raw/master/art/logo.png" alt="Logo of fonty">
+  <img src="https://github.com/jamesssooi/fonty/raw/master/artwork/logo.png" alt="Logo of fonty">
 </p>
 
 <h3 align="center">A command-line tool to download, manage and convert fonts</h3>
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/jamesssooi/fonty/feat/readme/art/hero.png" alt="Screenshot of fonty commands">
+  <img src="https://raw.githubusercontent.com/jamesssooi/fonty/master/artwork/hero.png" alt="Screenshot of fonty commands">
 </p>
 
 **fonty** is a command line interface that helps you simplify your font management workflow by allowing you to install and uninstall fonts like a package manager (think npm, apt-get, chocolatey). It can also help you create webfonts and generate @font-face declarations so that you can focus on building great websites.
