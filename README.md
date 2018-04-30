@@ -216,7 +216,7 @@ If a specific font name is specified, then this command prints a list of all the
 
 ---
 
-#### 3.3 &nbsp;&nbsp; `fonty webfont`
+#### 3.4 &nbsp;&nbsp; `fonty webfont`
 ```bash
 > fonty webfont <FONT FILES> [OPTIONS]
 > fonty webfont --download <FONT NAME> [OPTIONS]
@@ -244,7 +244,7 @@ The [Web Open Font Format (WOFF)](#) is a widely supported font format for web b
 
 ---
 
-#### 3.4 &nbsp;&nbsp; `fonty source`
+#### 3.5 &nbsp;&nbsp; `fonty source`
 ```bash
 > fonty source add <SOURCE URL>
 ```
