@@ -89,6 +89,7 @@ def cli_uninstall(ctx, name, variants):
     manifest = Manifest.load()
     for font in uninstalled_fonts:
         manifest.remove(font)
+        manifest.save()
 
     # Check for manifest staleness
     if manifest.is_stale():
