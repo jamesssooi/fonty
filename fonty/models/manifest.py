@@ -17,7 +17,7 @@ class Manifest:
 
     schema_version: str = "0.1.0"
     families: List[FontFamily]
-    last_updated: datetime
+    last_modified: datetime
     font_count: int
 
     # Constructor
@@ -25,11 +25,11 @@ class Manifest:
     def __init__(
         self,
         families: List[FontFamily],
-        last_updated: Union[str, datetime] = None,
+        last_modified: Union[str, datetime] = None,
         font_count: int = 0
     ):
         self.families = families
-        self.last_updated = utils.parse_date(last_updated)
+        self.last_modified = utils.parse_date(last_modified)
         self.font_count = font_count
 
 
@@ -134,7 +134,7 @@ class Manifest:
         families = []
         for family in data['font_families']:
             fonts = [InstalledFont(
-                installed_path=font.get('localPath'),
+                installed_path=font.get('local_path'),
                 registry_name=font.get('registryName', None),
                 family=family.get('name'),
                 variant=FontAttribute.parse(font.get('variant'))
@@ -144,7 +144,7 @@ class Manifest:
         return Manifest(
             families=families,
             font_count=data['font_count'],
-            last_updated=data['last_modified']
+            last_modified=data['last_modified']
         )
 
     @staticmethod
@@ -153,5 +153,5 @@ class Manifest:
         return Manifest(
             families=get_user_fonts(),
             font_count=get_user_fonts_count(),
-            last_updated=datetime.now()
+            last_modified=datetime.now()
         )

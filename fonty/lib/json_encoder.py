@@ -10,7 +10,7 @@ class FontyJSONEncoder(JSONEncoder):
             return {'name': o.name, 'fonts': o.fonts}
 
         if isinstance(o, Font):
-            return {'variant': str(o.variant), 'localPath': o.path_to_font}
+            return {'variant': str(o.variant), 'local_path': o.path_to_font}
 
         else:
             return JSONEncoder.default(self, o)
