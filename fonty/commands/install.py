@@ -131,11 +131,18 @@ def cli_install(ctx, args, output, variants, is_files):
     installed_fonts = install_fonts(fonts=local_fonts, output_dir=output)
     installed_families = FontFamily.from_font_list(installed_fonts)
 
+    # Update the font manifest
     if not output:
         manifest = Manifest.load()
         for font in installed_fonts:
             manifest.add(font)
         manifest.save()
+
+        # Check for manifest staleness
+        if manifest.is_stale():
+            task.message = 'Rebuilding font manifest...'
+            manifest = Manifest.generate()
+            manifest.save()
 
     # Done!
     message = "Installed '{}'".format(colored(', '.join([f.name for f in installed_families]), COLOR_INPUT))

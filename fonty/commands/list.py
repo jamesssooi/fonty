@@ -10,6 +10,7 @@ from fonty.models.manifest import Manifest
 from fonty.lib import utils
 from fonty.lib.terminal_size import get_terminal_size
 from fonty.lib.constants import COLOR_INPUT
+from fonty.lib.task import Task
 
 @click.command('list', short_help='List installed fonts')
 @click.argument(
@@ -42,9 +43,10 @@ def cli_list(name: str, rebuild: bool):
 
     # Rebuild manifest.json if --rebuild flag is specified
     if rebuild:
+        task = Task('Rebuilding font manifest...')
         manifest = Manifest.generate()
         manifest.save()
-        click.echo('Manifest rebuilded with {count} font families found.'.format(
+        task.complete('Rebuilt font manifest with {count} font families found.'.format(
             count=len(manifest.families)
         ))
         sys.exit(0)
@@ -55,6 +57,15 @@ def cli_list(name: str, rebuild: bool):
     except FileNotFoundError:
         manifest = Manifest.generate()
         manifest.save()
+
+    # Rebuild manifest.json if the manifest is stale
+    if manifest.is_stale():
+        task = Task('Rebuilding font manifest...')
+        manifest = Manifest.generate()
+        manifest.save()
+        task.complete('Rebuilt font manifest with {count} font families found.'.format(
+            count=len(manifest.families)
+        ))
 
     # List all installed fonts if no font family name is specified
     if not name:

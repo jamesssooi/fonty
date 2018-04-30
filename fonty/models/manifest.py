@@ -35,7 +35,7 @@ class Manifest:
 
     # Class Methods
 
-    def add(self, font: InstalledFont) -> 'Manifest':
+    def add(self, font: InstalledFont) -> int:
         '''Add a font to the manifest.'''
 
         family_name = font.get_family_name()
@@ -50,7 +50,7 @@ class Manifest:
         existing_variants = [str(variant) for variant in family.get_variants()]
         variant = str(font.get_variant())
         if variant in existing_variants:
-            return None
+            return 0
 
         # Add font to FontFamily object
         family.fonts.append(font)
@@ -61,23 +61,24 @@ class Manifest:
         else:
             self.families[family_idx] = family
 
-        return self
+        self.font_count += 1
+        return 1
 
-    def remove(self, font: InstalledFont) -> 'Manifest':
+    def remove(self, font: InstalledFont) -> int:
         '''Remove a font from the manifest.'''
 
         # Load FontFamily
         family = self.get(font.family)
         family_idx = self.get_index(font.family)
         if family is None:
-            return self
+            return 0
 
         # Remove font from FontFamily
         font_idx = next((
             i for i, val in enumerate(family.fonts) if val.variant == font.variant
         ), None)
         if font_idx is None:
-            return self
+            return 0
         del family.fonts[font_idx]
 
         # Update the instance with the updated FontFamily
@@ -86,7 +87,8 @@ class Manifest:
         else:
             del self.families[family_idx]
 
-        return self
+        self.font_count -= 1
+        return 1
 
     def get(self, name: str) -> FontFamily:
         '''Load a font family from the manifest.'''
@@ -111,6 +113,12 @@ class Manifest:
         # Write to file (manifest.json)
         with open(path, 'w') as f:
             json.dump(data, f, cls=FontyJSONEncoder, **JSON_DUMP_OPTS)
+
+    def is_stale(self) -> bool:
+        '''Returns `true` if the total number of fonts in the manifest does not
+           match the total number of fonts in the system.
+        '''
+        return get_user_fonts_count() != self.font_count
 
     # Static Methods
 
