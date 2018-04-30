@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="https://raw.githubusercontent.com/jamesssooi/fonty/feat/readme/art/logo.png" alt="Logo of fonty">
+  <img src="https://raw.githubusercontent.com/jamesssooi/fonty/feat/readme/art/logo.svg" alt="Logo of fonty">
 </p>
 
 <h3 align="center">A friendly CLI tool for installing, managing and converting fonts</h3>
