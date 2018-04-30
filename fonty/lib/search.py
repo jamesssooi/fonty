@@ -39,11 +39,11 @@ def search(name):
 
     try:
         repo = Repository.load_from_path(result['repository_path'])
-        typeface = repo.get_typeface(result['name'])
+        remote_family = repo.get_family(result['name'])
     except FileNotFoundError:
         raise
 
-    return repo, typeface
+    return repo, remote_family
 
 def create_index() -> Index:
     '''Creates a font search schema.'''
@@ -65,12 +65,11 @@ def index_fonts(repository: Repository, path_to_repository: str) -> None:
     # TODO: Implement incremental indexing
     writer.delete_by_term('repository_path', path_to_repository)
 
-    # Index all typefaces in this repository
-    for typeface in repository.typefaces:
+    # Index all font families in this repository
+    for family in repository.families:
         writer.add_document(
-            id=typeface.generate_id(path_to_repository),
-            name=typeface.name,
-            category=typeface.category,
+            id=family.generate_id(path_to_repository),
+            name=family.name,
             repository_path=path_to_repository
         )
     writer.commit()

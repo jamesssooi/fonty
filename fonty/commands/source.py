@@ -26,19 +26,17 @@ def add(url):
     task = Task("Loading '{}'...".format(colored(url, COLOR_INPUT)))
     sub = Subscription.load_from_url(url).subscribe()
     repo = sub.get_local_repository()
-    task.stop(status=TaskStatus.SUCCESS,
-              message="Loaded '{}'".format(colored(repo.name, COLOR_INPUT)))
+    task.complete("Loaded '{}'".format(colored(repo.name, COLOR_INPUT)))
 
     # Index fonts
-    task = Task("Indexing {count} typeface(s) in '{repo}'".format(
-        count=len(repo.typefaces),
+    task = Task("Indexing {count} font families in '{repo}'".format(
+        count=len(repo.families),
         repo=colored(repo.name, COLOR_INPUT)
     ))
     search.index_fonts(repo, sub.local_path)
-    task.stop(status=TaskStatus.SUCCESS,
-              message="Indexed {count} new typeface(s)".format(
-                  count=colored(len(repo.typefaces), COLOR_INPUT)
-              ))
+    task.complete("Indexed {count} new font families".format(
+        count=colored(len(repo.families), COLOR_INPUT)
+    ))
 
     print('')
     sub.pprint(output=True)
@@ -63,22 +61,18 @@ def remove(ctx, identifier: str):
 
     if sub is None:
         time.sleep(0.3)
-        task.stop(status=TaskStatus.ERROR,
-                  message="No subscriptions found with '{}'".format(
-                      colored(identifier, COLOR_INPUT)))
-        return
+        task.error("No subscriptions found with '{}'".format(colored(identifier, COLOR_INPUT)))
+        sys.exit(1)
 
     # Unsubscribe
     task.message = "Unsubscribing '{}'".format(colored(sub.name, COLOR_INPUT))
     sub.unsubscribe()
-    task.stop(status=TaskStatus.SUCCESS,
-              message="Unsubscribed from '{}'".format(colored(sub.name, COLOR_INPUT)))
+    task.complete("Unsubscribed from '{}'".format(colored(sub.name, COLOR_INPUT)))
 
     # Reindex fonts
     task = Task('Reindexing fonts...')
     count = search.unindex_fonts(sub.local_path)
-    task.stop(status=TaskStatus.SUCCESS,
-              message="Removed {} typeface(s) from index".format(colored(count, 'cyan')))
+    task.complete("Removed {} font families from index".format(colored(count, 'cyan')))
 
 
 @cli_source.command(name='list', short_help='List subscribed sources')
@@ -129,8 +123,7 @@ def update(force: bool):
         # Fetch remote repositories
         sub, has_changes = sub.fetch()
         if not has_changes and not force:
-            task.stop(status=TaskStatus.SUCCESS,
-                      message="No updates available for '{}'".format(name))
+            task.complete("No updates available for '{}'".format(name))
             continue
 
         # Reindex fonts
@@ -138,5 +131,4 @@ def update(force: bool):
         updated_repo = sub.get_local_repository()
         search.index_fonts(updated_repo, sub.local_path)
 
-        task.stop(status=TaskStatus.SUCCESS,
-                  message="Updated '{}'".format(name))
+        task.complete("Updated '{}'".format(name))

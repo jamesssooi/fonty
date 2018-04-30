@@ -3,6 +3,7 @@ import os
 import sys
 import inspect
 import click
+import colorama
 
 from fonty.version import __version__
 
@@ -13,6 +14,10 @@ from fonty.commands.source import cli_source
 from fonty.commands.list import cli_list
 from fonty.commands.webfont import cli_webfont
 
+from fonty.setup import initial_setup, is_first_run
+
+# Enable colored output on Windows
+colorama.init()
 
 @click.group(invoke_without_command=True)
 @click.option('--version', '-v', is_flag=True, help="Show the version number.")
@@ -34,10 +39,14 @@ def main(ctx, version: bool):
       >>> fonty uninstall "Open Sans"
 
     \b
-      Create webfonts of an existing installed font from this computer:
-      >>> fonty webfont --typeface "Open Sans"
+      Download and convert Open Sans to webfonts:
+      >>> fonty webfont --download "Open Sans"
     '''
-    from fonty.lib.constants import ROOT_DIR
+
+    # Perform initial setup scripts if this is fonty's first run
+    if is_first_run():
+        initial_setup()
+
     if ctx.invoked_subcommand:
         return
 

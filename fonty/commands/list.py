@@ -10,6 +10,7 @@ from fonty.models.manifest import Manifest
 from fonty.lib import utils
 from fonty.lib.terminal_size import get_terminal_size
 from fonty.lib.constants import COLOR_INPUT
+from fonty.lib.task import Task
 
 @click.command('list', short_help='List installed fonts')
 @click.argument(
@@ -42,10 +43,11 @@ def cli_list(name: str, rebuild: bool):
 
     # Rebuild manifest.json if --rebuild flag is specified
     if rebuild:
+        task = Task('Rebuilding font manifest...')
         manifest = Manifest.generate()
         manifest.save()
-        click.echo('Manifest rebuilded with {count} typefaces found.'.format(
-            count=len(manifest.typefaces)
+        task.complete('Rebuilt font manifest with {count} font families found.'.format(
+            count=len(manifest.families)
         ))
         sys.exit(0)
 
@@ -56,7 +58,16 @@ def cli_list(name: str, rebuild: bool):
         manifest = Manifest.generate()
         manifest.save()
 
-    # List all installed fonts if no typeface name is specified
+    # Rebuild manifest.json if the manifest is stale
+    if manifest.is_stale():
+        task = Task('Rebuilding font manifest...')
+        manifest = Manifest.generate()
+        manifest.save()
+        task.complete('Rebuilt font manifest with {count} font families found.'.format(
+            count=len(manifest.families)
+        ))
+
+    # List all installed fonts if no font family name is specified
     if not name:
         list_all_fonts(manifest)
     else:
@@ -67,9 +78,9 @@ def list_all_fonts(manifest: Manifest):
 
     # Get font list
     entries = ['{name} {variants}'.format(
-        name=typeface.name,
-        variants=colored('({})'.format(len(typeface.get_variants())), attrs=['dark'])
-    ) for typeface in manifest.typefaces]
+        name=family.name,
+        variants=colored('({})'.format(len(family.get_variants())), attrs=['dark'])
+    ) for family in manifest.families]
     entries.sort()
 
     # Find the optimal column count. How it works:
@@ -88,7 +99,7 @@ def list_all_fonts(manifest: Manifest):
         cols = utils.split_list(entries, col_count)
 
         # Get the longest word for each column
-        longest = [max(col, key=ansilen) for col in cols]
+        longest = [max(col, key=ansilen) for col in cols if len(col) > 0]
 
         # Calculate the maximum line length of this iteration
         line_length = reduce(lambda x, y: x + ansilen(y) + PADDING, longest, 0)
@@ -103,7 +114,7 @@ def list_all_fonts(manifest: Manifest):
         col_count -= 1
 
     # Print list
-    col_widths = [len(max(col, key=len)) for col in cols]
+    col_widths = [len(max(col, key=len)) for col in cols if len(col) > 0]
     for line in zip_longest(*cols):
         line = filter(None, line)
         separator = ' ' * PADDING
@@ -114,16 +125,16 @@ def list_all_fonts(manifest: Manifest):
         click.echo(s)
 
     # Print count
-    click.echo('\n{count} typefaces installed.'.format(count=len(entries)))
+    click.echo('\n{count} font families installed.'.format(count=len(entries)))
 
 def list_font(manifest: Manifest, name: str):
-    '''Show details for a particular typeface family.'''
+    '''Show details for a particular font family.'''
 
-    typeface = manifest.get(name)
-    if not typeface:
+    family = manifest.get(name)
+    if not family:
         click.echo("No results found for '{name}'".format(
             name=colored(name, COLOR_INPUT)
         ))
         sys.exit(1)
 
-    typeface.print()
+    family.print()

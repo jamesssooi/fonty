@@ -33,7 +33,7 @@ class Subscription:
         self.name = name
         self.remote_path = remote_path
         self.local_path = local_path
-        self.repo = repo,
+        self.repo = repo
         self.id_ = hashlib.md5(self.remote_path.encode('utf-8')).hexdigest()
 
         # Parse last updated date
@@ -172,7 +172,7 @@ class Subscription:
         format_ = [
             '{name} @ {url}',
             '- ID: {id_}',
-            '- Typeface(s) available: {count}',
+            '- Families available: {count}',
             '- Last updated: {last_updated}',
         ]
 
@@ -181,7 +181,7 @@ class Subscription:
         name = colored(repo.name, 'cyan') if ansi else repo.name
         url = colored(self.remote_path, attrs=['dark']) if ansi else self.remote_path
         id_ = colored(self.id_, attrs=['dark']) if ansi else self.id_
-        count = colored(len(repo.typefaces), attrs=['dark']) if ansi else len(repo.typefaces)
+        count = colored(len(repo.families), attrs=['dark']) if ansi else len(repo.families)
 
         last_updated = timeago.format(self.last_updated)
         last_updated = colored(last_updated, attrs=['dark']) if ansi else last_updated
@@ -233,9 +233,9 @@ class Subscription:
         subscription_data = {
             'id': subscription.id_,
             'name': subscription.name,
-            'remotePath': subscription.remote_path,
-            'localPath': subscription.local_path,
-            'lastUpdated': subscription.last_updated.isoformat()
+            'remote_path': subscription.remote_path,
+            'local_path': subscription.local_path,
+            'last_updated': subscription.last_updated.isoformat()
         }
         if idx is not None:
             data['subscriptions'][idx] = subscription_data
@@ -266,9 +266,9 @@ class Subscription:
         for sub in data['subscriptions']:
             subscriptions.append(Subscription(
                 name=sub.get('name', None),
-                remote_path=sub.get('remotePath', None),
-                local_path=sub.get('localPath', None),
-                last_updated=sub.get('lastUpdated', None)
+                remote_path=sub.get('remote_path', None),
+                local_path=sub.get('local_path', None),
+                last_updated=sub.get('last_updated', None)
             ))
 
         return subscriptions

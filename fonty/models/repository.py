@@ -2,30 +2,42 @@
 import json
 from typing import List
 
-from fonty.models.typeface import Typeface
+from fonty.lib.variants import FontAttribute
+from fonty.models.font import RemoteFontFamily, RemoteFont
 
 class Repository(object):
     '''`Repository` is a class that provides an interface to manage a repository
-    and its list of typefaces.
+    and its list of families.
 
     The `Repository` class does not manage subscriptions. For that, refer to the
     `Subscriptions` model instead.
 
     Attributes:
-        `typefaces` (List[Typeface]): Typefaces available in this repository.
+        `families` (List[RemoteFontFamily]): Font families available in this repository.
     '''
 
-    def __init__(self, name: str, typefaces: List[Typeface] = None):
+    #: The schema identifier for this schema
+    schema_identifier: str = "fonty_json_schema_v1"
+
+    #: The name of this repository
+    name: str
+
+    #: The font families available in this repository
+    families: List[RemoteFontFamily]
+
+    def __init__(
+        self,
+        name: str,
+        families: List[RemoteFontFamily] = None,
+        schema_identifier: str = None
+    ):
         self.name = name
-        self.typefaces = typefaces
+        self.families = families
+        self.schema_identifier = schema_identifier if schema_identifier else self.schema_identifier
 
-    def get_typeface(self, name):
-        '''Returns a Typeface object.'''
-        typeface = next((x for x in self.typefaces if x.name == name), None)
-        if typeface is None:
-            raise Exception
-
-        return typeface
+    def get_family(self, name):
+        '''Returns a RemoteFontFamily object.'''
+        return next((f for f in self.families if f.name == name), None)
 
     @staticmethod
     def load_from_json(json_data):
@@ -33,14 +45,38 @@ class Repository(object):
         repo = json_data
         if not isinstance(json_data, dict):
             repo = json.loads(json_data)
+        schema_identifier = repo.get('schema_identifier', 'no_schema')
 
-        # Convert all typefaces into `Typeface` instances
-        typefaces = []
-        for typeface in repo['typefaces']:
-            typefaces.append(Typeface.load_from_json(typeface))
+        # Convert all families into `RemoteFontFamily` instances
+        remote_families = []
 
-        return Repository(name=repo['name'],
-                          typefaces=typefaces)
+        # Parse `fonty_json_schema_v1`
+        if schema_identifier == 'fonty_json_schema_v1':
+            for family in repo['typefaces']:
+                remote_families.append(RemoteFontFamily(
+                    name=family['name'],
+                    fonts=[
+                        RemoteFont(
+                            remote_path=RemoteFont.Path(
+                                path=data['url'],
+                                type=RemoteFont.Path.Type.HTTP_REMOTE
+                            ),
+                            filename=data['filename'],
+                            family=family['name'],
+                            variant=FontAttribute.parse(variant)
+                        ) for variant, data in family['fonts'].items()
+                    ]
+                ))
+
+        # Unknown schema
+        else:
+            raise Exception("Unknown repository schema '{}'.".format(schema_identifier))
+
+        return Repository(
+            name=repo['name'],
+            families=remote_families,
+            schema_identifier=schema_identifier
+        )
 
     @staticmethod
     def load_from_path(path):
