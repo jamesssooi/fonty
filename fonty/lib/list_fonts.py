@@ -13,7 +13,7 @@ FONT_NAMEID_VARIANT = 2
 FONT_NAMEID_FAMILY_PREFFERED = 16
 FONT_NAMEID_VARIANT_PREFFERED = 17
 
-def get_user_fonts():
+def get_user_fonts() -> List[FontFamily]:
     '''Returns the list of installed user fonts in this system.'''
     platform_ = sys.platform
 
@@ -21,6 +21,10 @@ def get_user_fonts():
         return _get_user_fonts_osx()
     elif platform_ == 'win32' or platform_ == 'cygwin': # Windows
         return _get_user_fonts_win()
+    else:
+        raise Exception("Unsupported platform")
+
+    return None
 
 def _get_user_fonts_osx() -> List[FontFamily]:
     '''Returns the list of installed user fonts in this OSX system.'''
@@ -111,3 +115,32 @@ def parse_fonts(fonts: List[str]):
         })
 
     return families
+
+def get_user_fonts_count() -> int:
+    '''Returns the total number of installed user fonts in this system.'''
+    platform_ = sys.platform
+
+    if platform_ == 'darwin': # OSX
+        return _get_user_fonts_count_osx()
+    elif platform_ == 'win32' or platform_ == 'cygwin': # Windows
+        return _get_user_fonts_count_win()
+    else:
+        raise Exception("Unsupported platform")
+
+    return None
+
+def _get_user_fonts_count_osx() -> int:
+    '''Returns the total number of installed user fonts in this macOS system.'''
+    font_dir = os.path.join(os.path.expanduser('~/Library/Fonts'))
+    font_files = [name for name in os.listdir(font_dir)
+                  if os.path.isfile(os.path.join(font_dir, name))
+                  and not name.startswith('.')]
+    return len(font_files)
+
+def _get_user_fonts_count_win() -> int:
+    '''Returns the total number of installed user fonts in this Windows system.'''
+    font_dir = os.path.join(os.environ['WINDIR'], 'Fonts')
+    font_files = [os.path.join(font_dir, f) for f in os.listdir(font_dir)
+                  if os.path.isfile(os.path.join(font_dir, f)) and
+                  not f.startswith('.')]
+    return len(font_files)

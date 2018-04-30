@@ -5,7 +5,7 @@ from typing import List, Union
 
 from fonty.models.font import FontFamily, InstalledFont
 from fonty.lib.constants import APP_DIR, MANIFEST_PATH, JSON_DUMP_OPTS
-from fonty.lib.list_fonts import get_user_fonts
+from fonty.lib.list_fonts import get_user_fonts, get_user_fonts_count
 from fonty.lib.json_encoder import FontyJSONEncoder
 from fonty.lib.variants import FontAttribute
 from fonty.lib import utils
@@ -13,11 +13,29 @@ from fonty.lib import utils
 class Manifest:
     '''Manifest is a class to manage a manifest list of installed fonts on the user's system.'''
 
-    def __init__(self, families: List[FontFamily], last_updated: Union[str, datetime] = None):
+    # Class Attributes
+
+    schema_version: str = "0.1.0"
+    families: List[FontFamily]
+    last_updated: datetime
+    font_count: int
+
+    # Constructor
+
+    def __init__(
+        self,
+        families: List[FontFamily],
+        last_updated: Union[str, datetime] = None,
+        font_count: int = 0
+    ):
         self.families = families
         self.last_updated = utils.parse_date(last_updated)
+        self.font_count = font_count
 
-    def add(self, font: InstalledFont) -> 'Manifest':
+
+    # Class Methods
+
+    def add(self, font: InstalledFont) -> int:
         '''Add a font to the manifest.'''
 
         family_name = font.get_family_name()
@@ -32,7 +50,7 @@ class Manifest:
         existing_variants = [str(variant) for variant in family.get_variants()]
         variant = str(font.get_variant())
         if variant in existing_variants:
-            return None
+            return 0
 
         # Add font to FontFamily object
         family.fonts.append(font)
@@ -43,23 +61,24 @@ class Manifest:
         else:
             self.families[family_idx] = family
 
-        return self
+        self.font_count += 1
+        return 1
 
-    def remove(self, font: InstalledFont) -> 'Manifest':
+    def remove(self, font: InstalledFont) -> int:
         '''Remove a font from the manifest.'''
 
         # Load FontFamily
         family = self.get(font.family)
         family_idx = self.get_index(font.family)
         if family is None:
-            return self
+            return 0
 
         # Remove font from FontFamily
         font_idx = next((
             i for i, val in enumerate(family.fonts) if val.variant == font.variant
         ), None)
         if font_idx is None:
-            return self
+            return 0
         del family.fonts[font_idx]
 
         # Update the instance with the updated FontFamily
@@ -68,7 +87,8 @@ class Manifest:
         else:
             del self.families[family_idx]
 
-        return self
+        self.font_count -= 1
+        return 1
 
     def get(self, name: str) -> FontFamily:
         '''Load a font family from the manifest.'''
@@ -84,13 +104,23 @@ class Manifest:
         path = path if path else MANIFEST_PATH
 
         data = {
-            'lastUpdated': datetime.now().isoformat(),
-            'families': self.families
+            'schema_version': self.schema_version,
+            'last_modified': datetime.now().isoformat(),
+            'font_count': self.font_count,
+            'font_families': self.families
         }
 
         # Write to file (manifest.json)
         with open(path, 'w') as f:
             json.dump(data, f, cls=FontyJSONEncoder, **JSON_DUMP_OPTS)
+
+    def is_stale(self) -> bool:
+        '''Returns `true` if the total number of fonts in the manifest does not
+           match the total number of fonts in the system.
+        '''
+        return get_user_fonts_count() != self.font_count
+
+    # Static Methods
 
     @staticmethod
     def load(path: str = None) -> 'Manifest':
@@ -102,7 +132,7 @@ class Manifest:
 
         # Create FontFamily instances
         families = []
-        for family in data['families']:
+        for family in data['font_families']:
             fonts = [InstalledFont(
                 installed_path=font.get('localPath'),
                 registry_name=font.get('registryName', None),
@@ -111,12 +141,17 @@ class Manifest:
             ) for font in family['fonts']]
             families.append(FontFamily(name=family.get('name'), fonts=fonts))
 
-        return Manifest(families=families, last_updated=data['lastUpdated'])
+        return Manifest(
+            families=families,
+            font_count=data['font_count'],
+            last_updated=data['last_modified']
+        )
 
     @staticmethod
     def generate() -> 'Manifest':
         '''Generate a manifest list from the user's installed fonts.'''
         return Manifest(
             families=get_user_fonts(),
+            font_count=get_user_fonts_count(),
             last_updated=datetime.now()
         )
