@@ -110,14 +110,14 @@ class TelemetryEvent:
             self._send_request(d)
 
     def _send_request(self, d):
-        # try:
-        requests.post(
-            url=TELEMETRY_ENDPOINT,
-            data=json.dumps(d, cls=FontyJSONEncoder, **JSON_DUMP_OPTS),
-            headers={'Content-Type': 'application/json'}
-        )
-        # except:
-        #     pass
+        try:
+            requests.post(
+                url=TELEMETRY_ENDPOINT,
+                data=json.dumps(d, cls=FontyJSONEncoder, **JSON_DUMP_OPTS),
+                headers={'Content-Type': 'application/json'}
+            )
+        except:
+            pass
 
     @staticmethod
     def _get_os_info() -> Tuple[str, str]:
