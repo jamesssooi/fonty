@@ -2,17 +2,20 @@
 import os
 import json
 import shutil
+import timeit
 
 import click
 from termcolor import colored
 from fonty.lib.constants import APP_DIR, ROOT_DIR, COLOR_INPUT, CONFIG_FILENAME
 from fonty.lib.task import Task
+from fonty.lib import search
+from fonty.lib.telemetry import TelemetryEvent, TelemetryEventTypes
 from fonty.models.subscription import Subscription, AlreadySubscribedError
 from fonty.models.manifest import Manifest
-from fonty.lib import search
 
 def initial_setup() -> None:
     '''Perform initial fonty setup.'''
+    start_time = timeit.default_timer()
 
     # Print welcome message
     initial_setup_message = '\n'.join([
@@ -29,8 +32,36 @@ def initial_setup() -> None:
     # Generate initial config file
     generate_config()
 
+    click.echo('''
+
+Usage Data Notice
+-----------------
+fonty collects a few simple, anonymous and non-personal usage data (1) to
+better understand how users use fonty, and (2) to identify interesting font
+usage statistics and trends. You can always disable this permanently by turning
+off the `telemetry` setting in the fonty configuration file located in:
+
+    {}
+
+'''.format(os.path.join(APP_DIR, CONFIG_FILENAME)))
+
+    # Calculate execution time
+    end_time = timeit.default_timer()
+    total_time = round(end_time - start_time, 2)
+
+    # Send telemetry
+    TelemetryEvent(
+        status_code=0,
+        event_type=TelemetryEventTypes.FONTY_SETUP,
+        execution_time=total_time
+    ).send()
+
+    # Wait for confirmation
+    input('Press [ENTER] to continue...')
+
     # Print new line
     click.echo("")
+
 
 def generate_manifest() -> None:
     '''Generate a manifest list from the user's installed fonts.'''

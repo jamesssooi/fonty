@@ -17,6 +17,7 @@ from fonty.lib.config import CommonConfiguration
 
 class TelemetryEventTypes(Enum):
     '''An enum of possible telemetry event types.'''
+    FONTY_SETUP = 'FONTY_SETUP'
     FONT_INSTALL = 'FONT_INSTALL'
     FONT_UNINSTALL = 'FONT_UNINSTALL'
     FONT_LIST = 'FONT_LIST'
@@ -55,6 +56,9 @@ class TelemetryEvent:
     #: The current Python version.
     python_version: str
 
+    #: The time it took (in seconds) to run this command
+    execution_time: float
+
     #: The status code of the current command. 0 means success, >1 means error.
     status_code: int
 
@@ -65,6 +69,7 @@ class TelemetryEvent:
         self,
         status_code: int,
         event_type: TelemetryEventTypes,
+        execution_time: float = None,
         data: dict = None
     ) -> None:
         self.event_type = event_type
@@ -76,6 +81,7 @@ class TelemetryEvent:
             micro=sys.version_info.micro
         )
         self.os_family, self.os_version = TelemetryEvent._get_os_info()
+        self.execution_time = execution_time
         self.status_code = status_code
         self.data = data
 
@@ -86,13 +92,14 @@ class TelemetryEvent:
 
         # Create payload
         d = {
-            'event_type': self.event_type.value,
             'timestamp': self.timestamp,
+            'status_code': self.status_code,
+            'event_type': self.event_type.value,
+            'execution_time': self.execution_time,
             'fonty_version': self.fonty_version,
             'os_family': self.os_family,
             'os_version': self.os_version,
             'python_version': self.python_version,
-            'status_code': self.status_code,
             'data': self.data
         }
 
