@@ -4,7 +4,6 @@ import configparser
 
 import click
 from fonty.lib.constants import APP_DIR, CONFIG_FILENAME
-from fonty.setup import generate_config
 
 
 class CommonConfiguration(dict):
@@ -16,9 +15,6 @@ class CommonConfiguration(dict):
 
 def load_config(path: str = os.path.join(APP_DIR, CONFIG_FILENAME)):
     '''Load configuration values from the configuration file.'''
-    if not os.path.isfile(path):
-        click.echo('Unable to find configuration file. Regenerating...')
-        generate_config()
 
     # Parse configuration files
     config = configparser.ConfigParser()
