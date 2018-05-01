@@ -56,7 +56,7 @@ class TelemetryEvent:
     #: The current Python version.
     python_version: str
 
-    #: The time it took (in seconds) to run this command
+    #: The time it took (in seconds) to execute this event.
     execution_time: float
 
     #: The status code of the current command. 0 means success, >1 means error.
