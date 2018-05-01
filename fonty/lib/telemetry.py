@@ -1,17 +1,22 @@
 '''fonty.lib.telemetry'''
 import sys
 import platform
+import threading
 from enum import Enum
 from datetime import datetime
 from typing import Tuple
 
 import distro
+import requests
 from fonty.version import __version__
+from fonty.lib.constants import TELEMETRY_ENDPOINT
+from fonty.lib.config import CommonConfiguration
 
 
 class TelemetryEventTypes(Enum):
     '''An enum of possible telemetry event types.'''
     INSTALL_FONTS = 'INSTALL_FONTS'
+    FONT_SEARCH_NO_RESULTS = 'FONT_SEARCH_NO_RESULTS'
     UNINSTALL_FONTS = 'UNINSTALL_FONTS'
     CONVERT_FONTS = 'CONVERT_FONTS'
     ADD_SOURCE = 'ADD_SOURCE'
@@ -43,6 +48,9 @@ class TelemetryEvent:
     #: The operating system version of the current environment.
     os_version: str
 
+    #: The current Python version.
+    python_version: str
+
     #: The additional data that is relevant to this telemetry event.
     data: dict
 
@@ -54,12 +62,41 @@ class TelemetryEvent:
         self.event_type = event_type
         self.timestamp = datetime.now()
         self.fonty_version = __version__
+        self.python_version = '{major}.{minor}.{micro}'.format(
+            major=sys.version_info.major,
+            minor=sys.version_info.minor,
+            micro=sys.version_info.micro
+        )
         self.os_family, self.os_version = TelemetryEvent._get_os_info()
         self.data = data
 
-    def send(self, force=False) -> None:
+    def send(self, force=False, asynchronous=True) -> None:
         '''Sends the telemetry data to the central logging server.'''
-        pass
+        if not CommonConfiguration.telemetry and not force:
+            return
+
+        # Create payload
+        d = {
+            'event_type': self.event_type.value,
+            'timestamp': self.timestamp,
+            'fonty_version': self.fonty_version,
+            'os_family': self.os_family,
+            'os_version': self.os_version,
+            'python_version': self.python_version,
+            'data': self.data
+        }
+
+        # Send request
+        if asynchronous:
+            threading.Thread(target=self._send_request, args=(d,)).start()
+        else:
+            self._send_request(d)
+
+    def _send_request(self, d):
+        try:
+            requests.post(TELEMETRY_ENDPOINT, data=d)
+        except:
+            pass
 
     @staticmethod
     def _get_os_info() -> Tuple[str, str]:
