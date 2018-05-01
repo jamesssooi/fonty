@@ -45,7 +45,7 @@ Append any command with `--help` for a detailed help text of what you can do.
 
 ### 2.1 &nbsp;&nbsp; Installing and uninstalling fonts
 #### 2.1.1 &nbsp;&nbsp; Installing fonts
-Downloading and installing a font from [subscribed sources](#):
+Downloading and installing a font from [subscribed sources](#4--font-sources):
 ```bash
 > fonty install Lato
 ```
@@ -60,7 +60,7 @@ Download only the bold and bold italic variants of a font:
 > fonty install Lato -v 700,700i
 ```
 
-*__Further reading__: [`fonty install`](#)*
+*__Further reading__: [`fonty install`](#31--fonty-install)*
 
 ---
 
@@ -76,7 +76,7 @@ Uninstalling only a specific variant:
 > fonty uninstall Lato -v 900i
 ```
 
-*__Further reading__: [`fonty uninstall`](#)*
+*__Further reading__: [`fonty uninstall`](#32--fonty-uninstall)*
 
 ---
 
@@ -91,7 +91,7 @@ List further details about a specific installed font
 > fonty list Lato
 ```
 
-*__Further reading__: [`fonty list`](#)*
+*__Further reading__: [`fonty list`](#33--fonty-list)*
 
 ---
 
@@ -108,7 +108,7 @@ Generate webfonts into a specific directory:
 > fonty webfont *.ttf -o ./webfonts
 ```
 
-Download a font from your [subscribed sources](#) and convert:
+Download a font from your [subscribed sources](#4--font-sources) and convert:
 ```bash
 > fonty webfont --download Lato
 ```
@@ -118,12 +118,12 @@ Convert an existing installed font on your computer:
 > fonty webfont --installed Lato
 ```
 
-*__Further reading__: [`fonty webfont`](#)*
+*__Further reading__: [`fonty webfont`](#34--fonty-webfont)*
 
 ---
 
 ### 2.4 &nbsp;&nbsp; Managing font sources
-**fonty** searches and downloads fonts from your list of subscribed sources. Upon installation, fonty automatically subscribes to a few [default sources](#). Here's how you can manage your subscriptions:
+**fonty** searches and downloads fonts from your list of subscribed sources. Upon installation, fonty automatically subscribes to a few [default sources](#41--default-sources). Here's how you can manage your subscriptions:
 
 Adding a new font source:
 ```bash
@@ -149,7 +149,7 @@ Updating sources:
 > fonty source update
 ```
 
-*__Further reading__: [`fonty source`](#), [Font Sources](#)*
+*__Further reading__: [`fonty source`](#35--fonty-source), [Font Sources](#4--font-sources)*
 
 ---
 
@@ -168,12 +168,12 @@ Updating sources:
 ```
 **Installs a font into the computer or into a directory.**
 
-In it's default behaviour, **fonty** searches through your [subscribed sources](#) to download and install the specified font automatically. Alternatively, it can also support downloading `.ttf`/`.otf` files directly, or if a `--files` flag is passed, **fonty** can help you install local font files on your computer.
+In it's default behaviour, **fonty** searches through your [subscribed sources](#4--font-sources) to download and install the specified font automatically. Alternatively, it can also support downloading `.ttf`/`.otf` files directly, or if a `--files` flag is passed, **fonty** can help you install local font files on your computer.
 
 ##### Options
 
 * **`-v`/`--variants`** `text`
-    * A comma separated list of the [Fonty Attribute](#) format, with no spaces in between.
+    * A comma separated list of variants with no spaces in between.
 * **`-o`/`--output`** `path`
     * Output fonts into this directory. If supplied, the fonts won't be installed into the system.
 * **`--files`** `flag`
@@ -193,7 +193,7 @@ This command uninstalls the specified font from the computer and deletes them in
 ##### Options
 
 * **`-v`/`--variants`** `text`
-    * A list of comma separated values with no spaces in between using the [Fonty Attribute](#) format.
+    * A list of comma separated values of font variants with no spaces in between.
 
 ---
 
@@ -229,7 +229,7 @@ This command convert fonts to `.woff` and `.woff2` formats, as well as generate 
 
 **fonty's** default behaviour is to convert a list of font files that you have provided. You can specify glob patterns for your file paths. Alternatively, it can also download fonts using the `--download` flag, or use an existing installed font on your computer using the `--installed` flag.
 
-The [Web Open Font Format (WOFF)](#) is a widely supported font format for web browsers, and should be sufficient for a large majority of use cases. You can read the compatibility tables on [caniuse.com](https://caniuse.com/#search=woff).
+The [Web Open Font Format (WOFF)](https://developer.mozilla.org/en-US/docs/Web/Guide/WOFF) is a widely supported font format for web browsers, and should be sufficient for a large majority of use cases. You can read the compatibility tables on [caniuse.com](https://caniuse.com/#search=woff).
 
 ##### Options
 
@@ -295,14 +295,14 @@ With **fonty**, you can subscribe to multiple font sources at the same time to h
 Right out of the box, **fonty** is automatically subscribed to a few default font sources so you can enjoy the benefits of using **fonty** rightaway. These default sources are:
 
 1. **fonty's Google Fonts Repository**
-    * The entire [Google Fonts](#) repository, in a format that **fonty** understands.
+    * The entire [Google Fonts](https://fonts.google.com) repository, in a format that **fonty** understands.
     * **URL:** https://sources.fonty.io/googlefonts
 
 2. **fonty's Open Source Fonts Repository**
     * A self-maintained list of open source fonts across the web.
     * **URL**: https://sources.fonty.io/fontyfonts
 
-You can unsubscribe and subscribe from these sources at anytime. See the [`fonty source`](#) command.
+You can unsubscribe and subscribe from these sources at anytime. See the [`fonty source`](#35--fonty-source) command.
 
 ### 4.2 &nbsp;&nbsp; Hosting your own
 
