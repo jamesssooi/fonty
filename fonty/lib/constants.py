@@ -16,6 +16,9 @@ SUBSCRIPTIONS_PATH = os.path.join(APP_DIR, 'subscriptions.json')
 MANIFEST_PATH = os.path.join(APP_DIR, 'manifest.json')
 REPOSITORY_DIR = os.path.join(APP_DIR, 'repositories')
 
+# Filenames
+CONFIG_FILENAME = 'fonty.conf'
+
 # Colors
 COLOR_OK = 'green'
 COLOR_ERR = 'red'
