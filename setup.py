@@ -9,6 +9,7 @@ install_requires = [
     'brotlipy>=0.7.0',
     'click>=6.7',
     'colorama>=0.3.9',
+    'distro>=1.2.0; platform_system=="Linux"',
     'fonttools>=3.13.1',
     'pypiwin32>=220; platform_system=="Windows"',
     'python-dateutil>=2.6.0',
@@ -51,7 +52,7 @@ setup(
     author='James Ooi',
     author_email='wengteikooi@gmail.com',
     url='https://github.com/jamesssooi/fonty',
-    description='fonty is a simple command line tool for installing, managing and converting fonts.',
+    description='fonty is a command line tool for installing, managing and converting fonts.',
     keywords='font fonts typeface cli tool install uninstall convert manage',
     classifiers=[
         'Development Status :: 4 - Beta',

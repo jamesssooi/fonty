@@ -7,7 +7,6 @@ from enum import Enum
 from datetime import datetime
 from typing import Tuple
 
-import distro
 import requests
 from fonty.version import __version__
 from fonty.lib.json_encoder import FontyJSONEncoder
@@ -133,6 +132,7 @@ class TelemetryEvent:
             win = sys.getwindowsversion() # pylint: disable=E1101
             version = '{}.{}-{}-{}'.format(win.major, win.minor, win.build, win.platform)
         elif family.lower() == 'linux':
+            import distro
             dist = distro.linux_distribution(full_distribution_name=False)
             version = '{}-{}'.format(dist[0], dist[1])
         else:
