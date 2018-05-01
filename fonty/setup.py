@@ -5,7 +5,7 @@ import shutil
 
 import click
 from termcolor import colored
-from fonty.lib.constants import APP_DIR, ROOT_DIR, COLOR_INPUT
+from fonty.lib.constants import APP_DIR, ROOT_DIR, COLOR_INPUT, CONFIG_FILENAME
 from fonty.lib.task import Task
 from fonty.models.subscription import Subscription, AlreadySubscribedError
 from fonty.models.manifest import Manifest
@@ -79,7 +79,7 @@ def generate_config() -> None:
 
     # Copy default configuration file to app directory
     path_to_default = os.path.join(ROOT_DIR, 'defaults', 'fonty.conf')
-    dest_path = os.path.join(APP_DIR, 'fonty.conf')
+    dest_path = os.path.join(APP_DIR, CONFIG_FILENAME)
     shutil.copyfile(path_to_default, dest_path)
 
     # Done!
@@ -87,5 +87,5 @@ def generate_config() -> None:
 
 def is_first_run() -> bool:
     '''Check if fonty has already been setup on this system.'''
-    path_to_config = os.path.join(APP_DIR, 'fonty.conf')
+    path_to_config = os.path.join(APP_DIR, CONFIG_FILENAME)
     return not os.path.isfile(path_to_config)
