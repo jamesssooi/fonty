@@ -2,13 +2,15 @@
 import shutil
 import sys
 import time
+import timeit
 
 import click
 from termcolor import colored
 from fonty.lib import search
-from fonty.lib.task import Task, TaskStatus
+from fonty.lib.task import Task
 from fonty.lib.constants import COLOR_INPUT, SEARCH_INDEX_PATH
 from fonty.models.subscription import Subscription
+from fonty.lib.telemetry import TelemetryEvent, TelemetryEventTypes
 
 
 @click.group('source', short_help='Manage font sources')
@@ -21,6 +23,7 @@ def cli_source():
 @click.argument('url')
 def add(url):
     '''Add a new source.'''
+    start_time = timeit.default_timer()
 
     # Add to subscription list and fetch remote repository
     task = Task("Loading '{}'...".format(colored(url, COLOR_INPUT)))
@@ -41,12 +44,24 @@ def add(url):
     print('')
     sub.pprint(output=True)
 
+    # Calculate execution time
+    end_time = timeit.default_timer()
+    total_time = round(end_time - start_time, 2)
+
+    # Send telemetry
+    TelemetryEvent(
+        status_code=0,
+        event_type=TelemetryEventTypes.SOURCE_ADD,
+        execution_time=total_time
+    ).send()
+
 
 @cli_source.command(short_help='Remove a source')
 @click.argument('identifier', nargs=-1)
 @click.pass_context
 def remove(ctx, identifier: str):
     '''Remove a source.'''
+    start_time = timeit.default_timer()
 
     # Process arguments and options
     identifier = ' '.join(str(x) for x in identifier)
@@ -72,12 +87,25 @@ def remove(ctx, identifier: str):
     # Reindex fonts
     task = Task('Reindexing fonts...')
     count = search.unindex_fonts(sub.local_path)
-    task.complete("Removed {} font families from index".format(colored(count, 'cyan')))
+    task.complete("Removed {} font families from index".format(colored(str(count), 'cyan')))
+
+    # Calculate execution time
+    end_time = timeit.default_timer()
+    total_time = round(end_time - start_time, 2)
+
+    # Send telemetry
+    TelemetryEvent(
+        status_code=0,
+        execution_time=total_time,
+        event_type=TelemetryEventTypes.SOURCE_REMOVE,
+    ).send()
 
 
 @cli_source.command(name='list', short_help='List subscribed sources')
 def list_():
     '''List all subscribed sources.'''
+    start_time = timeit.default_timer()
+
     subscriptions = Subscription.load_entries()
     count = 1
     for sub in subscriptions:
@@ -98,6 +126,17 @@ def list_():
 
         count += 1
 
+    # Calculate execution time
+    end_time = timeit.default_timer()
+    total_time = round(end_time - start_time, 2)
+
+    # Send telemetry
+    TelemetryEvent(
+        status_code=0,
+        execution_time=total_time,
+        event_type=TelemetryEventTypes.SOURCE_LIST
+    ).send()
+
 
 @cli_source.command(short_help='Check sources for updates')
 @click.option(
@@ -106,6 +145,7 @@ def list_():
     help='Force all sources to update.')
 def update(force: bool):
     '''Check sources for updates.'''
+    start_time = timeit.default_timer()
 
     # Delete search index directory if `force` flag is True
     if force:
@@ -132,3 +172,14 @@ def update(force: bool):
         search.index_fonts(updated_repo, sub.local_path)
 
         task.complete("Updated '{}'".format(name))
+
+    # Calculate execution time
+    end_time = timeit.default_timer()
+    total_time = round(end_time - start_time, 2)
+
+    # Send telemetry
+    TelemetryEvent(
+        status_code=0,
+        execution_time=total_time,
+        event_type=TelemetryEventTypes.SOURCE_UPDATE
+    ).send()

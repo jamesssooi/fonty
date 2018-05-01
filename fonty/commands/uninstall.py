@@ -1,5 +1,6 @@
 '''fonty.commands.uninstall.py: Command-line interface to uninstall fonts.'''
 import sys
+import timeit
 
 import click
 from termcolor import colored
@@ -7,6 +8,7 @@ from fonty.lib.task import Task
 from fonty.lib.variants import FontAttribute
 from fonty.lib.constants import COLOR_INPUT
 from fonty.lib.uninstall import uninstall_fonts
+from fonty.lib.telemetry import TelemetryEvent, TelemetryEventTypes
 from fonty.models.manifest import Manifest
 from fonty.models.font import FontFamily
 
@@ -38,6 +40,8 @@ def cli_uninstall(ctx, name, variants):
 
     '''
 
+    start_time = timeit.default_timer()
+
     # Process arguments and options
     name = ' '.join(str(x) for x in name)
     if variants:
@@ -62,6 +66,14 @@ def cli_uninstall(ctx, name, variants):
     family = manifest.get(name)
     if family is None:
         task.error("No font family found with the name '{}'".format(colored(name, COLOR_INPUT)))
+
+        # Send telemetry
+        TelemetryEvent(
+            status_code=1,
+            event_type=TelemetryEventTypes.FONT_UNINSTALL,
+            data={'font_name': name}
+        ).send()
+
         sys.exit(1)
 
     # Check if variants exists
@@ -71,6 +83,14 @@ def cli_uninstall(ctx, name, variants):
             task.error("Variant(s) [{}] not available".format(
                 colored(', '.join([str(v) for v in invalid_variants]), COLOR_INPUT)
             ))
+
+            # Send telemetry
+            TelemetryEvent(
+                status_code=1,
+                event_type=TelemetryEventTypes.FONT_UNINSTALL,
+                data={'font_name': name}
+            ).send()
+
             sys.exit(1)
 
     if not variants:
@@ -107,3 +127,16 @@ def cli_uninstall(ctx, name, variants):
         ])
     )
     task.complete(message)
+
+    # Calculate execution time
+    end_time = timeit.default_timer()
+    total_time = round(end_time - start_time, 2)
+    click.echo('Done in {}s'.format(total_time))
+
+    # Send telemetry
+    TelemetryEvent(
+        status_code=0,
+        event_type=TelemetryEventTypes.FONT_UNINSTALL,
+        execution_time=total_time,
+        data={'font_name': name}
+    ).send()

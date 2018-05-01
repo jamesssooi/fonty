@@ -3,7 +3,7 @@ import os
 import json
 import hashlib
 from datetime import datetime
-from typing import List, Tuple, Union
+from typing import List, Tuple, Union, Any, cast
 
 import timeago
 import requests
@@ -27,9 +27,29 @@ class Subscription:
         `repo` (Repository): The repository this subscription contains.
     '''
 
-    def __init__(self, name: str, remote_path: str,
-                 local_path: str = None, repo: Repository = None,
-                 last_updated: Union[str, datetime] = None) -> None:
+    #: The name of the remote source.
+    name: str
+
+    #: The remote path to the remote copy of the source.
+    remote_path: str
+
+    #: The local path to the local copy of the source.
+    local_path: str
+
+    #: The repository instance.
+    repository: Repository
+
+    #: The timestamp of when the local copy was last synced with the remote copy.
+    last_updated: datetime
+
+    def __init__(
+        self,
+        name: str,
+        remote_path: str,
+        local_path: str = None,
+        repo: Repository = None,
+        last_updated: Union[str, datetime] = None
+    ) -> None:
         self.name = name
         self.remote_path = remote_path
         self.local_path = local_path
@@ -37,9 +57,10 @@ class Subscription:
         self.id_ = hashlib.md5(self.remote_path.encode('utf-8')).hexdigest()
 
         # Parse last updated date
-        self.last_updated = last_updated
-        if isinstance(self.last_updated, str):
-            self.last_updated = dateutil.parser.parse(self.last_updated)
+        if isinstance(last_updated, str):
+            self.last_updated = dateutil.parser.parse(cast(str, last_updated))
+        else:
+            self.last_updated = cast(datetime, last_updated)
 
     def fetch(self, save_to_local: bool = False) -> Tuple['Subscription', bool]:
         '''Update local copy of repository with remote.
@@ -148,7 +169,7 @@ class Subscription:
             return
 
         # Get list of subscriptions from subscriptions.json
-        data = {}
+        data: dict = {}
         with open(SUBSCRIPTIONS_PATH, encoding='utf-8') as f:
             data = json.loads(f.read())
 
@@ -181,25 +202,27 @@ class Subscription:
         name = colored(repo.name, 'cyan') if ansi else repo.name
         url = colored(self.remote_path, attrs=['dark']) if ansi else self.remote_path
         id_ = colored(self.id_, attrs=['dark']) if ansi else self.id_
-        count = colored(len(repo.families), attrs=['dark']) if ansi else len(repo.families)
+        count = colored(str(len(repo.families)), attrs=['dark']) \
+                if ansi else str(len(repo.families))
 
         last_updated = timeago.format(self.last_updated)
         last_updated = colored(last_updated, attrs=['dark']) if ansi else last_updated
 
-        lines = [line.format(name=name,
-                             url=url,
-                             id_=id_,
-                             count=count,
-                             last_updated=last_updated,)
-                 for line in format_]
+        lines = [line.format(
+            name=name,
+            url=url,
+            id_=id_,
+            count=count,
+            last_updated=last_updated
+        ) for line in format_]
 
         if output:
             print('\n'.join(lines))
 
         if join:
             return '\n'.join(lines)
-        else:
-            return lines
+
+        return lines
 
     @staticmethod
     def update_entry(subscription: 'Subscription') -> None:
@@ -210,7 +233,7 @@ class Subscription:
         '''
 
         # Get list of subscriptions from subscriptions.json
-        data = {}
+        data: Any = {}
         if os.path.isfile(SUBSCRIPTIONS_PATH):
             with open(SUBSCRIPTIONS_PATH, encoding='utf-8') as f:
                 content = f.read()
@@ -290,12 +313,13 @@ class Subscription:
     @staticmethod
     def get(id_: str) -> 'Subscription':
         '''Finds and returns a subscription.'''
-
         subscriptions = Subscription.load_entries()
 
-        return next((sub for sub in subscriptions if sub.remote_path == id_ or
-                                                     sub.name == id_ or
-                                                     sub.id_ == id_), None)
+        return next((
+            sub for sub in subscriptions if sub.remote_path == id_
+            or sub.name == id_
+            or sub.id_ == id_
+        ), None)
 
 
 class AlreadySubscribedError(Exception):

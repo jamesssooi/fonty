@@ -1,5 +1,5 @@
-'''terminal_size.py: Cross platform module to retrieve size of terminal/cmd
-
+'''fonty.lib.terminal_size
+Cross platform module to retrieve size of terminal/cmd
 Adapted from: https://gist.github.com/jtriley/1108174
 '''
 import os

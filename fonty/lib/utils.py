@@ -1,4 +1,4 @@
-'''utils.py: Utility functions.'''
+'''fonty.lib.utils'''
 import math
 import os
 from datetime import datetime
@@ -7,31 +7,20 @@ from typing import Union, List
 import dateutil.parser
 from fonty.lib.constants import APP_DIR
 
-def xstr(s):
+def xstr(s) -> str:
+    '''Returns an empty string if object is of `NoneType`'''
     return '' if s is None else str(s)
 
-def empty_string_if_none(obj, fn):
-    if obj is None:
-        return ''
-    else:
-        return fn(obj)
-
-def exists(obj):
+def exists(obj) -> bool:
+    '''Returns `true` if object is not of `NoneType`'''
     return obj is not None
 
-# def tabularize(data, keys=None, gutter_char=' '):
-#     '''Tabularize a dictionary.'''
-#     keys = keys if keys is not None else list(data[0].keys())
-#     max_len = {k: max(len(v[k]) for v in data) for k in keys}
-#     lines = []
-#     for value in data:
-#         lines.append(gutter_char.join(
-#             str(value[key]).ljust(max_len[key]) for key in keys
-#         ))
-#     return '\n'.join(lines)
-
-def tabularize(data: List[dict], keys: List[str] = None,
-               gutter: str = ' ', join: bool = True):
+def tabularize(
+    data: List[dict],
+    keys: List[str] = None,
+    gutter: str = ' ',
+    join: bool = True
+) -> Union[List[str], str]:
     '''Tabularize a list of dictionaries.'''
 
     # Load all keys if no explicit keys are provided
@@ -52,11 +41,11 @@ def tabularize(data: List[dict], keys: List[str] = None,
 
     if join:
         return '\n'.join(lines)
-    else:
-        return lines
+
+    return lines
 
 def check_dirs(path: str = None) -> str:
-    '''Check if directory exists. If not, create one.'''
+    '''Check if a directory exists. If not, create one.'''
     if path is None:
         path = APP_DIR
 

@@ -1,5 +1,6 @@
 '''fonty.commands.list.py: Command-line interface to list user installed fonts.'''
 import sys
+import timeit
 from functools import reduce
 from itertools import zip_longest
 
@@ -11,6 +12,7 @@ from fonty.lib import utils
 from fonty.lib.terminal_size import get_terminal_size
 from fonty.lib.constants import COLOR_INPUT
 from fonty.lib.task import Task
+from fonty.lib.telemetry import TelemetryEvent, TelemetryEventTypes
 
 @click.command('list', short_help='List installed fonts')
 @click.argument(
@@ -38,6 +40,8 @@ def cli_list(name: str, rebuild: bool):
       >>> fonty list "Open Sans"
     '''
 
+    start_time = timeit.default_timer()
+
     # Process arguments
     name = ' '.join(str(x) for x in name)
 
@@ -49,6 +53,19 @@ def cli_list(name: str, rebuild: bool):
         task.complete('Rebuilt font manifest with {count} font families found.'.format(
             count=len(manifest.families)
         ))
+
+        # Calculate execution time
+        end_time = timeit.default_timer()
+        total_time = round(end_time - start_time, 2)
+        click.echo('Done in {}s'.format(total_time))
+
+        # Send telemetry
+        TelemetryEvent(
+            status_code=0,
+            execution_time=total_time,
+            event_type=TelemetryEventTypes.FONT_LIST_REBUILD
+        ).send()
+
         sys.exit(0)
 
     # Check if manifest.json exists
@@ -72,6 +89,18 @@ def cli_list(name: str, rebuild: bool):
         list_all_fonts(manifest)
     else:
         list_font(manifest, name)
+
+    # Calculate execution time
+    end_time = timeit.default_timer()
+    total_time = round(end_time - start_time, 2)
+
+    # Send telemetry
+    TelemetryEvent(
+        status_code=0,
+        event_type=TelemetryEventTypes.FONT_LIST,
+        execution_time=total_time,
+        data={'font_name': name}
+    ).send()
 
 def list_all_fonts(manifest: Manifest):
     '''List all installed fonts in this system.'''

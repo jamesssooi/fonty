@@ -30,7 +30,7 @@ class Repository(object):
         name: str,
         families: List[RemoteFontFamily] = None,
         schema_identifier: str = None
-    ):
+    ) -> None:
         self.name = name
         self.families = families
         self.schema_identifier = schema_identifier if schema_identifier else self.schema_identifier

@@ -10,6 +10,7 @@ from termcolor import colored
 from fonty.lib.constants import COLOR_INPUT
 from fonty.lib.task import Task, TaskStatus
 from fonty.lib.progress import ProgressBar
+from fonty.lib.telemetry import TelemetryEvent, TelemetryEventTypes
 from fonty.models.manifest import Manifest
 from fonty.models.font import Font, FontFormat
 from fonty.commands.install import resolve_download, create_task_printer
@@ -75,7 +76,7 @@ def cli_webfont(ctx, args: List[str], is_installed: bool, is_download: bool, out
     # Resolve fonts
     if is_download:
         arg = ' '.join(str(s) for s in args)
-        remote_fonts = resolve_download(arg, print_task=True)
+        remote_fonts, font_source = resolve_download(arg, print_task=True)
 
         # Download fonts
         task = Task("Downloading ({}) font files...".format(len(remote_fonts)))
@@ -87,20 +88,28 @@ def cli_webfont(ctx, args: List[str], is_installed: bool, is_download: bool, out
         arg = ' '.join(str(s) for s in args)
         manifest = Manifest.load()
         family = manifest.get(arg)
+        if not family:
+            task = Task(
+                status=TaskStatus.ERROR,
+                message="No font(s) found for '{}'".format(colored(arg, COLOR_INPUT)),
+                asynchronous=False
+            )
+            sys.exit(1)
         fonts = family.fonts
-
     else:
         # On Unix based systems, a glob argument of *.ttf will be automatically
         # expanded by the shell. Meanwhile on Windows systems or if the pattern
         # is surrounded with quotes, it will be passed to this function as is.
         # Here we iterate through it and run the glob function anyway to be safe
         font_paths = [glob.glob(arg) for arg in args]
-        font_paths = [item for sublist in font_paths for item in sublist] # Flatten list
-        font_paths = [os.path.abspath(path) for path in font_paths] # Get absolute paths
+        flat_font_paths = [item for sublist in font_paths for item in sublist] # Flatten list
+        abs_font_paths = [os.path.abspath(path) for path in flat_font_paths] # Get absolute paths
         if not font_paths:
-            task.error("No font files found with the pattern '{}'".format(colored(args[0], COLOR_INPUT)))
+            task.error("No font files found with the pattern '{}'".format(
+                colored(args[0], COLOR_INPUT
+            )))
             sys.exit(1)
-        fonts = [Font(path_to_font=path) for path in font_paths]
+        fonts = [Font(path_to_font=path) for path in abs_font_paths]
 
     # Print task message
     task = Task('Generating webfonts for ({}) fonts...'.format(len(fonts)))
@@ -108,7 +117,7 @@ def cli_webfont(ctx, args: List[str], is_installed: bool, is_download: bool, out
 
     # Convert files to web-compatible formats (woff, woff2 and otf/ttf)
     output_dir = output if output else os.getcwd()
-    results = []
+    results: List[dict] = []
     for font in fonts:
 
         completed_count_str = colored('({count}/{total})'.format(
@@ -207,8 +216,20 @@ def cli_webfont(ctx, args: List[str], is_installed: bool, is_download: bool, out
 
     # Calculate execution time
     end_time = timeit.default_timer()
-    total_time = end_time - start_time
-    click.echo('Done in {}s'.format(round(total_time, 2)))
+    total_time = round(end_time - start_time, 2)
+    click.echo('Done in {}s'.format(total_time))
+
+    # Send telemetry
+    TelemetryEvent(
+        status_code=0,
+        event_type=TelemetryEventTypes.FONT_CONVERT,
+        execution_time=total_time,
+        data={
+            'source': font_source if is_download else 'system' if is_installed else 'local_files',
+            'font_name': arg if is_download or is_installed else '',
+            'output_dir': bool(output)
+        }
+    ).send()
 
 
 # TEMPLATES

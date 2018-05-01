@@ -6,6 +6,8 @@ import click
 import colorama
 
 from fonty.version import __version__
+from fonty.setup import initial_setup, is_first_run
+from fonty.lib.config import load_config
 
 # Import CLI commands
 from fonty.commands.install import cli_install
@@ -13,8 +15,6 @@ from fonty.commands.uninstall import cli_uninstall
 from fonty.commands.source import cli_source
 from fonty.commands.list import cli_list
 from fonty.commands.webfont import cli_webfont
-
-from fonty.setup import initial_setup, is_first_run
 
 # Enable colored output on Windows
 colorama.init()
@@ -47,6 +47,10 @@ def main(ctx, version: bool):
     if is_first_run():
         initial_setup()
 
+    # Load configuration values
+    load_config()
+
+    # Ignore the rest of this function if there is an invoked subcommand
     if ctx.invoked_subcommand:
         return
 

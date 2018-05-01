@@ -3,6 +3,7 @@
 import os
 import sys
 import inspect
+from typing import Dict, Any
 from appdirs import user_data_dir
 from termcolor import colored
 
@@ -15,6 +16,12 @@ SEARCH_INDEX_PATH = os.path.join(APP_DIR, 'index')
 SUBSCRIPTIONS_PATH = os.path.join(APP_DIR, 'subscriptions.json')
 MANIFEST_PATH = os.path.join(APP_DIR, 'manifest.json')
 REPOSITORY_DIR = os.path.join(APP_DIR, 'repositories')
+
+# Filenames
+CONFIG_FILENAME = 'fonty.conf'
+
+# URLs
+TELEMETRY_ENDPOINT = 'https://analytics.fonty.io/v1'
 
 # Colors
 COLOR_OK = 'green'
@@ -30,7 +37,7 @@ IS_x64 = sys.maxsize > 2**32
 IS_WINDOWS = os.name == 'nt'
 
 # Configuration
-JSON_DUMP_OPTS = {'indent': 2, 'separators': (',', ': ')}
+JSON_DUMP_OPTS: Dict[str, Any] = {'indent': 2, 'separators': (',', ': ')}
 
 # Icons
 ICON_WAITING = {
