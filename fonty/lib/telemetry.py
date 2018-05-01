@@ -1,5 +1,6 @@
 '''fonty.lib.telemetry'''
 import sys
+import json
 import platform
 import threading
 from enum import Enum
@@ -9,19 +10,22 @@ from typing import Tuple
 import distro
 import requests
 from fonty.version import __version__
-from fonty.lib.constants import TELEMETRY_ENDPOINT
+from fonty.lib.json_encoder import FontyJSONEncoder
+from fonty.lib.constants import TELEMETRY_ENDPOINT, JSON_DUMP_OPTS
 from fonty.lib.config import CommonConfiguration
 
 
 class TelemetryEventTypes(Enum):
     '''An enum of possible telemetry event types.'''
-    INSTALL_FONTS = 'INSTALL_FONTS'
-    FONT_SEARCH_NO_RESULTS = 'FONT_SEARCH_NO_RESULTS'
-    UNINSTALL_FONTS = 'UNINSTALL_FONTS'
-    CONVERT_FONTS = 'CONVERT_FONTS'
-    ADD_SOURCE = 'ADD_SOURCE'
-    REMOVE_SOURCE = 'REMOVE_SOURCE'
-    UPDATE_SOURCE = 'UPDATE_SOURCE'
+    FONT_INSTALL = 'FONT_INSTALL'
+    FONT_UNINSTALL = 'FONT_UNINSTALL'
+    FONT_LIST = 'FONT_LIST'
+    FONT_LIST_REBUILD = 'FONT_LIST_REBUILD'
+    FONT_CONVERT = 'FONT_CONVERT'
+    SOURCE_LIST = 'SOURCE_LIST'
+    SOURCE_ADD = 'SOURCE_ADD'
+    SOURCE_REMOVE = 'SOURCE_REMOVE'
+    SOURCE_UPDATE = 'SOURCE_UPDATE'
 
 
 class TelemetryEvent:
@@ -51,11 +55,15 @@ class TelemetryEvent:
     #: The current Python version.
     python_version: str
 
+    #: The status code of the current command. 0 means success, >1 means error.
+    status_code: int
+
     #: The additional data that is relevant to this telemetry event.
     data: dict
 
     def __init__(
         self,
+        status_code: int,
         event_type: TelemetryEventTypes,
         data: dict = None
     ) -> None:
@@ -68,6 +76,7 @@ class TelemetryEvent:
             micro=sys.version_info.micro
         )
         self.os_family, self.os_version = TelemetryEvent._get_os_info()
+        self.status_code = status_code
         self.data = data
 
     def send(self, force=False, asynchronous=True) -> None:
@@ -83,6 +92,7 @@ class TelemetryEvent:
             'os_family': self.os_family,
             'os_version': self.os_version,
             'python_version': self.python_version,
+            'status_code': self.status_code,
             'data': self.data
         }
 
@@ -93,10 +103,14 @@ class TelemetryEvent:
             self._send_request(d)
 
     def _send_request(self, d):
-        try:
-            requests.post(TELEMETRY_ENDPOINT, data=d)
-        except:
-            pass
+        # try:
+        requests.post(
+            url=TELEMETRY_ENDPOINT,
+            data=json.dumps(d, cls=FontyJSONEncoder, **JSON_DUMP_OPTS),
+            headers={'Content-Type': 'application/json'}
+        )
+        # except:
+        #     pass
 
     @staticmethod
     def _get_os_info() -> Tuple[str, str]:

@@ -6,9 +6,10 @@ import time
 import click
 from termcolor import colored
 from fonty.lib import search
-from fonty.lib.task import Task, TaskStatus
+from fonty.lib.task import Task
 from fonty.lib.constants import COLOR_INPUT, SEARCH_INDEX_PATH
 from fonty.models.subscription import Subscription
+from fonty.lib.telemetry import TelemetryEvent, TelemetryEventTypes
 
 
 @click.group('source', short_help='Manage font sources')
@@ -41,6 +42,9 @@ def add(url):
     print('')
     sub.pprint(output=True)
 
+    # Send telemetry
+    TelemetryEvent(status_code=0, event_type=TelemetryEventTypes.SOURCE_ADD).send()
+
 
 @cli_source.command(short_help='Remove a source')
 @click.argument('identifier', nargs=-1)
@@ -72,7 +76,10 @@ def remove(ctx, identifier: str):
     # Reindex fonts
     task = Task('Reindexing fonts...')
     count = search.unindex_fonts(sub.local_path)
-    task.complete("Removed {} font families from index".format(colored(count, 'cyan')))
+    task.complete("Removed {} font families from index".format(colored(str(count), 'cyan')))
+
+    # Send telemetry
+    TelemetryEvent(status_code=0, event_type=TelemetryEventTypes.SOURCE_REMOVE).send()
 
 
 @cli_source.command(name='list', short_help='List subscribed sources')
@@ -97,6 +104,9 @@ def list_():
         click.echo('')
 
         count += 1
+
+    # Send telemetry
+    TelemetryEvent(status_code=0, event_type=TelemetryEventTypes.SOURCE_LIST).send()
 
 
 @cli_source.command(short_help='Check sources for updates')
@@ -132,3 +142,6 @@ def update(force: bool):
         search.index_fonts(updated_repo, sub.local_path)
 
         task.complete("Updated '{}'".format(name))
+
+    # Send telemetry
+    TelemetryEvent(status_code=0, event_type=TelemetryEventTypes.SOURCE_UPDATE).send()

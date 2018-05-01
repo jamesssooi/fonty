@@ -11,6 +11,7 @@ from fonty.lib import utils
 from fonty.lib.terminal_size import get_terminal_size
 from fonty.lib.constants import COLOR_INPUT
 from fonty.lib.task import Task
+from fonty.lib.telemetry import TelemetryEvent, TelemetryEventTypes
 
 @click.command('list', short_help='List installed fonts')
 @click.argument(
@@ -49,6 +50,10 @@ def cli_list(name: str, rebuild: bool):
         task.complete('Rebuilt font manifest with {count} font families found.'.format(
             count=len(manifest.families)
         ))
+
+        # Send telemetry
+        TelemetryEvent(0, event_type=TelemetryEventTypes.FONT_LIST_REBUILD).send()
+
         sys.exit(0)
 
     # Check if manifest.json exists
@@ -72,6 +77,13 @@ def cli_list(name: str, rebuild: bool):
         list_all_fonts(manifest)
     else:
         list_font(manifest, name)
+
+    # Send telemetry
+    TelemetryEvent(
+        status_code=0,
+        event_type=TelemetryEventTypes.FONT_LIST,
+        data={'font_name': name}
+    ).send()
 
 def list_all_fonts(manifest: Manifest):
     '''List all installed fonts in this system.'''

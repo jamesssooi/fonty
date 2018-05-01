@@ -10,6 +10,7 @@ from termcolor import colored
 from fonty.lib.constants import COLOR_INPUT
 from fonty.lib.task import Task, TaskStatus
 from fonty.lib.progress import ProgressBar
+from fonty.lib.telemetry import TelemetryEvent, TelemetryEventTypes
 from fonty.models.manifest import Manifest
 from fonty.models.font import Font, FontFormat
 from fonty.commands.install import resolve_download, create_task_printer
@@ -75,7 +76,7 @@ def cli_webfont(ctx, args: List[str], is_installed: bool, is_download: bool, out
     # Resolve fonts
     if is_download:
         arg = ' '.join(str(s) for s in args)
-        remote_fonts = resolve_download(arg, print_task=True)
+        remote_fonts, font_source = resolve_download(arg, print_task=True)
 
         # Download fonts
         task = Task("Downloading ({}) font files...".format(len(remote_fonts)))
@@ -209,6 +210,17 @@ def cli_webfont(ctx, args: List[str], is_installed: bool, is_download: bool, out
     end_time = timeit.default_timer()
     total_time = end_time - start_time
     click.echo('Done in {}s'.format(round(total_time, 2)))
+
+    # Send telemetry
+    TelemetryEvent(
+        status_code=0,
+        event_type=TelemetryEventTypes.FONT_CONVERT,
+        data={
+            'source': font_source if is_download else 'system' if is_installed else 'local_files',
+            'font_name': arg if is_download or is_installed else '',
+            'output_dir': bool(output)
+        }
+    ).send()
 
 
 # TEMPLATES

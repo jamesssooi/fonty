@@ -7,6 +7,7 @@ from fonty.lib.task import Task
 from fonty.lib.variants import FontAttribute
 from fonty.lib.constants import COLOR_INPUT
 from fonty.lib.uninstall import uninstall_fonts
+from fonty.lib.telemetry import TelemetryEvent, TelemetryEventTypes
 from fonty.models.manifest import Manifest
 from fonty.models.font import FontFamily
 
@@ -62,6 +63,14 @@ def cli_uninstall(ctx, name, variants):
     family = manifest.get(name)
     if family is None:
         task.error("No font family found with the name '{}'".format(colored(name, COLOR_INPUT)))
+
+        # Send telemetry
+        TelemetryEvent(
+            status_code=1,
+            event_type=TelemetryEventTypes.FONT_UNINSTALL,
+            data={'font_name': name}
+        ).send()
+
         sys.exit(1)
 
     # Check if variants exists
@@ -71,6 +80,14 @@ def cli_uninstall(ctx, name, variants):
             task.error("Variant(s) [{}] not available".format(
                 colored(', '.join([str(v) for v in invalid_variants]), COLOR_INPUT)
             ))
+
+            # Send telemetry
+            TelemetryEvent(
+                status_code=1,
+                event_type=TelemetryEventTypes.FONT_UNINSTALL,
+                data={'font_name': name}
+            ).send()
+
             sys.exit(1)
 
     if not variants:
@@ -107,3 +124,10 @@ def cli_uninstall(ctx, name, variants):
         ])
     )
     task.complete(message)
+
+    # Send telemetry
+    TelemetryEvent(
+        status_code=0,
+        event_type=TelemetryEventTypes.FONT_UNINSTALL,
+        data={'font_name': name}
+    ).send()

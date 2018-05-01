@@ -4,7 +4,7 @@ import re
 import timeit
 import sys
 from urllib.parse import urlparse
-from typing import List
+from typing import List, Tuple
 
 import click
 from termcolor import colored
@@ -14,6 +14,7 @@ from fonty.lib.task import Task, TaskStatus
 from fonty.lib.progress import ProgressBar
 from fonty.lib.constants import COLOR_INPUT
 from fonty.lib.install import install_fonts
+from fonty.lib.telemetry import TelemetryEvent, TelemetryEventTypes
 from fonty.models.subscription import Subscription
 from fonty.models.font import FontFamily, RemoteFont
 from fonty.models.manifest import Manifest
@@ -88,7 +89,7 @@ def cli_install(ctx, args, output, variants, is_files):
         ))
         return
 
-    # Find fonts
+    # Find fonts in local files
     if is_files:
         remote_fonts = [RemoteFont(
             remote_path=RemoteFont.Path(path=path, type=RemoteFont.Path.Type.LOCAL),
@@ -96,9 +97,39 @@ def cli_install(ctx, args, output, variants, is_files):
             family=None,
             variant=None
         ) for path in args]
+
+        # Send telemetry data
+        TelemetryEvent(
+            status_code=0,
+            event_type=TelemetryEventTypes.FONT_INSTALL,
+            data={'font_source': 'local_files', 'variants': ', '.join(variants)}
+        ).send()
+
+    # Find fonts in remote sources
     else:
         arg = ' '.join(str(arg) for arg in args)
-        remote_fonts = resolve_download(arg, print_task=True)
+
+        try:
+            remote_fonts, font_source = resolve_download(arg, print_task=True)
+        except search.SearchNotFound:
+            # Send telemetry data
+            TelemetryEvent(
+                status_code=1,
+                event_type=TelemetryEventTypes.FONT_INSTALL,
+                data={
+                    'font_name': arg,
+                    'font_source': 'not_resolved',
+                    'variants': ', '.join(variants)
+                }
+            ).send()
+            sys.exit(1)
+
+        # Send telemetry data
+        TelemetryEvent(
+            status_code=0,
+            event_type=TelemetryEventTypes.FONT_INSTALL,
+            data={'font_name': arg, 'font_source': font_source, 'variants': ', '.join(variants)}
+        ).send()
 
     # Filter out variants
     # We will need to filter the variants again after downloading because
@@ -169,7 +200,7 @@ def create_task_printer(task: Task, remote_fonts: List[RemoteFont]):
 
     loaded_count = 0
 
-    def load_handler(font: RemoteFont, meta: any):
+    def load_handler(font: RemoteFont, meta):
         '''Generator function that is advanced when the font downloading/loading progresses.'''
 
         # Create a total loaded fonts counter. eg. (3/12) fonts downloaded
@@ -234,11 +265,13 @@ def create_task_printer(task: Task, remote_fonts: List[RemoteFont]):
 
     return load_handler
 
-def resolve_download(arg, print_task: bool = True) -> List[RemoteFont]:
+def resolve_download(arg, print_task: bool = True) -> Tuple[List[RemoteFont], str]:
     '''Resolve if provided argument is a font name or a HTTP download link.'''
+    font_source: str = ''
 
     # Check if argument is a URL path to font
     if re.search(r'^https?:\/\/', arg):
+        font_source = 'remote_url'
         fonts = [RemoteFont(
             remote_path=RemoteFont.Path(path=arg, type=RemoteFont.Path.Type.HTTP_REMOTE),
             filename=os.path.basename(urlparse(arg).path),
@@ -248,23 +281,33 @@ def resolve_download(arg, print_task: bool = True) -> List[RemoteFont]:
 
     # Argument is a font name to be searched in font sources
     else:
+        font_source = 'remote_source'
+
+        # Print task message
         if print_task:
             task = Task("Searching for '{}'...".format(colored(arg, COLOR_INPUT)))
 
         # Search for font family in local repositories
         try:
+
+            # Search fonts in index
             source, remote_family = search.search(arg)
             fonts = remote_family.fonts
+
         except search.SearchNotFound as e:
+
+            # Print no results message
             task.error("No results found for '{}'".format(colored(arg, COLOR_INPUT)))
             if e.suggestion:
                 click.echo("Did you mean '{}'".format(e.suggestion))
-            sys.exit(1)
 
+            raise e
+
+        # Complete task message
         if task:
             task.complete("Found '{family}' in {source}".format(
                 family=colored(remote_family.name, COLOR_INPUT),
                 source=source.name
             ))
 
-    return fonts
+    return fonts, font_source
