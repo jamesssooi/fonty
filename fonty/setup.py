@@ -27,7 +27,7 @@ def initial_setup() -> None:
     generate_default_subscriptions()
 
     # Generate initial font manifest
-    generate_manifest()
+    manifest = generate_manifest()
 
     # Generate initial config file
     generate_config()
@@ -53,7 +53,8 @@ off the `telemetry` setting in the fonty configuration file located in:
     TelemetryEvent(
         status_code=0,
         event_type=TelemetryEventTypes.FONTY_SETUP,
-        execution_time=total_time
+        execution_time=total_time,
+        data={'font_count': manifest.font_count}
     ).send()
 
     # Wait for confirmation
@@ -63,7 +64,7 @@ off the `telemetry` setting in the fonty configuration file located in:
     click.echo("")
 
 
-def generate_manifest() -> None:
+def generate_manifest() -> Manifest:
     '''Generate a manifest list from the user's installed fonts.'''
 
     task = Task("Generating initial font manifest...")
@@ -74,6 +75,8 @@ def generate_manifest() -> None:
 
     # Done!
     task.complete()
+
+    return manifest
 
 def generate_default_subscriptions() -> None:
     '''Subscribe to all default sources.'''

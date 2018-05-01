@@ -90,7 +90,9 @@ def cli_install(ctx, args, output, variants, is_files):
         return
 
     # Find fonts in local files
+    font_source = None
     if is_files:
+        font_source = 'local_files'
         remote_fonts = [RemoteFont(
             remote_path=RemoteFont.Path(path=path, type=RemoteFont.Path.Type.LOCAL),
             filename=os.path.basename(path),
@@ -98,17 +100,9 @@ def cli_install(ctx, args, output, variants, is_files):
             variant=None
         ) for path in args]
 
-        # Send telemetry data
-        TelemetryEvent(
-            status_code=0,
-            event_type=TelemetryEventTypes.FONT_INSTALL,
-            data={'font_source': 'local_files', 'variants': ', '.join(variants)}
-        ).send()
-
     # Find fonts in remote sources
     else:
         arg = ' '.join(str(arg) for arg in args)
-
         try:
             remote_fonts, font_source = resolve_download(arg, print_task=True)
         except search.SearchNotFound:
@@ -119,17 +113,10 @@ def cli_install(ctx, args, output, variants, is_files):
                 data={
                     'font_name': arg,
                     'font_source': 'not_resolved',
-                    'variants': ', '.join(variants)
+                    'variants': ', '.join(variants) or None
                 }
             ).send()
             sys.exit(1)
-
-        # Send telemetry data
-        TelemetryEvent(
-            status_code=0,
-            event_type=TelemetryEventTypes.FONT_INSTALL,
-            data={'font_name': arg, 'font_source': font_source, 'variants': ', '.join(variants)}
-        ).send()
 
     # Filter out variants
     # We will need to filter the variants again after downloading because
@@ -191,8 +178,21 @@ def cli_install(ctx, args, output, variants, is_files):
 
     # Calculate execution time
     end_time = timeit.default_timer()
-    total_time = end_time - start_time
-    click.echo('Done in {}s'.format(round(total_time, 2)))
+    total_time = round(end_time - start_time, 2)
+    click.echo('Done in {}s'.format(total_time))
+
+    # Send telemetry
+    TelemetryEvent(
+        status_code=0,
+        event_type=TelemetryEventTypes.FONT_INSTALL,
+        execution_time=total_time,
+        data={
+            'font_name': arg if not is_files else None,
+            'font_source': font_source,
+            'variants': ', '.join(variants) or None,
+            'output_dir': bool(output)
+        }
+    ).send()
 
 
 def create_task_printer(task: Task, remote_fonts: List[RemoteFont]):

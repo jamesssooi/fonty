@@ -2,6 +2,7 @@
 import shutil
 import sys
 import time
+import timeit
 
 import click
 from termcolor import colored
@@ -22,6 +23,7 @@ def cli_source():
 @click.argument('url')
 def add(url):
     '''Add a new source.'''
+    start_time = timeit.default_timer()
 
     # Add to subscription list and fetch remote repository
     task = Task("Loading '{}'...".format(colored(url, COLOR_INPUT)))
@@ -42,8 +44,16 @@ def add(url):
     print('')
     sub.pprint(output=True)
 
+    # Calculate execution time
+    end_time = timeit.default_timer()
+    total_time = round(end_time - start_time, 2)
+
     # Send telemetry
-    TelemetryEvent(status_code=0, event_type=TelemetryEventTypes.SOURCE_ADD).send()
+    TelemetryEvent(
+        status_code=0,
+        event_type=TelemetryEventTypes.SOURCE_ADD,
+        execution_time=total_time
+    ).send()
 
 
 @cli_source.command(short_help='Remove a source')
@@ -51,6 +61,7 @@ def add(url):
 @click.pass_context
 def remove(ctx, identifier: str):
     '''Remove a source.'''
+    start_time = timeit.default_timer()
 
     # Process arguments and options
     identifier = ' '.join(str(x) for x in identifier)
@@ -78,13 +89,23 @@ def remove(ctx, identifier: str):
     count = search.unindex_fonts(sub.local_path)
     task.complete("Removed {} font families from index".format(colored(str(count), 'cyan')))
 
+    # Calculate execution time
+    end_time = timeit.default_timer()
+    total_time = round(end_time - start_time, 2)
+
     # Send telemetry
-    TelemetryEvent(status_code=0, event_type=TelemetryEventTypes.SOURCE_REMOVE).send()
+    TelemetryEvent(
+        status_code=0,
+        execution_time=total_time,
+        event_type=TelemetryEventTypes.SOURCE_REMOVE,
+    ).send()
 
 
 @cli_source.command(name='list', short_help='List subscribed sources')
 def list_():
     '''List all subscribed sources.'''
+    start_time = timeit.default_timer()
+
     subscriptions = Subscription.load_entries()
     count = 1
     for sub in subscriptions:
@@ -105,8 +126,16 @@ def list_():
 
         count += 1
 
+    # Calculate execution time
+    end_time = timeit.default_timer()
+    total_time = round(end_time - start_time, 2)
+
     # Send telemetry
-    TelemetryEvent(status_code=0, event_type=TelemetryEventTypes.SOURCE_LIST).send()
+    TelemetryEvent(
+        status_code=0,
+        execution_time=total_time,
+        event_type=TelemetryEventTypes.SOURCE_LIST
+    ).send()
 
 
 @cli_source.command(short_help='Check sources for updates')
@@ -116,6 +145,7 @@ def list_():
     help='Force all sources to update.')
 def update(force: bool):
     '''Check sources for updates.'''
+    start_time = timeit.default_timer()
 
     # Delete search index directory if `force` flag is True
     if force:
@@ -143,5 +173,13 @@ def update(force: bool):
 
         task.complete("Updated '{}'".format(name))
 
+    # Calculate execution time
+    end_time = timeit.default_timer()
+    total_time = round(end_time - start_time, 2)
+
     # Send telemetry
-    TelemetryEvent(status_code=0, event_type=TelemetryEventTypes.SOURCE_UPDATE).send()
+    TelemetryEvent(
+        status_code=0,
+        execution_time=total_time,
+        event_type=TelemetryEventTypes.SOURCE_UPDATE
+    ).send()

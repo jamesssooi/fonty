@@ -208,13 +208,14 @@ def cli_webfont(ctx, args: List[str], is_installed: bool, is_download: bool, out
 
     # Calculate execution time
     end_time = timeit.default_timer()
-    total_time = end_time - start_time
-    click.echo('Done in {}s'.format(round(total_time, 2)))
+    total_time = round(end_time - start_time, 2)
+    click.echo('Done in {}s'.format(total_time))
 
     # Send telemetry
     TelemetryEvent(
         status_code=0,
         event_type=TelemetryEventTypes.FONT_CONVERT,
+        execution_time=total_time,
         data={
             'source': font_source if is_download else 'system' if is_installed else 'local_files',
             'font_name': arg if is_download or is_installed else '',

@@ -1,5 +1,6 @@
 '''fonty.commands.uninstall.py: Command-line interface to uninstall fonts.'''
 import sys
+import timeit
 
 import click
 from termcolor import colored
@@ -38,6 +39,8 @@ def cli_uninstall(ctx, name, variants):
       >>> fonty uninstall "Open Sans" -v 700,700i
 
     '''
+
+    start_time = timeit.default_timer()
 
     # Process arguments and options
     name = ' '.join(str(x) for x in name)
@@ -125,9 +128,15 @@ def cli_uninstall(ctx, name, variants):
     )
     task.complete(message)
 
+    # Calculate execution time
+    end_time = timeit.default_timer()
+    total_time = round(end_time - start_time, 2)
+    click.echo('Done in {}s'.format(total_time))
+
     # Send telemetry
     TelemetryEvent(
         status_code=0,
         event_type=TelemetryEventTypes.FONT_UNINSTALL,
+        execution_time=total_time,
         data={'font_name': name}
     ).send()

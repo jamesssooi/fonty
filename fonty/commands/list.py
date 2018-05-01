@@ -1,5 +1,6 @@
 '''fonty.commands.list.py: Command-line interface to list user installed fonts.'''
 import sys
+import timeit
 from functools import reduce
 from itertools import zip_longest
 
@@ -39,6 +40,8 @@ def cli_list(name: str, rebuild: bool):
       >>> fonty list "Open Sans"
     '''
 
+    start_time = timeit.default_timer()
+
     # Process arguments
     name = ' '.join(str(x) for x in name)
 
@@ -51,8 +54,17 @@ def cli_list(name: str, rebuild: bool):
             count=len(manifest.families)
         ))
 
+        # Calculate execution time
+        end_time = timeit.default_timer()
+        total_time = round(end_time - start_time, 2)
+        click.echo('Done in {}s'.format(total_time))
+
         # Send telemetry
-        TelemetryEvent(0, event_type=TelemetryEventTypes.FONT_LIST_REBUILD).send()
+        TelemetryEvent(
+            status_code=0,
+            execution_time=total_time,
+            event_type=TelemetryEventTypes.FONT_LIST_REBUILD
+        ).send()
 
         sys.exit(0)
 
@@ -78,10 +90,15 @@ def cli_list(name: str, rebuild: bool):
     else:
         list_font(manifest, name)
 
+    # Calculate execution time
+    end_time = timeit.default_timer()
+    total_time = round(end_time - start_time, 2)
+
     # Send telemetry
     TelemetryEvent(
         status_code=0,
         event_type=TelemetryEventTypes.FONT_LIST,
+        execution_time=total_time,
         data={'font_name': name}
     ).send()
 
