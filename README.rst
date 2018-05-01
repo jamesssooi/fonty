@@ -1,15 +1,13 @@
 
-.. centered::
+.. image:: https://github.com/jamesssooi/fonty/raw/master/artwork/logo.png
+      :alt: Logo of fonty
+      :width: 300px
+      :align: center
 
-      .. image:: https://github.com/jamesssooi/fonty/raw/master/artwork/logo.png
-            :alt: Logo of fonty
-            :width: 300px
-            :align: center
-
-      .. image:: https://raw.githubusercontent.com/jamesssooi/fonty/master/artwork/hero.png
-            :alt: Screenshot of fonty commands
-            :width: 760px
-            :align: center
+.. image:: https://raw.githubusercontent.com/jamesssooi/fonty/master/artwork/hero.png
+      :alt: Screenshot of fonty commands
+      :width: 760px
+      :align: center
 
 A command-line tool to download, manage and convert fonts
 =========================================================
