@@ -32,7 +32,7 @@
 *__Prerequisites__: Please make sure you have at least [Python 3](https://www.python.org/downloads/) installed*
 
 ```bash
-$ pip install fonty
+> pip install fonty
 ```
 
 **fonty** is only available for macOS and Windows for now. Linux support is planned.
@@ -40,7 +40,7 @@ $ pip install fonty
 ## 2 &nbsp;&nbsp; Basic Usage
 Append any command with `--help` for a detailed help text of what you can do.
 ```bash
-$ fonty [command] --help
+> fonty [command] --help
 ```
 
 ### 2.1 &nbsp;&nbsp; Installing and uninstalling fonts
