@@ -87,6 +87,13 @@ def cli_webfont(ctx, args: List[str], is_installed: bool, is_download: bool, out
         arg = ' '.join(str(s) for s in args)
         manifest = Manifest.load()
         family = manifest.get(arg)
+        if not family:
+            task = Task(
+                status=TaskStatus.ERROR,
+                message="No font(s) found for '{}'".format(colored(arg, COLOR_INPUT)),
+                asynchronous=False
+            )
+            sys.exit(1)
         fonts = family.fonts
 
     else:
