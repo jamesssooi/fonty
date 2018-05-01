@@ -40,8 +40,8 @@ def parse_version():
 
 
 def get_long_description():
-    '''Reads the README.md file contents.'''
-    with open('README.md', encoding='utf=8') as f:
+    '''Reads the README.rst file contents.'''
+    with open('README.rst', encoding='utf8') as f:
         return f.read()
 
 
@@ -60,7 +60,6 @@ setup(
     url='https://github.com/jamesssooi/fonty',
     description='fonty is a command line tool for installing, managing and converting fonts.',
     long_description=get_long_description(),
-    long_description_content_type='text/markdown',
     license='Apache License 2.0',
     keywords='font fonts typeface cli tool install uninstall convert manage',
     classifiers=[
