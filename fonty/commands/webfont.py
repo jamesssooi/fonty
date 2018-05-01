@@ -96,19 +96,20 @@ def cli_webfont(ctx, args: List[str], is_installed: bool, is_download: bool, out
             )
             sys.exit(1)
         fonts = family.fonts
-
     else:
         # On Unix based systems, a glob argument of *.ttf will be automatically
         # expanded by the shell. Meanwhile on Windows systems or if the pattern
         # is surrounded with quotes, it will be passed to this function as is.
         # Here we iterate through it and run the glob function anyway to be safe
         font_paths = [glob.glob(arg) for arg in args]
-        font_paths = [item for sublist in font_paths for item in sublist] # Flatten list
-        font_paths = [os.path.abspath(path) for path in font_paths] # Get absolute paths
+        flat_font_paths = [item for sublist in font_paths for item in sublist] # Flatten list
+        abs_font_paths = [os.path.abspath(path) for path in flat_font_paths] # Get absolute paths
         if not font_paths:
-            task.error("No font files found with the pattern '{}'".format(colored(args[0], COLOR_INPUT)))
+            task.error("No font files found with the pattern '{}'".format(
+                colored(args[0], COLOR_INPUT
+            )))
             sys.exit(1)
-        fonts = [Font(path_to_font=path) for path in font_paths]
+        fonts = [Font(path_to_font=path) for path in abs_font_paths]
 
     # Print task message
     task = Task('Generating webfonts for ({}) fonts...'.format(len(fonts)))
@@ -116,7 +117,7 @@ def cli_webfont(ctx, args: List[str], is_installed: bool, is_download: bool, out
 
     # Convert files to web-compatible formats (woff, woff2 and otf/ttf)
     output_dir = output if output else os.getcwd()
-    results = []
+    results: List[dict] = []
     for font in fonts:
 
         completed_count_str = colored('({count}/{total})'.format(

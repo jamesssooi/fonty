@@ -3,6 +3,7 @@ import os
 import json
 import shutil
 import timeit
+from typing import List
 
 import click
 from termcolor import colored
@@ -83,7 +84,7 @@ def generate_default_subscriptions() -> None:
 
     # Get list of default sources
     path_to_defaults = os.path.join(ROOT_DIR, 'defaults', 'sources.json')
-    sources = []
+    sources: List[dict] = []
     with open(path_to_defaults, encoding='utf-8') as f:
         sources = json.loads(f.read())
 

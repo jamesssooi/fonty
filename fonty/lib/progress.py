@@ -7,20 +7,21 @@ from fonty.lib import utils
 class ProgressBar(object):
     '''A simple, printable text-based progress bar.'''
 
-    # Default Properties ----------------------------------------------------- #
-    DEFAULT_FORMAT = '{desc}|{bar}| {percentage}'
+    #: The format string of how to print the progress bar.
+    DEFAULT_FORMAT: str = '{desc}|{bar}| {percentage}'
+
+    # The current value of the progress bar.
     value = 0
 
-    # Constructor ------------------------------------------------------------ #
     def __init__(
-            self,
-            total: int,
-            desc: str = None,
-            cols: int = 15,
-            bar_format: str = DEFAULT_FORMAT,
-            filled_char: str = '█',
-            empty_char: str = '░'
-        ) -> None:
+        self,
+        total: int,
+        desc: str = None,
+        cols: int = 15,
+        bar_format: str = DEFAULT_FORMAT,
+        filled_char: str = '█',
+        empty_char: str = '░'
+    ) -> None:
         self.total = total
         self.desc = desc
         self.cols = cols
@@ -28,7 +29,6 @@ class ProgressBar(object):
         self.empty_char = empty_char
         self.bar_format = bar_format
 
-    # Class Methods ---------------------------------------------------------- #
     def __str__(self) -> str:
         percentage = self.value / self.total
 

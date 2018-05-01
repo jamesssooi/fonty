@@ -2,7 +2,6 @@
 import os
 import configparser
 
-import click
 from fonty.lib.constants import APP_DIR, CONFIG_FILENAME
 
 

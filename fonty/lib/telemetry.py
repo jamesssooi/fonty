@@ -116,7 +116,7 @@ class TelemetryEvent:
                 data=json.dumps(d, cls=FontyJSONEncoder, **JSON_DUMP_OPTS),
                 headers={'Content-Type': 'application/json'}
             )
-        except:
+        except: # pylint: disable=W0702
             pass
 
     @staticmethod
@@ -130,7 +130,7 @@ class TelemetryEvent:
         if family.lower() == 'darwin':
             version = platform.mac_ver()[0]
         elif family.lower() == 'windows':
-            win = sys.getwindowsversion()
+            win = sys.getwindowsversion() # pylint: disable=E1101
             version = '{}.{}-{}-{}'.format(win.major, win.minor, win.build, win.platform)
         elif family.lower() == 'linux':
             dist = distro.linux_distribution(full_distribution_name=False)

@@ -27,7 +27,7 @@ class Manifest:
         families: List[FontFamily],
         last_modified: Union[str, datetime] = None,
         font_count: int = 0
-    ):
+    ) -> None:
         self.families = families
         self.last_modified = utils.parse_date(last_modified)
         self.font_count = font_count
@@ -79,7 +79,7 @@ class Manifest:
         ), None)
         if font_idx is None:
             return 0
-        del family.fonts[font_idx]
+        family.fonts.pop(font_idx)
 
         # Update the instance with the updated FontFamily
         if family.fonts:
@@ -98,7 +98,7 @@ class Manifest:
         '''Get the index position of the font family in the manifest.'''
         return next((idx for idx, val in enumerate(self.families) if val.name.lower() == name.lower()), None)
 
-    def save(self, path: str = None) -> str:
+    def save(self, path: str = None) -> None:
         '''Save the manifest list to disk.'''
         utils.check_dirs(APP_DIR)
         path = path if path else MANIFEST_PATH
@@ -133,7 +133,7 @@ class Manifest:
         # Create FontFamily instances
         families = []
         for family in data['font_families']:
-            fonts = [InstalledFont(
+            fonts: List[InstalledFont] = [InstalledFont(
                 installed_path=font.get('local_path'),
                 registry_name=font.get('registryName', None),
                 family=family.get('name'),

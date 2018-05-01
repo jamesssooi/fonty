@@ -1,22 +1,23 @@
 '''family.py: Class to manage a font family.'''
 import hashlib
-from typing import List
+from typing import List, Union, cast
 
 from termcolor import colored
 from fonty.lib.variants import FontAttribute
 from fonty.lib import utils
-from . import Font, RemoteFont
+from . import Font, InstalledFont, RemoteFont
 
+FontType = Union[Font, InstalledFont]
 
 class FontFamily(object):
     '''Class to manage a family of fonts.'''
 
     # Class Properties ------------------------------------------------------- #
     name: str
-    fonts: List[Font]
+    fonts: List[FontType]
 
     # Constructor ------------------------------------------------------------ #
-    def __init__(self, name: str, fonts: List[Font]) -> None:
+    def __init__(self, name: str, fonts: List[FontType]) -> None:
         self.name = name
         self.fonts = fonts
 
@@ -27,7 +28,7 @@ class FontFamily(object):
         return [font.variant for font in self.fonts]
 
     # Class Methods ---------------------------------------------------------- #
-    def get_fonts(self, variants: List[FontAttribute] = None) -> List[Font]:
+    def get_fonts(self, variants: List[FontAttribute] = None) -> List[FontType]:
         '''Returns the list of fonts in this font family.'''
         if variants:
             return [font for font in self.fonts if font.variant in variants]
@@ -50,7 +51,7 @@ class FontFamily(object):
             'variant': font.variant.print(long=True),
             'path': colored(font.path_to_font, attrs=['dark'])
         } for font in self.fonts]
-        font_lines = utils.tabularize(fonts, join=False)
+        font_lines = cast(List[str], utils.tabularize(fonts, join=False))
 
         # Indent font files
         for idx, _ in enumerate(font_lines):
@@ -77,7 +78,7 @@ class FontFamily(object):
         return hashlib.md5(unique_str.encode('utf-8')).hexdigest()
 
     @staticmethod
-    def from_font_list(fonts: List[Font]) -> List['FontFamily']:
+    def from_font_list(fonts: List[FontType]) -> List['FontFamily']:
         '''Create font family instance(s) from a list of fonts.'''
 
         family_names = list(set([font.family for font in fonts]))

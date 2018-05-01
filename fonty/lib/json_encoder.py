@@ -6,16 +6,18 @@ from fonty.models.font import Font, FontFamily
 class FontyJSONEncoder(JSONEncoder):
     '''Extends JSONEncoder to support the encoding of Fonty's data structures.'''
 
-    def default(self, o):
+    def default(self, o): # pylint: disable=E0202
 
+        # Datetime objects
         if isinstance(o, datetime):
             return o.isoformat()
 
-        if isinstance(o, FontFamily):
+        # FontFamily objects
+        elif isinstance(o, FontFamily):
             return {'name': o.name, 'fonts': o.fonts}
 
-        if isinstance(o, Font):
+        # Font objects
+        elif isinstance(o, Font):
             return {'variant': str(o.variant), 'local_path': o.path_to_font}
 
-        else:
-            return JSONEncoder.default(self, o)
+        return JSONEncoder.default(self, o)

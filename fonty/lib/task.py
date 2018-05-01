@@ -3,7 +3,7 @@ import sys
 import time
 import threading
 from enum import Enum
-from typing import Union, List
+from typing import Union, List, cast
 
 from ansiwrap import shorten, ansilen
 from termcolor import colored
@@ -36,33 +36,52 @@ class Task(object):
         ERROR: `✗ Unicorns do not exist`
     '''
 
-    # Class Properties ------------------------------------------------------- #
+    #: The `waiting` status icon.
     STATUS_WAITING: Union[str, List[str]] = ICON_WAITING['WINDOWS'] \
         if IS_WINDOWS else ICON_WAITING['OSX']
+
+    #: The `error` status icon.
     STATUS_ERROR: Union[str, List[str]] = ICON_ERROR['WINDOWS'] \
         if IS_WINDOWS else ICON_ERROR['OSX']
+    
+    #: The `success` status icon.
     STATUS_SUCCESS: Union[str, List[str]] = ICON_SUCCESS['WINDOWS'] \
         if IS_WINDOWS else ICON_SUCCESS['OSX']
+
+    #: The `warning` status icon.
     STATUS_WARNING: Union[str, List[str]] = '!'
+
+    #: The animation delay per frame.
     DELAY: float = 0.2
 
+    #: The current message of the task.
     message: str
-    status: TaskStatus = TaskStatus.WAITING
-    active: bool = True
-    truncate: bool = True
-    current_message: str = ''
 
+    #: The current status of the task.
+    status: TaskStatus = TaskStatus.WAITING
+
+    #: Indicates whether the task is active or not.
+    active: bool = True
+
+    #: Indicates whether the task message should be truncated or not.
+    truncate: bool = True
+
+    #: The annotated and full message of the task.
+    _current_message: str = ''
+
+    #: The current frame of the active indicator.
     _indicator_iteration: int = 0
+
+    #: Indicates whether the print loop is done.
     _done: bool = False
 
-    # Constructor ------------------------------------------------------------ #
     def __init__(
-            self,
-            message: str,
-            status: TaskStatus = TaskStatus.WAITING,
-            asynchronous: bool = True,
-            truncate: bool = True
-        ) -> None:
+        self,
+        message: str,
+        status: TaskStatus = TaskStatus.WAITING,
+        asynchronous: bool = True,
+        truncate: bool = True
+    ) -> None:
         self.message = message
         self.status = status
         self.truncate = truncate
@@ -73,17 +92,16 @@ class Task(object):
             self.active = False
             self.loop() # Prints only one iteration
 
-    # Class Methods ---------------------------------------------------------- #
     def loop(self) -> None:
         '''Main print loop.'''
 
         while True:
             # Clear previous line
-            sys.stdout.write('\r{}\r'.format(' ' * ansilen(self.current_message)))
+            sys.stdout.write('\r{}\r'.format(' ' * ansilen(self._current_message)))
             sys.stdout.flush()
 
             # Generate new message
-            self.current_message = '{indicator} {message}'.format(
+            self._current_message = '{indicator} {message}'.format(
                 indicator=self.get_indicator(),
                 message=self.message,
             )
@@ -93,12 +111,12 @@ class Task(object):
             # be problems with the output not clearing all lines.
             if self.truncate:
                 term_width, _ = get_terminal_size()
-                self.current_message = shorten(text=self.current_message,
+                self._current_message = shorten(text=self._current_message,
                                                width=term_width,
                                                placeholder='...')
 
             # Write new line
-            sys.stdout.write(self.current_message)
+            sys.stdout.write(self._current_message)
             sys.stdout.flush()
 
             # Exit condition
@@ -136,7 +154,6 @@ class Task(object):
 
     def get_indicator(self) -> str:
         '''Returns the current active indicator.'''
-
         indicator = ''
         if self.status == TaskStatus.WAITING:
             indicator = colored(self.STATUS_WAITING[self._indicator_iteration], 'blue')
@@ -144,10 +161,10 @@ class Task(object):
             if self._indicator_iteration >= len(self.STATUS_WAITING):
                 self._indicator_iteration = 0
         elif self.status == TaskStatus.ERROR:
-            indicator = colored(self.STATUS_ERROR, 'red')
+            indicator = colored(cast(str, self.STATUS_ERROR), 'red')
         elif self.status == TaskStatus.SUCCESS:
-            indicator = colored(self.STATUS_SUCCESS, 'green')
+            indicator = colored(cast(str, self.STATUS_SUCCESS), 'green')
         elif self.status == TaskStatus.WARNING:
-            indicator = colored(self.STATUS_WARNING, 'yellow')
+            indicator = colored(cast(str, self.STATUS_WARNING), 'yellow')
 
         return indicator
