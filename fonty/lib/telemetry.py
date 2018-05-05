@@ -1,8 +1,10 @@
 '''fonty.lib.telemetry'''
+import os
 import sys
 import json
 import platform
 import threading
+import subprocess
 from enum import Enum
 from datetime import datetime
 from typing import Tuple
@@ -10,7 +12,7 @@ from typing import Tuple
 import requests
 from fonty.version import __version__
 from fonty.lib.json_encoder import FontyJSONEncoder
-from fonty.lib.constants import TELEMETRY_ENDPOINT, JSON_DUMP_OPTS
+from fonty.lib.constants import TELEMETRY_ENDPOINT, JSON_DUMP_OPTS, ROOT_DIR
 from fonty.lib.config import CommonConfiguration
 
 
@@ -101,22 +103,18 @@ class TelemetryEvent:
             'python_version': self.python_version,
             'data': self.data
         }
+        json_d = json.dumps(d, cls=FontyJSONEncoder, **JSON_DUMP_OPTS)
 
-        # Send request
-        if asynchronous:
-            threading.Thread(target=self._send_request, args=(d,)).start()
-        else:
-            self._send_request(d)
-
-    def _send_request(self, d):
-        try:
-            requests.post(
-                url=TELEMETRY_ENDPOINT,
-                data=json.dumps(d, cls=FontyJSONEncoder, **JSON_DUMP_OPTS),
-                headers={'Content-Type': 'application/json'}
-            )
-        except: # pylint: disable=W0702
-            pass
+        # Call the separate telemetry script to send the request.
+        # The reason of extracting the code to a separate script is to prevent
+        # the async HTTP request from blocking the main fonty thread from
+        # exiting.
+        telemetry_bin = os.path.join(ROOT_DIR, 'bin', 'send_telemetry.py')
+        p = subprocess.Popen(
+            [sys.executable, telemetry_bin, TELEMETRY_ENDPOINT],
+            stdin=subprocess.PIPE
+        )
+        p.stdin.write(json_d.encode('utf8'))
 
     @staticmethod
     def _get_os_info() -> Tuple[str, str]:
