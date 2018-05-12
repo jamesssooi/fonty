@@ -21,7 +21,7 @@ REPOSITORY_DIR = os.path.join(APP_DIR, 'repositories')
 CONFIG_FILENAME = 'fonty.conf'
 
 # URLs
-TELEMETRY_ENDPOINT = 'https://analytics.fonty.io/v1'
+TELEMETRY_ENDPOINT = 'https://telemetry.fonty.io/v1'
 
 # Colors
 COLOR_OK = 'green'
