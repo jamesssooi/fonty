@@ -11,6 +11,9 @@ class CommonConfiguration(dict):
     #: Enables telemetry
     telemetry: bool = True
 
+    #: Enable auto checks for updates
+    check_for_updates: bool = True
+
 
 def load_config(path: str = os.path.join(APP_DIR, CONFIG_FILENAME)):
     '''Load configuration values from the configuration file.'''
@@ -22,3 +25,4 @@ def load_config(path: str = os.path.join(APP_DIR, CONFIG_FILENAME)):
     # Read `common` configuration values
     if 'common' in config:
         CommonConfiguration.telemetry = config.getboolean('common', 'telemetry')
+        CommonConfiguration.check_for_updates = config.getboolean('common', 'check_for_updates')
