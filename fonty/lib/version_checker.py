@@ -1,6 +1,6 @@
 '''
-    check_for_updates.py
-    ~~~~~~~~~~~~~~~~~~~~
+    version_checker.py
+    ~~~~~~~~~~~~~~~~~~
     Module to check for newer versions of fonty.
 '''
 from threading import Thread
@@ -23,7 +23,7 @@ def has_new_version() -> bool:
     return latest > current
 
 def cache_latest_version() -> None:
-    '''Get the latest fonty version from PyPi and stores in the local cache.'''
+    '''Get the latest fonty version from PyPi and store it in the meta store.'''
 
     # Check for updates at most once a day
     if MetaStore.last_check_for_update is not None:
