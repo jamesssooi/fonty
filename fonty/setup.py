@@ -7,10 +7,11 @@ from typing import List
 
 import click
 from termcolor import colored
+from fonty.lib import search
 from fonty.lib.constants import APP_DIR, ROOT_DIR, COLOR_INPUT, CONFIG_FILENAME
 from fonty.lib.task import Task
-from fonty.lib import search
 from fonty.lib.telemetry import TelemetryEvent, TelemetryEventTypes
+from fonty.lib.meta_store import MetaStore
 from fonty.models.subscription import Subscription, AlreadySubscribedError
 from fonty.models.manifest import Manifest
 
@@ -20,7 +21,8 @@ def initial_setup() -> None:
 
     # Print welcome message
     initial_setup_message = '\n'.join([
-        "Looks like this is your first time running fonty! Running initial setup scripts...",
+        "Looks like it's your first time running fonty! Running initial setup scripts...",
+        ""
     ])
     click.echo(initial_setup_message)
 
@@ -33,18 +35,19 @@ def initial_setup() -> None:
     # Generate initial config file
     generate_config()
 
-    click.echo('''
+    # Reset meta store
+    MetaStore.reset()
 
+    click.echo('''
 Usage Data Notice
 -----------------
-fonty collects a few simple, anonymous and non-personal usage data (1) to
-better understand how users use fonty, and (2) to identify interesting font
-usage statistics and trends. You can always disable this permanently by turning
-off the `telemetry` setting in the fonty configuration file located in:
+fonty collects a few simple, anonymous and non-personal usage data to better
+understand how users use fonty; and to identify interesting font usage
+statistics and trends. You can always disable this permanently by turning the
+`telemetry` setting off in the fonty configuration file located at:
 
     {}
-
-'''.format(os.path.join(APP_DIR, CONFIG_FILENAME)))
+'''.format(colored(os.path.join(APP_DIR, CONFIG_FILENAME), 'cyan')))
 
     # Calculate execution time
     end_time = timeit.default_timer()
