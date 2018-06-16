@@ -24,5 +24,5 @@ def load_config(path: str = os.path.join(APP_DIR, CONFIG_FILENAME)):
 
     # Read `common` configuration values
     if 'common' in config:
-        CommonConfiguration.telemetry = config.getboolean('common', 'telemetry')
-        CommonConfiguration.check_for_updates = config.getboolean('common', 'check_for_updates')
+        CommonConfiguration.telemetry = config.getboolean('common', 'telemetry', fallback=CommonConfiguration.telemetry)
+        CommonConfiguration.check_for_updates = config.getboolean('common', 'check_for_updates', fallback=CommonConfiguration.check_for_updates)
