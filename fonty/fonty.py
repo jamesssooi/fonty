@@ -5,9 +5,13 @@ import inspect
 import click
 import colorama
 
+from termcolor import colored
+
 from fonty.version import __version__
 from fonty.setup import initial_setup, is_first_run
 from fonty.lib.config import load_config
+from fonty.lib.meta_store import MetaStore
+from fonty.lib.check_for_updates import is_update_available, cache_latest_version
 
 # Import CLI commands
 from fonty.commands.install import cli_install
@@ -18,6 +22,9 @@ from fonty.commands.webfont import cli_webfont
 
 # Enable colored output on Windows
 colorama.init()
+
+# def foo(*args, **kwargs):
+#     print('foo')
 
 @click.group(invoke_without_command=True)
 @click.option('--version', '-v', is_flag=True, help="Show the version number.")
@@ -50,6 +57,9 @@ def main(ctx, version: bool):
     # Load configuration values
     load_config()
 
+    # Check for updates
+    cache_latest_version()
+
     # Ignore the rest of this function if there is an invoked subcommand
     if ctx.invoked_subcommand:
         return
@@ -72,3 +82,19 @@ main.add_command(cli_uninstall)
 main.add_command(cli_source)
 main.add_command(cli_list)
 main.add_command(cli_webfont)
+
+# Register callbacks
+@main.resultcallback()
+@click.pass_context
+def after_command(ctx, *args, **kwargs):
+    '''A callback that is called after the command has finished executing.'''
+
+    # Notify user for updates
+    if ctx.invoked_subcommand and is_update_available():
+        click.echo('')
+        click.echo("A new fonty version is available. The latest is '{latest}', you have '{current}'.".format(
+            latest=colored(MetaStore.latest_version, 'yellow'),
+            current=colored(MetaStore.current_version, 'yellow')
+        ))
+        click.echo("Run '{}' to update.".format(colored('pip install --upgrade fonty', 'cyan')))
+        click.echo('')
