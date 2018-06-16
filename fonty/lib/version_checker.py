@@ -13,7 +13,7 @@ from fonty.lib.meta_store import MetaStore
 
 FONTY_PYPI_URL = 'https://pypi.org/pypi/fonty/json'
 
-def is_update_available() -> bool:
+def has_new_version() -> bool:
     '''Notify user to update fonty if a newer version is available.'''
     if __version__ is None or MetaStore.latest_version is None:
         return False
