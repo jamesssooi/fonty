@@ -10,7 +10,7 @@ from termcolor import colored
 from fonty.version import __version__
 from fonty.setup import initial_setup, is_first_run
 from fonty.lib import version_checker
-from fonty.lib.config import load_config
+from fonty.lib.config import load_config, CommonConfiguration
 from fonty.lib.meta_store import MetaStore
 
 # Import CLI commands
@@ -58,7 +58,8 @@ def main(ctx, version: bool):
     load_config()
 
     # Check for updates
-    version_checker.cache_latest_version()
+    if CommonConfiguration.check_for_updates:
+        version_checker.cache_latest_version()
 
     # Ignore the rest of this function if there is an invoked subcommand
     if ctx.invoked_subcommand:
@@ -90,7 +91,7 @@ def after_command(ctx, *args, **kwargs):
     '''A callback that is called after the command has finished executing.'''
 
     # Notify user for updates
-    if ctx.invoked_subcommand and version_checker.has_new_version():
+    if CommonConfiguration.check_for_updates and ctx.invoked_subcommand and version_checker.has_new_version():
         click.echo('')
         click.echo("A new fonty version is available. You have '{current}', the latest is '{latest}'.".format(
             current=colored(__version__, 'yellow'),
