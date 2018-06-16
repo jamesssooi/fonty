@@ -35,12 +35,18 @@ class BaseMetaStore(dict):
         # Create default meta store if it doesn't exist
         if not os.path.isfile(META_STORE_PATH):
             with open(META_STORE_PATH, 'wb+') as f:
-                pickle.dump(self.get_dict(), f)
+                pickle.dump({}, f)
 
         # Load existing meta store from disk
         with open(META_STORE_PATH, 'rb') as f:
             d = pickle.load(f)
             self.set_dict(d)
+
+    def reset(self) -> None:
+        '''Resets the meta store to defaults.'''
+        with open(META_STORE_PATH, 'wb+') as f:
+            pickle.dump({}, f)
+        self.__dict__ = {}
 
     def save(self) -> None:
         '''Save all changes to the disk.'''
