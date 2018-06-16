@@ -16,6 +16,7 @@ SEARCH_INDEX_PATH = os.path.join(APP_DIR, 'index')
 SUBSCRIPTIONS_PATH = os.path.join(APP_DIR, 'subscriptions.json')
 MANIFEST_PATH = os.path.join(APP_DIR, 'manifest.json')
 REPOSITORY_DIR = os.path.join(APP_DIR, 'repositories')
+META_STORE_PATH = os.path.join(APP_DIR, 'meta.db')
 
 # Filenames
 CONFIG_FILENAME = 'fonty.conf'
