@@ -7,6 +7,7 @@
 import os
 import pickle
 from typing import Dict, List
+from datetime import datetime
 
 from fonty.version import __version__
 from fonty.lib.constants import META_STORE_PATH
@@ -15,13 +16,13 @@ class BaseMetaStore(dict):
     '''The MetaStore contains meta information about fonty.'''
 
     #: Define a list of attributes that are readonly
-    _read_only_attrs: List[str] = ['current_version']
-
-    #:readonly The current version of fonty
-    current_version: str = __version__
+    _read_only_attrs: List[str] = []
 
     #: The latest version of fonty
     latest_version: str = None
+
+    #: The last check for update that occurred
+    last_check_for_update: datetime = None
 
     def __setattr__(self, key, value):
         '''Override to prevent modification of readonly attributes.'''
