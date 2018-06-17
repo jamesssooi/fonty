@@ -9,7 +9,7 @@ from termcolor import colored
 from fonty.lib import search
 from fonty.lib.task import Task
 from fonty.lib.constants import COLOR_INPUT, SEARCH_INDEX_PATH
-from fonty.models.subscription import Subscription
+from fonty.models.subscription import Subscription, AlreadySubscribedError
 from fonty.lib.telemetry import TelemetryEvent, TelemetryEventTypes
 
 
@@ -26,10 +26,18 @@ def add(url):
     start_time = timeit.default_timer()
 
     # Add to subscription list and fetch remote repository
-    task = Task("Loading '{}'...".format(colored(url, COLOR_INPUT)))
-    sub = Subscription.load_from_url(url).subscribe()
-    repo = sub.get_local_repository()
-    task.complete("Loaded '{}'".format(colored(repo.name, COLOR_INPUT)))
+    try:
+        task = Task("Loading '{}'...".format(colored(url, COLOR_INPUT)))
+        sub = Subscription.load_from_url(url).subscribe()
+        repo = sub.get_local_repository()
+        task.complete("Loaded '{}'".format(colored(repo.name, COLOR_INPUT)))
+    except AlreadySubscribedError:
+        task.error("You are already subscribed to this source.")
+        end_time = timeit.default_timer()
+        TelemetryEvent(status_code=3,
+                       event_type=TelemetryEventTypes.SOURCE_ADD,
+                       execution_time=round(end_time - start_time, 2)).send()
+        sys.exit(3)
 
     # Index fonts
     task = Task("Indexing {count} font families in '{repo}'".format(
