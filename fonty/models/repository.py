@@ -25,6 +25,9 @@ class Repository(object):
     #: The font families available in this repository
     families: List[RemoteFontFamily]
 
+    #: The remote path of this repository
+    remote_path: str
+
     #: Sets if this repository is a public repository
     public: bool
 
@@ -33,11 +36,13 @@ class Repository(object):
         name: str,
         families: List[RemoteFontFamily] = None,
         schema_identifier: str = None,
-        public = False
+        remote_path: str = None,
+        public: bool = False
     ) -> None:
         self.name = name
         self.families = families
         self.public = public
+        self.remote_path = remote_path
         self.schema_identifier = schema_identifier if schema_identifier else self.schema_identifier
 
     def get_family(self, name):
@@ -82,6 +87,7 @@ class Repository(object):
             families=remote_families,
             schema_identifier=schema_identifier,
             public=repo['public'],
+            remote_path=repo['source'],
         )
 
     @staticmethod

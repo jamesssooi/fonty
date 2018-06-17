@@ -37,7 +37,7 @@ class Subscription:
     local_path: str
 
     #: The repository instance.
-    repository: Repository
+    repo: Repository
 
     #: The timestamp of when the local copy was last synced with the remote copy.
     last_updated: datetime

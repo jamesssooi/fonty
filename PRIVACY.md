@@ -24,14 +24,11 @@ The following data is collected in all telemetry events.
 ### Event-specific data
 The following additional data is collected depending on the command being run.
 
-#### `FONTY_SETUP`
-Called when the initial setup script is ran.
-* `font_count`: The total number of fonts installed in the user's system.
-
 #### `FONT_INSTALL`
 Called when the user initiates the `fonty install` command.
 * `font_name`: The name of the font being installed (only when not files are provided)
-* `font_source`: The font source where this font is resolved from.
+* `font_source`: Either `local_files`, `remote_url`, `private_source` or `font_source`.
+* `source_url`: The URL of the font source, only if the source is marked as `public`.
 * `variants`: The list of variants the user provided.
 * `output_dir`: A true/false value on whether the user provided an output directory.
 
@@ -41,7 +38,9 @@ Called when the user initiates the `fonty uninstall` command.
 
 #### `FONT_LIST`
 Called when the user initiates the `font list` command.
-* `font_name`: A true/false value on whether a font name is provided.
+* `has_font_name`: A true/false value on whether a font name is provided.
+* `font_count`: The total number of fonts installed in the user's system.
+* `family_count`: The total number of font families installed in the user's system.
 
 #### `FONT_LIST_REBUILD`
 Called when the user initiates the `font list --rebuild` command.
@@ -49,7 +48,8 @@ Called when the user initiates the `font list --rebuild` command.
 
 #### `FONT_CONVERT`
 Called when the user initiates the `fonty webfont` command.
-* `source`: If the `download` flag is provided, it logs the font source where the font is resolved from. Otherwise it's `system` or `local_files`.
+* `font_source`: Either `local_files`, `remote_url`, `private_source` or `font_source`.
+* `source_url`: The URL of the font source, only if the source is marked as `public`.
 * `font_name`: The name of the font being converted.
 * `output_dir`: A true/false value on whether the user provided an output directory.
 
@@ -59,15 +59,20 @@ Called when the user initiates the `fonty source list` command.
 
 #### `SOURCE_ADD`
 Called when the user initiates the `fonty source add` command.
-* No additional data is collected.
+* `source_url`: The URL of the source, only if the font source is marked as `public`.
 
 #### `SOURCE_REMOVE`
 Called when the user initiates the `fonty source remove` command.
-* No additional data is collected.
+* `source_url`: The URL of the source, only if the font source is marked as `public`.
 
 #### `SOURCE_UPDATE`
 Called when the user initiates the `fonty source update` command.
 * No additional data is collected.
+
+#### `FONTY_SETUP`
+Called when the initial setup script is ran.
+* `font_count`: The total number of fonts installed in the user's system.
+* `family_count`: The total number of font families installed in the user's system.
 
 ## How is the data processed?
 All telemetry data is sent to a telemetry service, which is a simple Go API endpoint hosted in a Google Compute Engine instance. The Go API endpoint simply acts as a relay and immediately publishes the event data into Google PubSub.

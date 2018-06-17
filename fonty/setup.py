@@ -60,7 +60,10 @@ Read more about our privacy policy in https://github.com/jamesssooi/fonty.
         status_code=0,
         event_type=TelemetryEventTypes.FONTY_SETUP,
         execution_time=total_time,
-        data={'font_count': manifest.font_count}
+        data={
+            'font_count': manifest.font_count,
+            'family_count': len(manifest.families)
+        }
     ).send()
 
     # Wait for confirmation

@@ -99,7 +99,11 @@ def cli_list(name: str, rebuild: bool):
         status_code=0,
         event_type=TelemetryEventTypes.FONT_LIST,
         execution_time=total_time,
-        data={'font_name': name}
+        data={
+            'has_font_name': True if name else False,
+            'font_count': manifest.font_count,
+            'family_count': len(manifest.families)
+        }
     ).send()
 
 def list_all_fonts(manifest: Manifest):

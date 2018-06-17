@@ -187,8 +187,9 @@ def cli_install(ctx, args, output, variants, is_files):
         event_type=TelemetryEventTypes.FONT_INSTALL,
         execution_time=total_time,
         data={
-            'font_name': arg if not is_files else None,
-            'font_source': font_source,
+            'font_name': None if is_files or font_source == 'remote_url' else arg,
+            'font_source': font_source if font_source in ['local_files', 'private_source', 'remote_url'] else 'public_source',
+            'source_url': font_source if not font_source in ['local_files', 'private_source', 'remote_url'] else None,
             'variants': ', '.join(variants) or None,
             'output_dir': bool(output)
         }
@@ -310,6 +311,9 @@ def resolve_download(arg, print_task: bool = True) -> Tuple[List[RemoteFont], st
             ))
 
         # Report font_source only if the source is listed as a public source
-        font_source = source.name if source.public else 'private_source'
+        if source.public:
+            font_source = source.remote_path
+        else:
+            font_source = 'private_source'
 
     return fonts, font_source

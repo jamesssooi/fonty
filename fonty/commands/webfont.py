@@ -96,6 +96,7 @@ def cli_webfont(ctx, args: List[str], is_installed: bool, is_download: bool, out
             )
             sys.exit(1)
         fonts = family.fonts
+        font_source = 'system'
     else:
         # On Unix based systems, a glob argument of *.ttf will be automatically
         # expanded by the shell. Meanwhile on Windows systems or if the pattern
@@ -110,6 +111,7 @@ def cli_webfont(ctx, args: List[str], is_installed: bool, is_download: bool, out
             )))
             sys.exit(1)
         fonts = [Font(path_to_font=path) for path in abs_font_paths]
+        font_source = 'local_files'
 
     # Print task message
     task = Task('Generating webfonts for ({}) fonts...'.format(len(fonts)))
@@ -225,7 +227,8 @@ def cli_webfont(ctx, args: List[str], is_installed: bool, is_download: bool, out
         event_type=TelemetryEventTypes.FONT_CONVERT,
         execution_time=total_time,
         data={
-            'source': font_source if is_download else 'system' if is_installed else 'local_files',
+            'font_source': font_source if font_source in ['local_files', 'private_source', 'system'] else 'public_source',
+            'source_url': font_source if not font_source in ['local_files', 'private_source', 'system'] else None,
             'font_name': arg if is_download or is_installed else '',
             'output_dir': bool(output)
         }

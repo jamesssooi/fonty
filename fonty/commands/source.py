@@ -60,7 +60,8 @@ def add(url):
     TelemetryEvent(
         status_code=0,
         event_type=TelemetryEventTypes.SOURCE_ADD,
-        execution_time=total_time
+        execution_time=total_time,
+        data={'source_url': sub.remote_path if repo.public else 'private_source'}
     ).send()
 
 
@@ -81,6 +82,7 @@ def remove(ctx, identifier: str):
     # Search for subscription
     task = Task("Looking for '{}'".format(colored(identifier, COLOR_INPUT)))
     sub = Subscription.get(identifier)
+    repo = sub.get_local_repository()
 
     if sub is None:
         time.sleep(0.3)
@@ -106,6 +108,7 @@ def remove(ctx, identifier: str):
         status_code=0,
         execution_time=total_time,
         event_type=TelemetryEventTypes.SOURCE_REMOVE,
+        data={'source_url': sub.remote_path if repo.public else 'private_source'}
     ).send()
 
 
