@@ -1,11 +1,12 @@
 # Privacy
 fonty collects a few simple, anonymous and non-personal usage data to better understand how users use fonty; and to identify interesting font usage statistics and trends.
 
-As a privacy-conscious person who strongly believes in keeping personal data personal, efforts has been made to fonty to ensure your right as a data citizen is not infringed:
+As a privacy-conscious person who believes in keeping personal data personal, efforts has been made to fonty to ensure your have full and total control over how your data is collected:
 
 * You can opt-out of telemetry anytime.
 * Data collected is non-personal and non-identifying.
 * Your IP address is discarded.
+* Data is only reported and presented in the form of aggregates.
 
 ## What data is collected?
 Telemetry data is sent in the form of events to a telemetry service. In all events, a common base data is collected in addition to its event-specific data.
