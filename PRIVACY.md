@@ -35,6 +35,7 @@ Called when the user initiates the `fonty install` command.
 #### `FONT_UNINSTALL`
 Called when the user initiates the `fonty uninstall` command.
 * `font_name`: The name of the font being uninstalled.
+* `variants`: The list of variants the user provided.
 
 #### `FONT_LIST`
 Called when the user initiates the `font list` command.
