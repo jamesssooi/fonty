@@ -47,6 +47,8 @@ statistics and trends. You can always disable this permanently by turning the
 `telemetry` setting off in the fonty configuration file located at:
 
     {}
+
+Read more about our privacy policy in https://github.com/jamesssooi/fonty.
 '''.format(colored(os.path.join(APP_DIR, CONFIG_FILENAME), 'cyan')))
 
     # Calculate execution time
