@@ -26,7 +26,8 @@
     * [Default sources](#41--default-sources)
     * [Hosting your own](#42--hosting-your-own)
 * [Roadmap](#5--roadmap)
-* [Licensing](#6--licensing)
+* [Privacy](#6--privacy)
+* [Licensing](#7--licensing)
 
 ## 1 &nbsp;&nbsp; Installation
 *__Prerequisites__: Please make sure you have at least [Python 3](https://www.python.org/downloads/) installed*
@@ -327,7 +328,7 @@ collection permanently by turning the `telemetry` setting off in:
 Read more about fonty's privacy policy [here](PRIVACY.md) to learn about what
 data is collected and how they are used.
 
-## 6 &nbsp;&nbsp; Licensing
+## 7 &nbsp;&nbsp; Licensing
 **fonty** is released under the [Apache License, Version 2.0](https://github.com/jamesssooi/fonty/blob/master/LICENSE).  
 
 Copyright © 2018 [James] Ooi Weng Teik.
