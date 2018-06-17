@@ -90,7 +90,7 @@ def cli_install(ctx, args, output, variants, is_files):
         return
 
     # Find fonts in local files
-    font_source = None
+    font_source: str = None
     if is_files:
         font_source = 'local_files'
         remote_fonts = [RemoteFont(
@@ -281,7 +281,6 @@ def resolve_download(arg, print_task: bool = True) -> Tuple[List[RemoteFont], st
 
     # Argument is a font name to be searched in font sources
     else:
-        font_source = 'remote_source'
 
         # Print task message
         if print_task:
@@ -309,5 +308,8 @@ def resolve_download(arg, print_task: bool = True) -> Tuple[List[RemoteFont], st
                 family=colored(remote_family.name, COLOR_INPUT),
                 source=source.name
             ))
+
+        # Report font_source only if the source is listed as a public source
+        font_source = source.name if source.public else 'private_source'
 
     return fonts, font_source

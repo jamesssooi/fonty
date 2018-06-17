@@ -1,13 +1,14 @@
 '''search.py: Library to handle the search of fonts.'''
-
 import os.path
-import click
-from whoosh.query import Phrase, And, Term
+from typing import Tuple
+
 from whoosh.qparser import QueryParser
 from whoosh.index import create_in, open_dir, EmptyIndexError, Index
 from whoosh.fields import Schema, TEXT, KEYWORD, ID
+
 from fonty.lib.constants import SEARCH_INDEX_PATH
 from fonty.models.repository import Repository
+from fonty.models.font import RemoteFontFamily
 
 SCHEMA = Schema(
     id=ID(stored=True),
@@ -16,7 +17,7 @@ SCHEMA = Schema(
     repository_path=ID(stored=True)
 )
 
-def search(name):
+def search(name) -> Tuple[Repository, RemoteFontFamily]:
     '''Search the font index and return results.'''
     index = load_index()
     parser = QueryParser('name', SCHEMA)
