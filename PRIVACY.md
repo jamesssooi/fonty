@@ -1,7 +1,7 @@
 # Privacy
 fonty collects a few simple, anonymous and non-personal usage data to better understand how users use fonty; and to identify interesting font usage statistics and trends.
 
-As a privacy-conscious person who believes in keeping personal data personal, efforts has been made to fonty to ensure your have full and total control over how your data is collected:
+As a privacy-conscious person who believes in keeping personal data personal, efforts has been made to fonty to ensure you have full and total control over how your data is collected:
 
 * You can opt-out of telemetry anytime.
 * Data collected is non-personal and non-identifying.
@@ -72,7 +72,7 @@ Called when the user initiates the `fonty source update` command.
 ## How is the data processed?
 All telemetry data is sent to a telemetry service, which is a simple Go API endpoint hosted in a Google Compute Engine instance. The Go API endpoint simply acts as a relay and immediately publishes the event data into Google PubSub.
 
-A Google PubSub consumer then consumes the event data, discards any identifiable information such as IP addresses, then apply transformations to the data, before finally storing the transformed data into Google BigQuery.
+A Google PubSub consumer then consumes the event data, discards any identifiable information such as IP addresses, then apply transformations to the data, before finally storing the transformed data into Google BigQuery for future processing and analytics.
 
 ## Open Source
 In the spirit of open-source, the public is urged and welcome to not only review and contribute to fonty's source code, but also to its data collection policies. PRs and discussions are always welcomed!

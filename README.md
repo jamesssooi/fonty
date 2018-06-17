@@ -315,6 +315,18 @@ While **fonty** is still in alpha, the schema and specifications for font source
 - [ ] Finalise fonty sources schema and specifications
 - [ ] Add support for installation via `homebrew`
 
+## 6 &nbsp;&nbsp; Privacy
+
+fonty collects a few simple, anonymous and non-personal usage data to better
+understand how users use fonty; and to identify interesting font usage
+statistics and trends. You can always disable usage data
+collection permanently by turning the `telemetry` setting off in:
+* MacOS: `~/Application Support/fonty/fonty.conf`
+* Windows: `%USERPROFILE%\Application Data\Local Settings\fonty\fonty\fonty.conf`
+
+Read more about fonty's privacy policy [here](PRIVACY.md) to learn about what
+data is collected and how they are used.
+
 ## 6 &nbsp;&nbsp; Licensing
 **fonty** is released under the [Apache License, Version 2.0](https://github.com/jamesssooi/fonty/blob/master/LICENSE).  
 
