@@ -71,7 +71,10 @@ def cli_uninstall(ctx, name, variants):
         TelemetryEvent(
             status_code=1,
             event_type=TelemetryEventTypes.FONT_UNINSTALL,
-            data={'font_name': name}
+            data={
+                'font_name': name,
+                'variants': ','.join([str(v) for v in variants]) or None
+            }
         ).send()
 
         sys.exit(1)
@@ -88,19 +91,19 @@ def cli_uninstall(ctx, name, variants):
             TelemetryEvent(
                 status_code=1,
                 event_type=TelemetryEventTypes.FONT_UNINSTALL,
-                data={'font_name': name}
+                data={
+                    'font_name': name,
+                    'variants': ','.join([str(v) for v in variants]) or None,
+                }
             ).send()
 
             sys.exit(1)
-
-    if not variants:
-        variants = family.variants
 
     # Uninstall this font family
     local_fonts = family.get_fonts(variants)
     task.message = "Uninstalling {name} ({variants})".format(
         name=colored(family.name, COLOR_INPUT),
-        variants=colored(', '.join([str(v) for v in variants]), 'green')
+        variants=colored(', '.join([str(v) for v in family.variants]), 'green')
     )
     uninstalled_fonts = uninstall_fonts(local_fonts)
     uninstalled_families = FontFamily.from_font_list(uninstalled_fonts)
@@ -138,5 +141,8 @@ def cli_uninstall(ctx, name, variants):
         status_code=0,
         event_type=TelemetryEventTypes.FONT_UNINSTALL,
         execution_time=total_time,
-        data={'font_name': name}
+        data={
+            'font_name': name,
+            'variants': ','.join([str(v) for v in variants]) or None,
+        }
     ).send()

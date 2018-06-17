@@ -113,7 +113,7 @@ def cli_install(ctx, args, output, variants, is_files):
                 data={
                     'font_name': arg,
                     'font_source': 'not_resolved',
-                    'variants': ', '.join(variants) or None
+                    'variants': ','.join([str(v) for v in variants]) or None
                 }
             ).send()
             sys.exit(1)
@@ -190,7 +190,7 @@ def cli_install(ctx, args, output, variants, is_files):
             'font_name': None if is_files or font_source == 'remote_url' else arg,
             'font_source': font_source if font_source in ['local_files', 'private_source', 'remote_url'] else 'public_source',
             'source_url': font_source if not font_source in ['local_files', 'private_source', 'remote_url'] else None,
-            'variants': ', '.join(variants) or None,
+            'variants': ','.join([str(v) for v in variants]) or None,
             'output_dir': bool(output)
         }
     ).send()
